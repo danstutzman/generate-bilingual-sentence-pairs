@@ -1,0 +1,23 @@
+mnemonics:
+-
+  - ㅁ
+  - map
+  - m sound
+-
+  - ㅏ
+  - 'tree with a mark on the far side'
+  - far
+  - a sound
+-
+  - ㅗ
+  - 'brook with a mark over it'
+  - over
+  - o sound
+
+compositions:
+  마:
+    topleft: ㅁ
+    right: ㅏ
+  모:
+    topleft: ㅁ
+    bottom: ㅗ
