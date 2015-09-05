@@ -14,6 +14,7 @@ def reverse(arc, arcs, reverse_parts)
     is_from_l2:      arc[:is_to_l2],
     is_to_l2:        arc[:is_from_l2],
     height:          arc[:height],
+    level:           arc[:level],
     part_arc_ids:    (arc[:part_arc_ids] || []).map { |part_arc_id|
       part_arc = arcs.find { |found_arc| found_arc[:id] == part_arc_id }
       arcs.find { |found_arc|
@@ -26,7 +27,7 @@ def reverse(arc, arcs, reverse_parts)
   new_arc.reject { |key, value| key == :part_arc_ids && value == [] }
 end
 
-for sequence in yaml['mnemonics']
+yaml['mnemonics'].each_with_index do |sequence, level0|
   for string in sequence
     unless string_to_concept[string]
       if string == sequence.first
@@ -40,6 +41,7 @@ for sequence in yaml['mnemonics']
         id:      string_to_concept.size + 1,
         type:    type,
         content: string,
+        level:   level0 + 1,
       }
     end
   end
@@ -54,6 +56,7 @@ for sequence in yaml['mnemonics']
         is_from_l2:      (i == 0) ? 2 : 1,
         is_to_l2:        false,
         height:          1,
+        level:           level0 + 1,
       }
       part_arc_ids.push new_arc[:id]
       arcs.push new_arc
@@ -68,6 +71,7 @@ for sequence in yaml['mnemonics']
     is_to_l2:        false,
     part_arc_ids:    part_arc_ids,
     height:          part_arc_ids != [] ? 2 : 1,
+    level:           level0 + 1,
   }
   arcs.push new_arc
   arcs.push reverse(new_arc, arcs, true)
@@ -75,10 +79,14 @@ end
 
 for composition, position_to_jamo in yaml['compositions']
   raise if string_to_concept[composition]
+  level = position_to_jamo.map { |position, jamo|
+      string_to_concept[jamo][:level]
+  }.max
   string_to_concept[composition] = {
     id:      string_to_concept.size + 1,
     type:    'composition',
     content: composition,
+    level:   level,
   }
 
   #puts "#{composition} => #{position_to_jamo.values().join(' and ')}"
@@ -127,6 +135,7 @@ for composition, position_to_jamo in yaml['compositions']
     id:      string_to_concept.size + 1,
     type:    'sound',
     content: all_sounds,
+    level:   level,
   }
 
   new_arc = {
@@ -137,6 +146,7 @@ for composition, position_to_jamo in yaml['compositions']
     is_to_l2:        false,
     part_arc_ids:    part_arc_ids,
     height:          max_height_of_part_arcs + 1,
+    level:           level,
   }
   arcs.push new_arc
   arcs.push reverse(new_arc, arcs, false)
@@ -151,11 +161,12 @@ db.execute 'drop table if exists concepts'
 db.execute 'create table if not exists concepts(
   id      integer primary key not null,
   type    varchar not null,
-  content varchar not null
+  content varchar not null,
+  level   integer not null
 )'
 for concept in string_to_concept.values
-  db.execute 'insert into concepts values (?, ?, ?)',
-    concept[:id], concept[:type], concept[:content]
+  db.execute 'insert into concepts values (?, ?, ?, ?)',
+    concept[:id], concept[:type], concept[:content], concept[:level]
 end
 
 db.execute 'drop table if exists arcs'
@@ -167,12 +178,14 @@ db.execute 'create table if not exists arcs(
   is_to_l2        boolean not null,
   height          integer not null,
   part_arc_ids    varchar,
-  was_correct     boolean not null
+  was_correct     boolean not null,
+  level           integer not null
 )'
 for arc in arcs
-  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?, ?)',
+  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     arc[:id], arc[:from_concept_id], arc[:to_concept_id],
     arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
     arc[:part_arc_ids] && arc[:part_arc_ids].join(','),
-    1
+    arc[:level] < 3 || arc[:height] <= 2 ? 1 : 0,
+    arc[:level]
 end

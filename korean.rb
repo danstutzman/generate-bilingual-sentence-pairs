@@ -62,20 +62,36 @@ end
 
 arc_id_to_arc = {}
 sql = 'select id, from_concept_id, to_concept_id, is_from_l2,
-  is_to_l2, height, part_arc_ids, was_correct
-  from arcs'
+  is_to_l2, height, part_arc_ids, was_correct, level
+  from arcs
+  where was_correct = 0'
 for row in db.execute(sql) do
   arc = {}
   arc[:id], arc[:from_concept_id], arc[:to_concept_id],
     arc[:is_from_l2], arc[:is_to_l2], arc[:height], arc[:part_arc_ids],
-    arc[:was_correct] = row
+    arc[:was_correct], arc[:level] = row
   arc_id_to_arc[arc[:id]] = arc
 end
 
-# prefer wrong arcs, then higher arcs (if right) or lower arcs (if wrong), arcs to l2, arcs from l2
+if arc_id_to_arc.size == 0
+  raise "No failed cards to review"
+end
+
+# prefer harder if correct, or easier if incorrect, where harder means:
+# - arcs with greater level
+# - arcs with greater height
+# - arcs to l2
+# - arcs from l2
 arcs_sorted = arc_id_to_arc.sort_by { |arc_id, arc|
-  [arc[:was_correct], (arc[:was_correct] == 1 ? -1 : 1) * arc[:height],
-    -arc[:is_to_l2], arc[:is_from_l2], rand]
+  was_correct = (arc[:was_correct] == 1) ? 1 : -1
+  [
+    was_correct,
+    was_correct * -arc[:level],
+    was_correct * -arc[:height],
+    was_correct * -arc[:is_to_l2],
+    was_correct * -arc[:is_from_l2],
+    rand,
+  ]
 }.map { |arc_id, arc| arc }
 arc = arcs_sorted.first
 from_concept = concept_id_to_concept[arc[:from_concept_id]]
@@ -88,6 +104,22 @@ case [from_concept[:type], to_concept[:type]]
     puts 'With your finger, draw the jamo for the sound:'
   when ['sound', 'composition']
     puts 'With your finger, draw the hangul for the sounds:'
+  when ['sound', 'mnemonic']
+    puts 'Think of the mnemonic for the sound:'
+  when ['mnemonic', 'jamo']
+    puts 'With your finger, draw the jamo for the mnemonic:'
+  when ['mnemonic', 'sound']
+    puts 'Say the sound intended by the mnemonic:'
+  when ['mnemonic', 'mnemonic']
+    if from_concept[:content].size > to_concept[:content].size
+      puts 'Isolate the key word in the mnemonic:'
+    else
+      puts "Think of the mnemonic for the drawing for the mnemonic:"
+    end
+  when ['jamo', 'sound']
+    puts 'Say the sound that this jamo makes'
+  when ['composition', 'sound']
+    puts 'Read this character aloud'
   else
     raise "Don't know how to ask for #{from_concept[:type]}, #{to_concept[:type]}"
 end
