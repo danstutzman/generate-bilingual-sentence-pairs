@@ -166,11 +166,13 @@ db.execute 'create table if not exists arcs(
   is_from_l2      boolean not null,
   is_to_l2        boolean not null,
   height          integer not null,
-  part_arc_ids    varchar
+  part_arc_ids    varchar,
+  was_correct     boolean not null
 )'
 for arc in arcs
-  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?)',
+  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?, ?)',
     arc[:id], arc[:from_concept_id], arc[:to_concept_id],
     arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
-    arc[:part_arc_ids] && arc[:part_arc_ids].join(',')
+    arc[:part_arc_ids] && arc[:part_arc_ids].join(','),
+    1
 end

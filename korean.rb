@@ -51,31 +51,85 @@ def u_sequences_to_utf8(s)
 end
 
 db = SQLite3::Database.new "test.db"
-sql = "
-  select
-    from_assets.content as from_content,
-    to_assets.content as to_content
-  from arcs
-  join assets as from_assets on from_assets.id = arcs.from_asset_id
-  join assets as to_assets   on to_assets.id   = arcs.to_asset_id
-  where from_assets.name like 'uhcj-%'
-  and to_assets.name like 'njp-%'
-  ;
-"
-jamo_mnemonic_pairs = []
+
+concept_id_to_concept = {}
+sql = 'select id, type, content from concepts'
 for row in db.execute(sql) do
-  jamo_utf8 = u_sequences_to_utf8(row[0])
-  mnemonic  = u_sequences_to_utf8(row[1])
-  jamo_mnemonic_pairs.push [jamo_utf8, mnemonic]
+  concept = {}
+  concept[:id], concept[:type], concept[:content] = row
+  concept_id_to_concept[concept[:id]] = concept
 end
 
-pair = jamo_mnemonic_pairs[rand(jamo_mnemonic_pairs.size)]
-puts "What is the mnemonic for: #{pair[0]}?  Press enter to show answer."
+arc_id_to_arc = {}
+sql = 'select id, from_concept_id, to_concept_id, is_from_l2,
+  is_to_l2, height, part_arc_ids, was_correct
+  from arcs'
+for row in db.execute(sql) do
+  arc = {}
+  arc[:id], arc[:from_concept_id], arc[:to_concept_id],
+    arc[:is_from_l2], arc[:is_to_l2], arc[:height], arc[:part_arc_ids],
+    arc[:was_correct] = row
+  arc_id_to_arc[arc[:id]] = arc
+end
+
+# prefer wrong arcs, then higher arcs (if right) or lower arcs (if wrong), arcs to l2, arcs from l2
+arcs_sorted = arc_id_to_arc.sort_by { |arc_id, arc|
+  [arc[:was_correct], (arc[:was_correct] == 1 ? -1 : 1) * arc[:height],
+    -arc[:is_to_l2], arc[:is_from_l2], rand]
+}.map { |arc_id, arc| arc }
+arc = arcs_sorted.first
+from_concept = concept_id_to_concept[arc[:from_concept_id]]
+to_concept   = concept_id_to_concept[arc[:to_concept_id]]
+
+case [from_concept[:type], to_concept[:type]]
+  when ['jamo', 'mnemonic']
+    puts 'Think of the mnemonic for:'
+  when ['sound', 'jamo']
+    puts 'With your finger, draw the jamo for the sound:'
+  when ['sound', 'composition']
+    puts 'With your finger, draw the hangul for the sounds:'
+  else
+    raise "Don't know how to ask for #{from_concept[:type]}, #{to_concept[:type]}"
+end
+puts "   #{from_concept[:content]}"
+puts "Press enter to show answer."
 readline
-puts "The answer was: #{pair[1]}.  Did you get it right? (y/n)"
+
+puts "The answer is:"
+puts "   #{to_concept[:content]}"
+puts "Got it right? (y/n)"
 was_correct = (readline.strip == 'y')
+
 if was_correct
-  puts 'yeah'
+  arc[:was_correct] = 1
 else
-  puts 'crap'
+  arc[:was_correct] = 0
+end
+sql = 'update arcs set was_correct = ? where id = ?'
+db.execute(sql, arc[:was_correct], arc[:id])
+
+def ask_about_part_arcs(arc, arc_id_to_arc, concept_id_to_concept, db)
+  if arc[:part_arc_ids] != nil
+    puts "Which part arc(s) did you get wrong? (Separate numbers with commas)"
+    for part_arc_id in arc[:part_arc_ids].split(',')
+      part_arc = arc_id_to_arc[part_arc_id.to_i]
+      from_concept = concept_id_to_concept[part_arc[:from_concept_id]]
+      to_concept = concept_id_to_concept[part_arc[:to_concept_id]]
+      puts "  #{part_arc_id}. #{from_concept[:content]} -> #{to_concept[:content]}"
+    end
+    part_arc_ids_to_review = readline.split(',').map { |id| id.to_i }
+    if part_arc_ids_to_review != [0]
+      for part_arc_id in part_arc_ids_to_review
+        part_arc = arc_id_to_arc[part_arc_id]
+        part_arc[:was_correct] = 0
+        sql = 'update arcs set was_correct = 0 where id = ?'
+        db.execute(sql, part_arc_id)
+        ask_about_part_arcs(part_arc, arc_id_to_arc, concept_id_to_concept, db)
+      end
+    end
+  end
+end
+
+if not was_correct
+  ask_about_part_arcs(arc, arc_id_to_arc, concept_id_to_concept, db)
 end
