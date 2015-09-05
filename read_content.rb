@@ -11,6 +11,7 @@ def reverse(arc, arcs, reverse_parts)
     id:              arcs.size + 1,
     from_concept_id: arc[:to_concept_id],
     to_concept_id:   arc[:from_concept_id],
+    height:          arc[:height],
     part_arc_ids:    (arc[:part_arc_ids] || []).map { |part_arc_id|
       part_arc = arcs.find { |found_arc| found_arc[:id] == part_arc_id }
       arcs.find { |found_arc|
@@ -48,6 +49,7 @@ for sequence in yaml['mnemonics']
         id:              arcs.size + 1,
         from_concept_id: string_to_concept[sequence[i]][:id],
         to_concept_id:   string_to_concept[sequence[i + 1]][:id],
+        height:          1,
       }
       part_arc_ids.push new_arc[:id]
       arcs.push new_arc
@@ -59,6 +61,7 @@ for sequence in yaml['mnemonics']
     from_concept_id: string_to_concept[sequence.first][:id],
     to_concept_id:   string_to_concept[sequence.last][:id],
     part_arc_ids:    part_arc_ids,
+    height:          part_arc_ids != [] ? 2 : 1,
   }
   arcs.push new_arc
   arcs.push reverse(new_arc, arcs, true)
@@ -76,6 +79,7 @@ for composition, position_to_jamo in yaml['compositions']
 
   sounds = []
   part_arc_ids = []
+  max_height_of_part_arcs = 0
   for position, jamo in position_to_jamo
     jamo_concept_id = string_to_concept[jamo][:id]
     #new_arc = {
@@ -93,6 +97,9 @@ for composition, position_to_jamo in yaml['compositions']
     jamo_to_sound_arc = arcs.find { |arc|
       arc[:from_concept_id] == jamo_concept_id && arc[:part_arc_ids] }
     part_arc_ids.push jamo_to_sound_arc[:id]
+    if jamo_to_sound_arc[:height] > max_height_of_part_arcs
+      max_height_of_part_arcs = jamo_to_sound_arc[:height]
+    end
 
     sound_concept = string_to_concept.values.find { |concept|
       concept[:id] == jamo_to_sound_arc[:to_concept_id]
@@ -121,6 +128,7 @@ for composition, position_to_jamo in yaml['compositions']
     from_concept_id: string_to_concept[composition][:id],
     to_concept_id:   string_to_concept[all_sounds][:id],
     part_arc_ids:    part_arc_ids,
+    height:          max_height_of_part_arcs + 1,
   }
   arcs.push new_arc
   arcs.push reverse(new_arc, arcs, false)
@@ -147,10 +155,11 @@ db.execute 'create table if not exists arcs(
   id              integer primary key not null,
   from_concept_id integer not null,
   to_concept_id   integer not null,
+  height          integer not null,
   part_arc_ids    varchar
 )'
 for arc in arcs
-  db.execute 'insert into arcs values (?, ?, ?, ?)',
-    arc[:id], arc[:from_concept_id], arc[:to_concept_id],
+  db.execute 'insert into arcs values (?, ?, ?, ?, ?)',
+    arc[:id], arc[:from_concept_id], arc[:to_concept_id], arc[:height],
     arc[:part_arc_ids] && arc[:part_arc_ids].join(',')
 end
