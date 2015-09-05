@@ -11,6 +11,8 @@ def reverse(arc, arcs, reverse_parts)
     id:              arcs.size + 1,
     from_concept_id: arc[:to_concept_id],
     to_concept_id:   arc[:from_concept_id],
+    is_from_l2:      arc[:is_to_l2],
+    is_to_l2:        arc[:is_from_l2],
     height:          arc[:height],
     part_arc_ids:    (arc[:part_arc_ids] || []).map { |part_arc_id|
       part_arc = arcs.find { |found_arc| found_arc[:id] == part_arc_id }
@@ -49,6 +51,8 @@ for sequence in yaml['mnemonics']
         id:              arcs.size + 1,
         from_concept_id: string_to_concept[sequence[i]][:id],
         to_concept_id:   string_to_concept[sequence[i + 1]][:id],
+        is_from_l2:      (i == 0) ? 2 : 1,
+        is_to_l2:        false,
         height:          1,
       }
       part_arc_ids.push new_arc[:id]
@@ -60,6 +64,8 @@ for sequence in yaml['mnemonics']
     id:              arcs.size + 1,
     from_concept_id: string_to_concept[sequence.first][:id],
     to_concept_id:   string_to_concept[sequence.last][:id],
+    is_from_l2:      true,
+    is_to_l2:        false,
     part_arc_ids:    part_arc_ids,
     height:          part_arc_ids != [] ? 2 : 1,
   }
@@ -127,6 +133,8 @@ for composition, position_to_jamo in yaml['compositions']
     id:              arcs.size + 1,
     from_concept_id: string_to_concept[composition][:id],
     to_concept_id:   string_to_concept[all_sounds][:id],
+    is_from_l2:      true,
+    is_to_l2:        false,
     part_arc_ids:    part_arc_ids,
     height:          max_height_of_part_arcs + 1,
   }
@@ -155,11 +163,14 @@ db.execute 'create table if not exists arcs(
   id              integer primary key not null,
   from_concept_id integer not null,
   to_concept_id   integer not null,
+  is_from_l2      boolean not null,
+  is_to_l2        boolean not null,
   height          integer not null,
   part_arc_ids    varchar
 )'
 for arc in arcs
-  db.execute 'insert into arcs values (?, ?, ?, ?, ?)',
-    arc[:id], arc[:from_concept_id], arc[:to_concept_id], arc[:height],
+  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?)',
+    arc[:id], arc[:from_concept_id], arc[:to_concept_id],
+    arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
     arc[:part_arc_ids] && arc[:part_arc_ids].join(',')
 end
