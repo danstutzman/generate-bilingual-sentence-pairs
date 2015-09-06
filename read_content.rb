@@ -133,10 +133,25 @@ end
 end
 
 %q[
-  20  ㅌ   ㄷ with aspiration    t
+  20  ㅋ   ㄱ with aspiration     k
+  21  ㅌ   ㄷ with aspiration     t
+  22  ㅎ   ㅇ with aspiration     h
+  23  ㅈ   ㅅ + Judgment Church   j
+  24  ㅊ   ㅅ + Judgment Church   ch
+  30  ㅉ   ㅈ doubled             jj
+  31  ㅃ   ㅂ doubled             bb
+  32  ㄸ   ㄷ doubled             dd
+  33  ㄲ   ㄱ doubled             gg
+  34  ㅆ   ㅅ doubled             ss
+  40  ㅛ   y plus ㅗ              yo
+  41  ㅕ   y plus ㅓ              yeo
+  42  ㅑ   y plus ㅏ              ya
+  43  ㅒ   y plus ㅐ              yae
+  44  ㅖ   y plus ㅔ              ye
+  45  ㅠ   y plus ㅜ              yu
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, level, new_jamo, *new_mnemonic, new_pronunciation = line.split(/\s+/)
-  old_jamo = new_mnemonic[0]
+  old_jamo = (new_mnemonic[0] == 'y') ? new_mnemonic[2] : new_mnemonic[0]
   new_mnemonic = new_mnemonic.join(' ')
 
   old_jamo = $concept_by_type_and_content.fetch(['jamo', old_jamo])
@@ -184,12 +199,19 @@ codepoint_name_to_chr = {}
 end
 
 %q[
-  뱃맨    Batman
-  토토로  Totoro
-  모      Mo
-  마리오  Mario
+  뱃맨       baet-maen (Batman)
+  토토로     to-to-ro (Totoro)
+  모         Mo
+  마리오     Mario
+  니모       ni-mo (Nemo)
+  해리 포터  hae-ri po-teo (Harry Potter)
+  엘머       el-meo (Elmo)
+  미키       mi-ki (Micky)
+  골럼       gol-leom (Gollum)
+  번째       beon-jjae
 ].split("\n").reject { |line| line == '' }.each do |line|
-  _, word, word_transcription = line.split(/\s+/)
+  _, word, *word_transcription = line.split(/\s+/)
+  word_transcription = word_transcription.join(' ')
   composition_strings = word.split('')
   compositions = composition_strings.map do |composition_string|
     jamos_decomposed = UnicodeUtils.canonical_decomposition(composition_string)
