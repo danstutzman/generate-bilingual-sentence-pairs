@@ -1,280 +1,246 @@
 require 'pp'
-require 'sqlite3'
-require 'yaml'
+require 'unicode_utils'
+require './models'
 
-yaml = YAML::load(File.read('content.yaml'))
-string_to_concept = {}
-arcs = []
+JAMO_MNEMONIC_HEIGHT1 = 2
+JAMO_MNEMONIC_HEIGHT2 = 2
+JAMO_MNEMONIC_HEIGHT3 = 3
+JAMO_HEIGHT           = 4
+COMPOSITION_HEIGHT    = 5
+WORD_HEIGHT           = 6
 
-def reverse(arc, arcs, reverse_parts)
-  new_arc = {
-    id:              arcs.size + 1,
-    from_concept_id: arc[:to_concept_id],
-    to_concept_id:   arc[:from_concept_id],
-    is_from_l2:      arc[:is_to_l2],
-    is_to_l2:        arc[:is_from_l2],
-    height:          arc[:height],
-    level:           arc[:level],
-    part_arc_ids:    (arc[:part_arc_ids] || []).map { |part_arc_id|
-      part_arc = arcs.find { |found_arc| found_arc[:id] == part_arc_id }
-      arcs.find { |found_arc|
-        found_arc[:from_concept_id] == part_arc[:to_concept_id] &&
-        found_arc[:to_concept_id]   == part_arc[:from_concept_id]
-      }[:id]
-    }
-  }
-  new_arc[:part_arc_ids].reverse! if reverse_parts
-  new_arc.reject { |key, value| key == :part_arc_ids && value == [] }
-end
-
-yaml['mnemonics'].each_with_index do |sequence, level0|
-  for string in sequence
-    unless string_to_concept[string]
-      if string == sequence.first
-        type = 'jamo'
-      elsif string == sequence.last
-        type = 'sound'
-      else
-        type = 'mnemonic'
-      end
-      string_to_concept[string] = {
-        id:      string_to_concept.size + 1,
-        type:    type,
-        content: string,
-        level:   level0 + 1,
-      }
-    end
-  end
-
-  part_arc_ids = []
-  if sequence.size > 2
-    0.upto(sequence.size - 2) do |i|
-      new_arc = {
-        id:              arcs.size + 1,
-        from_concept_id: string_to_concept[sequence[i]][:id],
-        to_concept_id:   string_to_concept[sequence[i + 1]][:id],
-        is_from_l2:      (i == 0) ? 2 : 1,
-        is_to_l2:        false,
-        height:          1,
-        level:           level0 + 1,
-      }
-      part_arc_ids.push new_arc[:id]
-      arcs.push new_arc
-      arcs.push reverse(new_arc, arcs, true)
-    end
-  end
-  new_arc = {
-    id:              arcs.size + 1,
-    from_concept_id: string_to_concept[sequence.first][:id],
-    to_concept_id:   string_to_concept[sequence.last][:id],
-    is_from_l2:      true,
-    is_to_l2:        false,
-    part_arc_ids:    part_arc_ids,
-    height:          part_arc_ids != [] ? 2 : 1,
-    level:           level0 + 1,
-  }
-  arcs.push new_arc
-  arcs.push reverse(new_arc, arcs, true)
-end
-
-composition_to_position_to_jamo = {}
-for initial_sequence in yaml['mnemonics']
-  initial_compatibility_jamo = initial_sequence.first
-  initial_combining_jamo = {
-      'ㄱ' => "\u1100",
-      'ㄴ' => "\u1102",
-      'ㄷ' => "\u1103",
-      'ㅂ' => "\u1107",
-      'ㅇ' => "\u110B",
-      'ㄹ' => "\u1105",
-      'ㅁ' => "\u1106",
-      'ㅍ' => "\u1111",
-      'ㅅ' => "\u1109",
-      'ㅌ' => "\u1110",
-  }[initial_compatibility_jamo]
-  next if not initial_combining_jamo
-
-  for vowel_sequence in yaml['mnemonics']
-    vowel_compatibility_jamo = vowel_sequence.first
-    vowel_combining_jamo, vowel_position = {
-      'ㅣ' => ["\u1175", 'right'],
-      'ㅓ' => ["\u1165", 'right'],
-      'ㅏ' => ["\u1161", 'right'],
-      'ㅔ' => ["\u1166", 'right'],
-      'ㅐ' => ["\u1162", 'right'],
-      'ㅡ' => ["\u1173", 'bottom'],
-      'ㅗ' => ["\u1169", 'bottom'],
-      'ㅜ' => ["\u116E", 'bottom'],
-    }[vowel_compatibility_jamo]
-    next if not vowel_combining_jamo
-
-    composition = initial_combining_jamo + vowel_combining_jamo
-    composition_to_position_to_jamo[composition] = {
-       'topleft'      => initial_compatibility_jamo,
-       vowel_position => vowel_compatibility_jamo,
-    }
-    print composition
-  end
-
-end
-
-for composition, position_to_jamo in composition_to_position_to_jamo
-  raise if string_to_concept[composition]
-  level = position_to_jamo.map { |position, jamo|
-      string_to_concept[jamo][:level]
-  }.max
-  string_to_concept[composition] = {
-    id:      string_to_concept.size + 1,
-    type:    'composition',
-    content: composition,
-    level:   level,
-  }
-
-  #puts "#{composition} => #{position_to_jamo.values().join(' and ')}"
-
-  sounds = []
-  part_arc_ids = []
-  max_height_of_part_arcs = 0
-  for position, jamo in position_to_jamo
-    jamo_concept_id = string_to_concept[jamo][:id]
-    #new_arc = {
-    #  id:              arcs.size + 1,
-    #  from_concept_id: string_to_concept[composition][:id],
-    #  to_concept_id:   jamo_concept_id,
-    #}
-    #arcs.push new_arc
-    #arcs.push reverse(new_arc, arcs)
-    #part_arc_ids.push new_arc[:id]
-
-    if not string_to_concept.has_key?(jamo)
-      raise "Can't find concept for jamo #{jamo}"
-    end
-    jamo_to_sound_arc = arcs.find { |arc|
-      arc[:from_concept_id] == jamo_concept_id && arc[:part_arc_ids] }
-    part_arc_ids.push jamo_to_sound_arc[:id]
-    if jamo_to_sound_arc[:height] > max_height_of_part_arcs
-      max_height_of_part_arcs = jamo_to_sound_arc[:height]
-    end
-
-    sound_concept = string_to_concept.values.find { |concept|
-      concept[:id] == jamo_to_sound_arc[:to_concept_id]
-    }
-    if sound_concept.nil?
-      raise "Couldn't find 'to' concept for #{jamo_to_sound_arc}"
-    end
-    sound = sound_concept[:content]
-    sounds.push sound
-  end
-
-  all_sounds = sounds.join
-  if string_to_concept[all_sounds]
-    raise "Concept for '#{all_sounds}' already exists"
-  end
-  string_to_concept[all_sounds] = {
-    id:      string_to_concept.size + 1,
-    type:    'sound',
-    content: all_sounds,
-    level:   level,
-  }
-
-  new_arc = {
-    id:              arcs.size + 1,
-    from_concept_id: string_to_concept[composition][:id],
-    to_concept_id:   string_to_concept[all_sounds][:id],
-    is_from_l2:      true,
-    is_to_l2:        false,
-    part_arc_ids:    part_arc_ids,
-    height:          max_height_of_part_arcs + 1,
-    level:           level,
-  }
-  arcs.push new_arc
-  arcs.push reverse(new_arc, arcs, false)
-end
-
-for l1_transliteration in yaml['l1_transliterations']
-  l1_syllables = l1_transliteration.downcase.split('-')
-  next if l1_syllables.size == 1
-
-  syllable_arcs = []
-  for l1_syllable in l1_syllables
-    l1_concept = string_to_concept[l1_syllable] or raise "bad syllable #{l1_syllable}"
-    syllable_arc = arcs.find { |arc|
-      arc[:from_concept_id] == l1_concept[:id]
-    }
-    raise "Can't find syllable_arc for #{l1_syllable}" if syllable_arc.nil?
-    syllable_arcs.push syllable_arc
-  end
-
-  l1_transliteration_concept = string_to_concept[l1_transliteration] = {
-    id:      string_to_concept.size + 1,
-    type:    'l1_transliteration',
-    content: l1_transliteration,
-    level:   syllable_arcs.map { |arc| arc[:level] }.max + 1,
-  }
-
-  l2_word = syllable_arcs.map { |arc|
-    l2_concept = string_to_concept.values.find { |concept|
-      concept[:id] == arc[:to_concept_id]
-    }
-    l2_concept[:content]
-  }.join
-
-  l2_word_concept = string_to_concept[l2_word] = {
-    id:      string_to_concept.size + 1,
-    type:    'l2_word',
-    content: l2_word,
-    level:   l1_transliteration_concept[:level],
-  }
-
-  new_arc = {
-    id:              arcs.size + 1,
-    from_concept_id: l1_transliteration_concept[:id],
-    to_concept_id:   l2_word_concept[:id],
-    is_from_l2:      false,
-    is_to_l2:        true,
-    part_arc_ids:    syllable_arcs.map { |arc| arc[:id] },
-    height:          syllable_arcs.map { |arc| arc[:height] }.max + 1,
-    level:           syllable_arcs.map { |arc| arc[:level] }.max,
-  }
-  arcs.push new_arc
-  arcs.push reverse(new_arc, arcs, false)
-end
-
-#pp string_to_concept.values
-#pp arcs
-
-db = SQLite3::Database.new 'test.db'
-
+db = ActiveRecord::Base.connection
 db.execute 'drop table if exists concepts'
 db.execute 'create table if not exists concepts(
-  id      integer primary key not null,
-  type    varchar not null,
-  content varchar not null,
-  level   integer not null
+  id           integer primary key not null,
+  type         varchar not null,
+  content      varchar not null,
+  level        integer not null,
+  is_l2_script boolean not null
 )'
-for concept in string_to_concept.values
-  db.execute 'insert into concepts values (?, ?, ?, ?)',
-    concept[:id], concept[:type], concept[:content], concept[:level]
-end
 
 db.execute 'drop table if exists arcs'
 db.execute 'create table if not exists arcs(
-  id              integer primary key not null,
-  from_concept_id integer not null,
-  to_concept_id   integer not null,
-  is_from_l2      boolean not null,
-  is_to_l2        boolean not null,
-  height          integer not null,
-  part_arc_ids    varchar,
-  was_correct     boolean not null,
-  level           integer not null
+  id                integer primary key not null,
+  from_concept_id   integer not null,
+  to_concept_id     integer not null,
+  is_from_l2_script boolean not null,
+  is_to_l2_script   boolean not null,
+  height            integer not null,
+  part_arc_ids      varchar,
+  was_correct       boolean not null,
+  level             integer not null
 )'
-for arc in arcs
-  db.execute 'insert into arcs values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    arc[:id], arc[:from_concept_id], arc[:to_concept_id],
-    arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
-    arc[:part_arc_ids] && arc[:part_arc_ids].join(','),
-    #(arc[:level] < 3 || arc[:height] <= 3 || !arc[:is_to_l2]) ? 1 : 0,
-    (arc[:level] < 3 || arc[:height] <= 3) ? 1 : 0,
-    arc[:level]
+
+$concept_by_id = {}
+$arc_by_id = {}
+$concept_by_type_and_content = {}
+$arc_by_from_concept_and_to_concept_type = {}
+
+def new_concept type, content, level, is_l2_script
+  concept = Concept.create type: type, content: content, level: level,
+    is_l2_script: is_l2_script
+  $concept_by_id[concept.id] = concept
+  $concept_by_type_and_content[[type, content]] = concept
+end
+
+def new_arc height, from, to
+  level = [from.level, to.level].max
+
+  arc1 = Arc.create from_concept_id: from.id,
+    to_concept_id: to.id,
+    height: height,
+    level: level,
+    is_from_l2_script: from.is_l2_script,
+    is_to_l2_script: to.is_l2_script,
+    was_correct: true
+  $arc_by_id[arc1.id] = arc1
+  $arc_by_from_concept_and_to_concept_type[
+    [arc1.from_concept, arc1.to_concept.type]] = arc1
+
+  arc2 = Arc.create from_concept_id: to.id,
+    to_concept_id: from.id,
+    height: height,
+    level: level,
+    is_from_l2_script: to.is_l2_script,
+    is_to_l2_script: from.is_l2_script,
+    was_correct: height < WORD_HEIGHT
+  $arc_by_id[arc2.id] = arc2
+  $arc_by_from_concept_and_to_concept_type[
+    [arc2.from_concept, arc2.to_concept.type]] = arc2
+
+  arc1
+end
+
+def reverse_arc arc
+  $arc_by_from_concept_and_to_concept_type.fetch(
+    [arc.to_concept, arc.from_concept.type])
+end
+
+def split_arc height, arc, middle_concept
+  arc1 = new_arc height, arc.from_concept, middle_concept
+  arc2 = new_arc height, middle_concept, arc.to_concept
+  arc.add_part_arcs! [arc1, arc2]
+  reverse_arc(arc).add_part_arcs! [reverse_arc(arc2), reverse_arc(arc1)]
+  [arc1, arc2]
+end
+
+%q[
+   1 ㄱ gun         g
+   2 ㅣ tree        i
+   3 ㄴ nose        n
+   4 ㅡ brook       eu
+   5 ㄷ door        d
+   6 ㅂ bucket      b
+   7 ㄹ rattlesnake r
+   8 ㅁ map         m
+   9 ㅍ part-two    p
+  10 ㅅ summit      s
+  11 ㅇ nothing     0
+  12 ㅏ far         a
+  13 ㅓ up-front    eo
+  14 ㅔ before      e
+  15 ㅐ after       ae
+  16 ㅗ over        o
+  17 ㅜ root        u
+].split("\n").reject { |line| line == '' }.each do |line|
+  _, level, jamo, mnemonic, pronunciation = line.split(/\s+/)
+
+  jamo = new_concept 'jamo', jamo, level, true
+  mnemonic = new_concept 'jamo-mnemonic', mnemonic, level, false
+  pronunciation = new_concept 'jamo-pronunciation', pronunciation, level, false
+
+  arc = new_arc JAMO_HEIGHT, jamo, pronunciation
+  split_arc JAMO_MNEMONIC_HEIGHT2, arc, mnemonic
+end
+
+%q[
+  far       mark on the far side of the tree
+  up-front  mark on the up-front side of the tree
+  before    mark before the first tree
+  after     mark after the first tree
+  over      mark over the brook
+  root      mark at the root of the brook
+].split("\n").reject { |line| line == '' }.each do |line|
+  _, mnemonic, *phrase = line.split(/\s+/)
+  phrase = phrase.join(' ')
+
+  mnemonic = $concept_by_type_and_content.fetch(['jamo-mnemonic', mnemonic])
+  phrase = new_concept 'jamo-mnemonic-phrase', phrase, mnemonic.level, false
+
+  arc_n_to_j = $arc_by_from_concept_and_to_concept_type.fetch([mnemonic, 'jamo'])
+  split_arc JAMO_MNEMONIC_HEIGHT1, arc_n_to_j, phrase
+end
+
+%q[
+  20  ㅌ   ㄷ with aspiration    t
+].split("\n").reject { |line| line == '' }.each do |line|
+  _, level, new_jamo, *new_mnemonic, new_pronunciation = line.split(/\s+/)
+  old_jamo = new_mnemonic[0]
+  new_mnemonic = new_mnemonic.join(' ')
+
+  old_jamo = $concept_by_type_and_content.fetch(['jamo', old_jamo])
+  old_jamo_mnemonic_arc = $arc_by_from_concept_and_to_concept_type.fetch(
+    [old_jamo, 'jamo-pronunciation'])
+  new_jamo = new_concept 'jamo', new_jamo, level, true
+  new_mnemonic = new_concept 'jamo-mnemonic', new_mnemonic, level, false
+  new_pronunciation = new_concept 'jamo-pronunciation', new_pronunciation, level,
+    false
+
+  arc_j_to_p = new_arc JAMO_MNEMONIC_HEIGHT3, new_jamo, new_pronunciation
+  _, arc_n_to_p = split_arc JAMO_MNEMONIC_HEIGHT2, arc_j_to_p, new_mnemonic
+  arc_n_to_p.add_part_arcs! [old_jamo_mnemonic_arc]
+  reverse_arc(arc_n_to_p).add_part_arcs! [reverse_arc(old_jamo_mnemonic_arc)]
+end
+
+JAMO_TO_RRK_VOWELS = {}
+lines = %q[
+  ㅏ ㅐ ㅑ  ㅒ ㅓ ㅔ ㅕ ㅖ ㅗ ㅘ ㅙ  ㅚ ㅛ ㅜ ㅝ ㅞ ㅟ ㅠ ㅡ ㅢ ㅣ
+  a  ae ya yae eo e yeo ye o  wa wae oe yo u  wo we wi yu eu ui i
+].split("\n").reject { |line| line == '' }.map { |line| line.strip }
+rrk_vowels = lines[1].split(/\s+/)
+lines[0].split(/\s+/).each_with_index do |jamo, i|
+  JAMO_TO_RRK_VOWELS[jamo] = rrk_vowels[i]
+end
+
+JAMO_TO_RRK_INITIALS = {}
+JAMO_TO_RRK_FINALS = {}
+lines = %q[
+  ㄱ  ㄲ  ㄴ  ㄷ  ㄸ  ㄹ  ㅁ  ㅂ  ㅃ  ㅅ  ㅆ  ㅇ  ㅈ  ㅉ  ㅊ  ㅋ  ㅌ  ㅍ  ㅎ
+   g  kk  n   d   tt  r   m   b   pp  s   ss  -   j   jj  ch  k   t   p   h
+   k   k  n   t   -   l   m   p   -   t    t  ng  t   -    t  k   t   p   t
+].split("\n").reject { |line| line == '' }.map { |line| line.strip }
+rrk_initials = lines[1].split(/\s+/)
+rrk_finals = lines[2].split(/\s+/)
+lines[0].split(/\s+/).each_with_index do |jamo, i|
+  JAMO_TO_RRK_INITIALS[jamo] = rrk_initials[i]
+  JAMO_TO_RRK_FINALS[jamo]   = rrk_finals[i]
+end
+
+codepoint_name_to_chr = {}
+((0x3131..0x3163).to_a).each do |codepoint|
+  # for example, "HANGUL LETTER AE" will point to "ㅐ"
+  codepoint_name_to_chr[UnicodeUtils.sid(codepoint)] = codepoint.chr('UTF-8')
+end
+
+%q[
+  뱃맨    Batman
+  토토로  Totoro
+  모      Mo
+  마리오  Mario
+].split("\n").reject { |line| line == '' }.each do |line|
+  _, word, word_transcription = line.split(/\s+/)
+  composition_strings = word.split('')
+  compositions = composition_strings.map do |composition_string|
+    jamos_decomposed = UnicodeUtils.canonical_decomposition(composition_string)
+    jamos = []
+    syllable_rrk = []
+    jamos_decomposed.split('').each do |jamo_decomposed|
+      name = UnicodeUtils.sid(jamo_decomposed.ord)
+      match = name.match(/^HANGUL (CHOSEONG|JUNGSEONG|JONGSEONG) (.*)$/)
+      if not match
+        raise "Name #{name} must start with HANGUL CHOSEONG|JUNGSEONG|JONGSEONG"
+      end
+      jamo = codepoint_name_to_chr.fetch("HANGUL LETTER #{match[2]}")
+      jamo = $concept_by_type_and_content.fetch(['jamo', jamo])
+      jamos.push jamo
+
+      rrk = case match[1]
+        when 'CHOSEONG'  then JAMO_TO_RRK_INITIALS[jamo.content]
+        when 'JUNGSEONG' then JAMO_TO_RRK_VOWELS[jamo.content]
+        when 'JONGSEONG' then JAMO_TO_RRK_FINALS[jamo.content]
+        else raise "Unexpected character name #{name}"
+      end
+      syllable_rrk.push rrk
+    end
+
+    composition = $concept_by_type_and_content[['composition', composition_string]]
+    if composition
+      syllable_arc = $arc_by_from_concept_and_to_concept_type.fetch(
+        [composition, 'syllable-rrk'])
+    else
+      max_level = jamos.map { |jamo| jamo.level }.max
+      composition = new_concept 'composition', composition_string, max_level, true
+      syllable_rrk = syllable_rrk.join()
+      syllable_rrk = new_concept 'syllable-rrk', syllable_rrk, max_level, false
+      syllable_arc = new_arc COMPOSITION_HEIGHT, composition, syllable_rrk
+      jamo_arcs = jamos.map { |jamo|
+        $arc_by_from_concept_and_to_concept_type.fetch([jamo, 'jamo-pronunciation'])
+      }
+      syllable_arc.add_part_arcs! jamo_arcs
+      reverse_arc(syllable_arc).add_part_arcs! jamo_arcs.map { |arc| reverse_arc(arc) }
+    end
+    composition
+  end
+
+  max_level = compositions.map { |composition| composition.level }.max
+  word = new_concept 'word', word, max_level, true
+  word_transcription = new_concept 'word-transcription', word_transcription,
+    max_level, false
+  word_arc = new_arc WORD_HEIGHT, word, word_transcription
+  syllable_arcs = compositions.map { |composition|
+    $arc_by_from_concept_and_to_concept_type.fetch([composition, 'syllable-rrk'])
+  }
+  word_arc.add_part_arcs! syllable_arcs
+  reverse_arc(word_arc).add_part_arcs! syllable_arcs.map { |arc| reverse_arc(arc) }
 end
