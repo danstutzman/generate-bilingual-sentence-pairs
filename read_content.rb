@@ -167,7 +167,9 @@ for composition, position_to_jamo in composition_to_position_to_jamo
   end
 
   all_sounds = sounds.join
-  raise if string_to_concept[all_sounds]
+  if string_to_concept[all_sounds]
+    raise "Concept for '#{all_sounds}' already exists"
+  end
   string_to_concept[all_sounds] = {
     id:      string_to_concept.size + 1,
     type:    'sound',
@@ -184,6 +186,55 @@ for composition, position_to_jamo in composition_to_position_to_jamo
     part_arc_ids:    part_arc_ids,
     height:          max_height_of_part_arcs + 1,
     level:           level,
+  }
+  arcs.push new_arc
+  arcs.push reverse(new_arc, arcs, false)
+end
+
+for l1_transliteration in yaml['l1_transliterations']
+  l1_syllables = l1_transliteration.downcase.split('-')
+  next if l1_syllables.size == 1
+
+  syllable_arcs = []
+  for l1_syllable in l1_syllables
+    l1_concept = string_to_concept[l1_syllable] or raise "bad syllable #{l1_syllable}"
+    syllable_arc = arcs.find { |arc|
+      arc[:from_concept_id] == l1_concept[:id]
+    }
+    raise "Can't find syllable_arc for #{l1_syllable}" if syllable_arc.nil?
+    syllable_arcs.push syllable_arc
+  end
+
+  l1_transliteration_concept = string_to_concept[l1_transliteration] = {
+    id:      string_to_concept.size + 1,
+    type:    'l1_transliteration',
+    content: l1_transliteration,
+    level:   syllable_arcs.map { |arc| arc[:level] }.max + 1,
+  }
+
+  l2_word = syllable_arcs.map { |arc|
+    l2_concept = string_to_concept.values.find { |concept|
+      concept[:id] == arc[:to_concept_id]
+    }
+    l2_concept[:content]
+  }.join
+
+  l2_word_concept = string_to_concept[l2_word] = {
+    id:      string_to_concept.size + 1,
+    type:    'l2_word',
+    content: l2_word,
+    level:   l1_transliteration_concept[:level],
+  }
+
+  new_arc = {
+    id:              arcs.size + 1,
+    from_concept_id: l1_transliteration_concept[:id],
+    to_concept_id:   l2_word_concept[:id],
+    is_from_l2:      false,
+    is_to_l2:        true,
+    part_arc_ids:    syllable_arcs.map { |arc| arc[:id] },
+    height:          syllable_arcs.map { |arc| arc[:height] }.max + 1,
+    level:           syllable_arcs.map { |arc| arc[:level] }.max,
   }
   arcs.push new_arc
   arcs.push reverse(new_arc, arcs, false)
@@ -223,6 +274,7 @@ for arc in arcs
     arc[:id], arc[:from_concept_id], arc[:to_concept_id],
     arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
     arc[:part_arc_ids] && arc[:part_arc_ids].join(','),
-    (arc[:level] < 3 || arc[:height] <= 2 || !arc[:is_to_l2]) ? 1 : 0,
+    #(arc[:level] < 3 || arc[:height] <= 3 || !arc[:is_to_l2]) ? 1 : 0,
+    (arc[:level] < 3 || arc[:height] <= 3) ? 1 : 0,
     arc[:level]
 end

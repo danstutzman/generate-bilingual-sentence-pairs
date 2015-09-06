@@ -2,54 +2,58 @@ mnemonics:
 -
   - ㄱ
   - gun
-  - G
+  - g
 -
   - ㅣ
   - tree
-  - i (like ee in tree)
+  - i
 -
   - ㄴ
   - nose
-  - N
+  - n
 -
   - ㅡ
   - brook
-  - eu (like oo in book)
+  - eu
 -
   - ㄷ
   - door
-  - D
+  - d
 -
   - ㅂ
   - bucket
-  - B
+  - b
 -
   - ㄹ
   - rattlesnake
-  - R
+  - r
 -
   - ㅁ
   - map
-  - M
+  - m
 -
   - ㅍ
   - part two
-  - P
+  - p
 -
   - ㅅ
   - summit
-  - S
+  - s
 -
   - ㅇ
   - nothing
-  - NG
+  - '0'
 -
   - ㅏ
   - 'mark on the far side of the tree'
   - far
-  - a sound
+  - a
 -
   - ㅗ
   - 'mark over the brook'
   - over
-  - o sound
+  - o
+
+l1_transliterations:
+- Ma-ri-0o
+- Mo

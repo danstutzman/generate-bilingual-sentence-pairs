@@ -40,12 +40,6 @@ ma   = "\u1106\u1161"       # 마
 ri   = "\u1105\u1175"       # 리
 o    = "\u110b\u1169"       # 오
 
-#jamo = [u3131, u3134, u3137, u3142, u3147, u3161, u3163]
-#
-#puts 'Given jamo, type English letter(s) representing sounds'
-#puts jamo[rand(jamo.size)]
-#puts readline
-
 def u_sequences_to_utf8(s)
   s.gsub(/\\u[0-9A-F]{4}/) { |u_sequence| u_sequence[2...6].to_i(16).chr('UTF-8') }
 end
@@ -72,9 +66,13 @@ for row in db.execute(sql) do
   arc_id_to_arc[arc[:id]] = arc
 end
 
-if arc_id_to_arc.values.select { |arc| arc[:was_correct] == 0 }.size == 0
+arcs_to_review = arc_id_to_arc.values.select { |arc| arc[:was_correct] == 0 }
+if arcs_to_review.size == 0
   raise "No failed cards to review"
 end
+p ['arcs_to_review'] + arcs_to_review.map { |arc|
+  concept_id_to_concept[arc[:to_concept_id]][:content]
+}
 
 # prefer harder if correct, or easier if incorrect, where harder means:
 # - arcs with greater level
@@ -100,13 +98,13 @@ case [from_concept[:type], to_concept[:type]]
   when ['jamo', 'mnemonic']
     puts 'Think of the mnemonic for:'
   when ['sound', 'jamo']
-    puts 'With your finger, draw the jamo for the sound:'
+    puts 'With your finger, write the jamo for the sound:'
   when ['sound', 'composition']
-    puts 'With your finger, draw the hangul for the sounds:'
+    puts 'With your finger, write the hangul for the sounds:'
   when ['sound', 'mnemonic']
     puts 'Think of the mnemonic for the sound:'
   when ['mnemonic', 'jamo']
-    puts 'With your finger, draw the jamo for the mnemonic:'
+    puts 'With your finger, write the jamo for the mnemonic:'
   when ['mnemonic', 'sound']
     puts 'Say the sound intended by the mnemonic:'
   when ['mnemonic', 'mnemonic']
@@ -119,6 +117,10 @@ case [from_concept[:type], to_concept[:type]]
     puts 'Say the sound that this jamo makes'
   when ['composition', 'sound']
     puts 'Read this character aloud'
+  when ['l1_transliteration', 'l2_word']
+    puts 'With your finger, write the hanguls for the word:'
+  when ['l2_word', 'l1_transliteration']
+    puts 'Read this word aloud:'
   else
     raise "Don't know how to ask for #{from_concept[:type]}, #{to_concept[:type]}"
 end
