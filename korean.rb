@@ -62,7 +62,7 @@ case [arc.from_concept.type, arc.to_concept.type]
   when ['word-transcription', 'word']
     puts 'Write the hanguls for the transcription:'
   when ['word', 'word-translation']
-    puts 'Say the English translation aloud:'
+    puts 'Translate to English aloud:'
   when ['word-translation', 'word']
     puts 'Write this word in Korean:'
   when ['word-translation', 'word-mnemonic']
