@@ -135,22 +135,22 @@ end
 end
 
 %q[
-  20  ㅋ   ㄱ with aspiration     k
-  21  ㅌ   ㄷ with aspiration     t
-  22  ㅎ   ㅇ with aspiration     h
-  23  ㅈ   ㅅ + Judgment Church   j
-  24  ㅊ   ㅅ + Judgment Church   ch
-  30  ㅉ   ㅈ doubled             jj
-  31  ㅃ   ㅂ doubled             bb
-  32  ㄸ   ㄷ doubled             dd
-  33  ㄲ   ㄱ doubled             gg
-  34  ㅆ   ㅅ doubled             ss
-  40  ㅛ   y plus ㅗ              yo
-  41  ㅕ   y plus ㅓ              yeo
-  42  ㅑ   y plus ㅏ              ya
-  43  ㅒ   y plus ㅐ              yae
-  44  ㅖ   y plus ㅔ              ye
-  45  ㅠ   y plus ㅜ              yu
+  20  ㅋ   ㄱ with aspiration        k
+  21  ㅌ   ㄷ with aspiration        t
+  22  ㅎ   ㅇ with aspiration        h
+  23  ㅈ   ㅅ Summit? Jack hit Jill  j
+  24  ㅊ   ㅅ Summit? Jack hit Jill  ch
+  30  ㅉ   ㅈ doubled                jj
+  31  ㅃ   ㅂ doubled                bb
+  32  ㄸ   ㄷ doubled                dd
+  33  ㄲ   ㄱ doubled                gg
+  34  ㅆ   ㅅ doubled                ss
+  40  ㅛ   y plus ㅗ                 yo
+  41  ㅕ   y plus ㅓ                 yeo
+  42  ㅑ   y plus ㅏ                 ya
+  43  ㅒ   y plus ㅐ                 yae
+  44  ㅖ   y plus ㅔ                 ye
+  45  ㅠ   y plus ㅜ                 yu
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, level, new_jamo, *new_mnemonic, new_pronunciation = line.split(/\s+/)
   old_jamo = (new_mnemonic[0] == 'y') ? new_mnemonic[2] : new_mnemonic[0]
