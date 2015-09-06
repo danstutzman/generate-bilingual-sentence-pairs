@@ -1,23 +1,68 @@
+
+
 mnemonics:
+-
+  - ㅇ
+  - nothing
+  - NG
+-
+  - ㄱ
+  - gun
+  - G
+-
+  - ㄴ
+  - nose
+  - N
+-
+  - ㄷ
+  - door
+  - D
+-
+  - ㅂ
+  - bucket
+  - B
+-
+  - ㅡ
+  - brook
+  - oo (as in book)
+-
+  - ㄹ
+  - rattlesnake
+  - R
 -
   - ㅁ
   - map
-  - m sound
+  - M
+-
+  - ㅍ
+  - part two
+  - P
+-
+  - ㅅ
+  - summit
+  - S
+-
+  - ㅣ
+  - tree
+  - ee (as in tree)
 -
   - ㅏ
-  - 'tree with a mark on the far side'
+  - 'mark on the far side of the tree'
   - far
   - a sound
 -
   - ㅗ
-  - 'brook with a mark over it'
+  - 'mark over the brook'
   - over
   - o sound
 
 compositions:
-  마:
-    topleft: ㅁ
-    right: ㅏ
-  모:
-    topleft: ㅁ
-    bottom: ㅗ
+  리:
+    topleft: ㄹ
+    right: ㅣ
+#  마:
+#    topleft: ㅁ
+#    right: ㅏ
+#  모:
+#    topleft: ㅁ
+#    bottom: ㅗ

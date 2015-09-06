@@ -121,12 +121,8 @@ for composition, position_to_jamo in yaml['compositions']
     if sound_concept.nil?
       raise "Couldn't find 'to' concept for #{jamo_to_sound_arc}"
     end
-    sound_content = sound_concept[:content]
-    if match = sound_content.match(/^(.*) sound$/)
-      sounds.push(match[1])
-    else
-      raise "Expected #{sound_content} to end with 'sound'"
-    end
+    sound = sound_concept[:content]
+    sounds.push sound
   end
 
   all_sounds = sounds.join
