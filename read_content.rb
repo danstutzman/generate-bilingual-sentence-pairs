@@ -77,7 +77,48 @@ yaml['mnemonics'].each_with_index do |sequence, level0|
   arcs.push reverse(new_arc, arcs, true)
 end
 
-for composition, position_to_jamo in yaml['compositions']
+composition_to_position_to_jamo = {}
+for initial_sequence in yaml['mnemonics']
+  initial_compatibility_jamo = initial_sequence.first
+  initial_combining_jamo = {
+      'ㄱ' => "\u1100",
+      'ㄴ' => "\u1102",
+      'ㄷ' => "\u1103",
+      'ㅂ' => "\u1107",
+      'ㅇ' => "\u110B",
+      'ㄹ' => "\u1105",
+      'ㅁ' => "\u1106",
+      'ㅍ' => "\u1111",
+      'ㅅ' => "\u1109",
+      'ㅌ' => "\u1110",
+  }[initial_compatibility_jamo]
+  next if not initial_combining_jamo
+
+  for vowel_sequence in yaml['mnemonics']
+    vowel_compatibility_jamo = vowel_sequence.first
+    vowel_combining_jamo, vowel_position = {
+      'ㅣ' => ["\u1175", 'right'],
+      'ㅓ' => ["\u1165", 'right'],
+      'ㅏ' => ["\u1161", 'right'],
+      'ㅔ' => ["\u1166", 'right'],
+      'ㅐ' => ["\u1162", 'right'],
+      'ㅡ' => ["\u1173", 'bottom'],
+      'ㅗ' => ["\u1169", 'bottom'],
+      'ㅜ' => ["\u116E", 'bottom'],
+    }[vowel_compatibility_jamo]
+    next if not vowel_combining_jamo
+
+    composition = initial_combining_jamo + vowel_combining_jamo
+    composition_to_position_to_jamo[composition] = {
+       'topleft'      => initial_compatibility_jamo,
+       vowel_position => vowel_compatibility_jamo,
+    }
+    print composition
+  end
+
+end
+
+for composition, position_to_jamo in composition_to_position_to_jamo
   raise if string_to_concept[composition]
   level = position_to_jamo.map { |position, jamo|
       string_to_concept[jamo][:level]
@@ -182,6 +223,6 @@ for arc in arcs
     arc[:id], arc[:from_concept_id], arc[:to_concept_id],
     arc[:is_from_l2] ? 1 : 0, arc[:is_to_l2] ? 1 : 0, arc[:height],
     arc[:part_arc_ids] && arc[:part_arc_ids].join(','),
-    arc[:level] < 3 || arc[:height] <= 2 ? 1 : 0,
+    (arc[:level] < 3 || arc[:height] <= 2 || !arc[:is_to_l2]) ? 1 : 0,
     arc[:level]
 end
