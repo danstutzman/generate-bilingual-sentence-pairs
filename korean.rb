@@ -1,4 +1,4 @@
-require 'sqlite3'
+require './models'
 
 # JG = jamo glyph
 # JP = jamo pronunciation
@@ -44,34 +44,12 @@ def u_sequences_to_utf8(s)
   s.gsub(/\\u[0-9A-F]{4}/) { |u_sequence| u_sequence[2...6].to_i(16).chr('UTF-8') }
 end
 
-db = SQLite3::Database.new "test.db"
-
-concept_id_to_concept = {}
-sql = 'select id, type, content from concepts'
-for row in db.execute(sql) do
-  concept = {}
-  concept[:id], concept[:type], concept[:content] = row
-  concept_id_to_concept[concept[:id]] = concept
-end
-
-arc_id_to_arc = {}
-sql = 'select id, from_concept_id, to_concept_id, is_from_l2,
-  is_to_l2, height, part_arc_ids, was_correct, level
-  from arcs'
-for row in db.execute(sql) do
-  arc = {}
-  arc[:id], arc[:from_concept_id], arc[:to_concept_id],
-    arc[:is_from_l2], arc[:is_to_l2], arc[:height], arc[:part_arc_ids],
-    arc[:was_correct], arc[:level] = row
-  arc_id_to_arc[arc[:id]] = arc
-end
-
-arcs_to_review = arc_id_to_arc.values.select { |arc| arc[:was_correct] == 0 }
+arcs_to_review = $arc_id_to_arc.values.select { |arc| !arc.was_correct }
 if arcs_to_review.size == 0
   raise "No failed cards to review"
 end
 p ['arcs_to_review'] + arcs_to_review.map { |arc|
-  concept_id_to_concept[arc[:to_concept_id]][:content]
+  $concept_id_to_concept[arc[:to_concept_id]][:content]
 }
 
 # prefer harder if correct, or easier if incorrect, where harder means:
@@ -79,22 +57,20 @@ p ['arcs_to_review'] + arcs_to_review.map { |arc|
 # - arcs with greater height
 # - arcs to l2
 # - arcs from l2
-arcs_sorted = arc_id_to_arc.sort_by { |arc_id, arc|
-  was_correct = (arc[:was_correct] == 1) ? 1 : -1
+arcs_sorted = $arc_id_to_arc.sort_by { |arc_id, arc|
+  was_correct = arc.was_correct ? 1 : -1
   [
     was_correct,
-    was_correct * -arc[:level],
-    was_correct * -arc[:height],
-    was_correct * -arc[:is_to_l2],
-    was_correct * -arc[:is_from_l2],
+    was_correct * -arc.level,
+    was_correct * -arc.height,
+    was_correct * (arc.is_to_l2 ? -1 : 1),
+    was_correct * (arc.is_from_l2 ? -1 : 1),
     rand,
   ]
 }.map { |arc_id, arc| arc }
 arc = arcs_sorted.first
-from_concept = concept_id_to_concept[arc[:from_concept_id]]
-to_concept   = concept_id_to_concept[arc[:to_concept_id]]
 
-case [from_concept[:type], to_concept[:type]]
+case [arc.from_concept.type, arc.to_concept.type]
   when ['jamo', 'mnemonic']
     puts 'Think of the mnemonic for:'
   when ['sound', 'jamo']
@@ -108,7 +84,7 @@ case [from_concept[:type], to_concept[:type]]
   when ['mnemonic', 'sound']
     puts 'Say the sound intended by the mnemonic:'
   when ['mnemonic', 'mnemonic']
-    if from_concept[:content].size > to_concept[:content].size
+    if arc.from_concept[:content].size > arc.to_concept[:content].size
       puts 'Isolate the key word in the mnemonic:'
     else
       puts "Think of the mnemonic for the drawing for the mnemonic:"
@@ -122,47 +98,38 @@ case [from_concept[:type], to_concept[:type]]
   when ['l2_word', 'l1_transliteration']
     puts 'Read this word aloud:'
   else
-    raise "Don't know how to ask for #{from_concept[:type]}, #{to_concept[:type]}"
+    raise "Don't know how to ask for #{arc.from_concept.type}, #{arc.to_concept.type}"
 end
-puts "   #{from_concept[:content]}"
+puts "   #{arc.from_concept.content}"
 puts "Press enter to show answer."
 readline
 
 puts "The answer is:"
-puts "   #{to_concept[:content]}"
+puts "   #{arc.to_concept.content}"
 puts "Got it right? (y/n)"
-was_correct = (readline.strip == 'y')
+arc.was_correct = (readline.strip == 'y')
+arc.save!
 
-if was_correct
-  arc[:was_correct] = 1
-else
-  arc[:was_correct] = 0
-end
-sql = 'update arcs set was_correct = ? where id = ?'
-db.execute(sql, arc[:was_correct], arc[:id])
-
-def ask_about_part_arcs(arc, arc_id_to_arc, concept_id_to_concept, db)
-  if arc[:part_arc_ids] != nil
+def ask_about_part_arcs(arc)
+  if arc.part_arc_ids != nil
     puts "Which part arc(s) did you get wrong? (Separate numbers with commas)"
-    for part_arc_id in arc[:part_arc_ids].split(',')
-      part_arc = arc_id_to_arc[part_arc_id.to_i]
-      from_concept = concept_id_to_concept[part_arc[:from_concept_id]]
-      to_concept = concept_id_to_concept[part_arc[:to_concept_id]]
-      puts "  #{part_arc_id}. #{from_concept[:content]} -> #{to_concept[:content]}"
+    for part_arc_id in arc.part_arc_ids.split(',')
+      part_arc = $arc_id_to_arc[part_arc_id.to_i]
+      puts "  #{part_arc_id}. #{part_arc.from_concept.content} -> " +
+        "#{part_arc.to_concept.content}"
     end
     part_arc_ids_to_review = readline.split(',').map { |id| id.to_i }
     if part_arc_ids_to_review != [0]
       for part_arc_id in part_arc_ids_to_review
-        part_arc = arc_id_to_arc[part_arc_id]
-        part_arc[:was_correct] = 0
-        sql = 'update arcs set was_correct = 0 where id = ?'
-        db.execute(sql, part_arc_id)
-        ask_about_part_arcs(part_arc, arc_id_to_arc, concept_id_to_concept, db)
+        part_arc = $arc_id_to_arc[part_arc_id]
+        part_arc.was_correct = false
+        part_arc.save!
+        ask_about_part_arcs part_arc
       end
     end
   end
 end
 
-if not was_correct
-  ask_about_part_arcs(arc, arc_id_to_arc, concept_id_to_concept, db)
+if not arc.was_correct
+  ask_about_part_arcs arc
 end
