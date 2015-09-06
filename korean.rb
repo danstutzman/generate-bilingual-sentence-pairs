@@ -63,8 +63,7 @@ end
 arc_id_to_arc = {}
 sql = 'select id, from_concept_id, to_concept_id, is_from_l2,
   is_to_l2, height, part_arc_ids, was_correct, level
-  from arcs
-  where was_correct = 0'
+  from arcs'
 for row in db.execute(sql) do
   arc = {}
   arc[:id], arc[:from_concept_id], arc[:to_concept_id],
@@ -73,7 +72,7 @@ for row in db.execute(sql) do
   arc_id_to_arc[arc[:id]] = arc
 end
 
-if arc_id_to_arc.size == 0
+if arc_id_to_arc.values.select { |arc| arc[:was_correct] == 0 }.size == 0
   raise "No failed cards to review"
 end
 
