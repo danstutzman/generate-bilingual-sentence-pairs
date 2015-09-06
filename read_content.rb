@@ -79,11 +79,13 @@ def reverse_arc arc
     [arc.to_concept, arc.from_concept.type])
 end
 
-def split_arc height, arc, middle_concept
+def split_arc height, arc, middle_concept, both_ways
   arc1 = new_arc height, arc.from_concept, middle_concept
   arc2 = new_arc height, middle_concept, arc.to_concept
   arc.add_part_arcs! [arc1, arc2]
-  reverse_arc(arc).add_part_arcs! [reverse_arc(arc2), reverse_arc(arc1)]
+  if both_ways
+    reverse_arc(arc).add_part_arcs! [reverse_arc(arc2), reverse_arc(arc1)]
+  end
   [arc1, arc2]
 end
 
@@ -113,7 +115,7 @@ end
   pronunciation = new_concept 'jamo-pronunciation', pronunciation, level, false
 
   arc = new_arc JAMO_HEIGHT, jamo, pronunciation
-  split_arc JAMO_MNEMONIC_HEIGHT2, arc, mnemonic
+  split_arc JAMO_MNEMONIC_HEIGHT2, arc, mnemonic, true
 end
 
 %q[
@@ -131,7 +133,7 @@ end
   phrase = new_concept 'jamo-mnemonic-phrase', phrase, mnemonic.level, false
 
   arc_n_to_j = $arc_by_from_concept_and_to_concept_type.fetch([mnemonic, 'jamo'])
-  split_arc JAMO_MNEMONIC_HEIGHT1, arc_n_to_j, phrase
+  split_arc JAMO_MNEMONIC_HEIGHT1, arc_n_to_j, phrase, true
 end
 
 %q[
@@ -165,7 +167,7 @@ end
     false
 
   arc_j_to_p = new_arc JAMO_MNEMONIC_HEIGHT3, new_jamo, new_pronunciation
-  _, arc_n_to_p = split_arc JAMO_MNEMONIC_HEIGHT2, arc_j_to_p, new_mnemonic
+  _, arc_n_to_p = split_arc JAMO_MNEMONIC_HEIGHT2, arc_j_to_p, new_mnemonic, true
   arc_n_to_p.add_part_arcs! [old_jamo_mnemonic_arc]
   reverse_arc(arc_n_to_p).add_part_arcs! [reverse_arc(old_jamo_mnemonic_arc)]
 end
@@ -210,14 +212,18 @@ end
 #  골럼   Gollum
 #  번째   -th (e.g. 4th)
 lines = %q[
-  어제 |yesterday |Yesterday I drank *UP* all the *eO*. J.
-  아침 |morning   |The morning is for achivement.
+  어제 |O.J. was drank up yesterday.        |yesterday
+       |Yesterday I drank *UP* the *eO*. J. |
+  아침 |Achivement in the morning!          |morning
+       |Morning's for achivement.           |
 ].split("\n").reject { |line| line == '' }
-lines.each do |line|
-  word, translation, mnemonic = line.split('|')
+(lines.size / 2).times do |i|
+  two_lines = lines[i*2], lines[i*2 + 1]
+  word, word_to_translation_mnemonic, translation = two_lines[0].split('|')
   word.strip!
   translation.strip!
-  mnemonic.strip!
+  word_to_translation_mnemonic.strip!
+  translation_to_word_mnemonic = two_lines[1].split('|')[1].strip
 
   composition_strings = word.split('')
   compositions = composition_strings.map do |composition_string|
@@ -274,13 +280,20 @@ lines.each do |line|
   transcription = new_concept 'word-transcription', syllables_joined,
     max_level, false
   word_to_transcription, transcription_to_translation =
-    split_arc WORD_TRANSCRIPTION_HEIGHT, word_arc, transcription
+    split_arc WORD_TRANSCRIPTION_HEIGHT, word_arc, transcription, true
   word_to_transcription.add_part_arcs! syllable_arcs
   reverse_arc(word_to_transcription).add_part_arcs!(
     syllable_arcs.map { |arc| reverse_arc(arc) })
 
-  mnemonic = new_concept 'word-mnemonic', mnemonic, max_level, false
-  split_arc WORD_TRANSLATION_RRK_HEIGHT, transcription_to_translation, mnemonic
+  word_to_translation_mnemonic = new_concept 'word-mnemonic',
+    word_to_translation_mnemonic, max_level, false
+  split_arc WORD_TRANSLATION_RRK_HEIGHT, transcription_to_translation,
+    word_to_translation_mnemonic, false
+
+  translation_to_word_mnemonic = new_concept 'word-mnemonic',
+    translation_to_word_mnemonic, max_level, false
+  split_arc WORD_TRANSLATION_RRK_HEIGHT, reverse_arc(transcription_to_translation),
+    translation_to_word_mnemonic, false
 end
 
 #%q[
