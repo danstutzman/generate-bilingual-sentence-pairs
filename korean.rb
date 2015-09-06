@@ -61,6 +61,18 @@ case [arc.from_concept.type, arc.to_concept.type]
     puts 'Read this word aloud:'
   when ['word-transcription', 'word']
     puts 'Write the hanguls for the transcription:'
+  when ['word', 'word-translation']
+    puts 'Say the English translation aloud:'
+  when ['word-translation', 'word']
+    puts 'Write this word in Korean:'
+  when ['word-translation', 'word-mnemonic']
+    puts 'Translate this word to Korean:'
+  when ['word-translation', 'word-transcription']
+    puts 'Translate this word to Romanized Korean:'
+  when ['word-transcription', 'word-translation']
+    puts 'Translate the Romanized Korean:'
+  when ['word-mnemonic', 'word-translation']
+    puts 'Extract the translation part out of the mnemonic:'
   else
     raise "Don't know how to ask for #{arc.from_concept.type}, #{arc.to_concept.type}"
 end

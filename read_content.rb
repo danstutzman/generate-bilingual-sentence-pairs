@@ -2,12 +2,14 @@ require 'pp'
 require 'unicode_utils'
 require './models'
 
-JAMO_MNEMONIC_HEIGHT1 = 2
-JAMO_MNEMONIC_HEIGHT2 = 2
-JAMO_MNEMONIC_HEIGHT3 = 3
-JAMO_HEIGHT           = 4
-COMPOSITION_HEIGHT    = 5
-WORD_HEIGHT           = 6
+JAMO_MNEMONIC_HEIGHT1          = 2
+JAMO_MNEMONIC_HEIGHT2          = 2
+JAMO_MNEMONIC_HEIGHT3          = 3
+JAMO_HEIGHT                    = 4
+COMPOSITION_HEIGHT             = 5
+WORD_TRANSCRIPTION_HEIGHT      = 6
+WORD_TRANSLATION_RRK_HEIGHT    = 7
+WORD_TRANSLATION_HANGUL_HEIGHT = 8
 
 db = ActiveRecord::Base.connection
 db.execute 'drop table if exists concepts'
@@ -64,7 +66,7 @@ def new_arc height, from, to
     level: level,
     is_from_l2_script: to.is_l2_script,
     is_to_l2_script: from.is_l2_script,
-    was_correct: height < WORD_HEIGHT
+    was_correct: height < WORD_TRANSLATION_HANGUL_HEIGHT
   $arc_by_id[arc2.id] = arc2
   $arc_by_from_concept_and_to_concept_type[
     [arc2.from_concept, arc2.to_concept.type]] = arc2
@@ -198,20 +200,25 @@ codepoint_name_to_chr = {}
   codepoint_name_to_chr[UnicodeUtils.sid(codepoint)] = codepoint.chr('UTF-8')
 end
 
-%q[
-  뱃맨       baet-maen (Batman)
-  토토로     to-to-ro (Totoro)
-  모         Mo
-  마리오     Mario
-  니모       ni-mo (Nemo)
-  해리 포터  hae-ri po-teo (Harry Potter)
-  엘머       el-meo (Elmo)
-  미키       mi-ki (Micky)
-  골럼       gol-leom (Gollum)
-  번째       beon-jjae
-].split("\n").reject { |line| line == '' }.each do |line|
-  _, word, *word_transcription = line.split(/\s+/)
-  word_transcription = word_transcription.join(' ')
+#  뱃맨   Batman
+#  토토로 Totoro
+#  모     Mo
+#  마리오 Mario
+#  니모   Nemo
+#  엘머   Elmo
+#  미키   Micky
+#  골럼   Gollum
+#  번째   -th (e.g. 4th)
+lines = %q[
+  어제 |yesterday |Yesterday I drank *UP* all the *eO*. J.
+  아침 |morning   |The morning is for achivement.
+].split("\n").reject { |line| line == '' }
+lines.each do |line|
+  word, translation, mnemonic = line.split('|')
+  word.strip!
+  translation.strip!
+  mnemonic.strip!
+
   composition_strings = word.split('')
   compositions = composition_strings.map do |composition_string|
     jamos_decomposed = UnicodeUtils.canonical_decomposition(composition_string)
@@ -257,12 +264,25 @@ end
 
   max_level = compositions.map { |composition| composition.level }.max
   word = new_concept 'word', word, max_level, true
-  word_transcription = new_concept 'word-transcription', word_transcription,
-    max_level, false
-  word_arc = new_arc WORD_HEIGHT, word, word_transcription
+  translation = new_concept 'word-translation', translation, max_level, false
+  word_arc = new_arc WORD_TRANSLATION_HANGUL_HEIGHT, word, translation
+
   syllable_arcs = compositions.map { |composition|
     $arc_by_from_concept_and_to_concept_type.fetch([composition, 'syllable-rrk'])
   }
-  word_arc.add_part_arcs! syllable_arcs
-  reverse_arc(word_arc).add_part_arcs! syllable_arcs.map { |arc| reverse_arc(arc) }
+  syllables_joined = syllable_arcs.map { |arc| arc.to_concept.content }.join
+  transcription = new_concept 'word-transcription', syllables_joined,
+    max_level, false
+  word_to_transcription, transcription_to_translation =
+    split_arc WORD_TRANSCRIPTION_HEIGHT, word_arc, transcription
+  word_to_transcription.add_part_arcs! syllable_arcs
+  reverse_arc(word_to_transcription).add_part_arcs!(
+    syllable_arcs.map { |arc| reverse_arc(arc) })
+
+  mnemonic = new_concept 'word-mnemonic', mnemonic, max_level, false
+  split_arc WORD_TRANSLATION_RRK_HEIGHT, transcription_to_translation, mnemonic
 end
+
+#%q[
+#  어제 아침   yesterday morning
+#]
