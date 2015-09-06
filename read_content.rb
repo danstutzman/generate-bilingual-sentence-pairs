@@ -173,8 +173,8 @@ lines = %q[
 rrk_initials = lines[1].split(/\s+/)
 rrk_finals = lines[2].split(/\s+/)
 lines[0].split(/\s+/).each_with_index do |jamo, i|
-  JAMO_TO_RRK_INITIALS[jamo] = rrk_initials[i]
-  JAMO_TO_RRK_FINALS[jamo]   = rrk_finals[i]
+  JAMO_TO_RRK_INITIALS[jamo] = rrk_initials[i].sub('-', '')
+  JAMO_TO_RRK_FINALS[jamo]   = rrk_finals[i].sub('-', '')
 end
 
 codepoint_name_to_chr = {}
