@@ -13,75 +13,65 @@ def to_sentence(words)
   words[0...-1].join(' ') + words[-1]
 end
 
-def choose_agent(features)
-  agent = case [features[:person], features[:number], features[:object]]
-    when [1, 'S', false]
-      one_of([
-        ['NP', ['I'], ['yo']],
-        ['NP', ['(I)'], []]
-      ])
-    when [1, 'S', true]
-      ['NP', ['me'], ['yo']]
-    when [2, 'S', false]
-      one_of([
-        ['NP', ['you'], ['tu']],
-        ['NP', ['(you)'], []]
-      ])
-    when [2, 'S', true]
-      ['NP', ['you'], ['tu']]
-    when [3, 'S', false]
-      one_of([
-        ['NP', ['he'],  ['el']],
-        ['NP', ['she'], ['ella']],
-        ['NP', ['it(m)'], ['el']],
-        ['NP', ['it(f)'], ['ella']],
-        ['NP', ['(he/she/it)'], []],
-      ] + (features[:question] ? [['NP', ['who'], ['quien']]] : []))
-    when [3, 'S', true]
-      one_of([
-        ['NP', ['him'],  ['el']],
-        ['NP', ['him'], ['ella']],
-        ['NP', ['it(m)'], ['el']],
-        ['NP', ['it(f)'], ['ella']],
-      ])
-    when [1, 'P', false]
-      one_of([
-        ['NP', ['we'], ['nosotros']],
-        ['NP', ['(we)'], []],
-      ])
-    when [1, 'P', true]
-      ['NP', ['us'], ['nosotros']]
-    when [3, 'P', false]
-      one_of([
-        ['NP', ['they'], ['ellos']],
-        ['NP', ['they(f)'], ['ellas']],
-        ['NP', ['(they)'], []],
-      ])
-    when [3, 'P', true]
-      one_of([
-        ['NP', ['them'], ['ellos']],
-        ['NP', ['them(f)'], ['ellas']],
-      ])
-    else
-      raise "Can't handle #{features}"
-  end
+def choose_agent
+  l1, l2, features = one_of([
+    ['I',         'yo', {gender:'?', person:1, number:'S', question:false}],
+    ['I',          nil, {gender:'?', person:1, number:'S', question:false}],
+    ['you',       'tu', {gender:'?', person:2, number:'S', question:false}],
+    ['you',        nil, {gender:'?', person:2, number:'S', question:false}],
+    ['he',        'el', {gender:'M', person:3, number:'S', question:false}],
+    ['she',     'ella', {gender:'F', person:3, number:'S', question:false}],
+    ['it',        'el', {gender:'N', person:3, number:'S', question:false}],
+    ['it',      'ella', {gender:'N', person:3, number:'S', question:false}],
+    ['we',  'nosotros', {gender:'?', person:1, number:'P', question:false}],
+    ['we',         nil, {gender:'?', person:1, number:'P', question:false}],
+    ['they',   'ellos', {gender:'?', person:3, number:'P', question:false}],
+    ['they',   'ellas', {gender:'?', person:3, number:'P', question:false}],
+    ['they',       nil, {gender:'?', person:3, number:'P', question:false}],
+    ['who',    'quien', {gender:'N', person:3, number:'S', question:true}],
+  ])
+  [[l1], l2 ? [l2] : [], features]
 end
 
-def choose_object(prefix_pronoun)
-  if prefix_pronoun
-    one_of([
-      ['NP', ['me'],  ['me']],
-      ['NP', ['you'], ['te']],
-      ['NP', ['him'], ['le(m)']],
-      ['NP', ['her'], ['le(f)']],
-      ['NP', ['it'],  ['le']],
-      ['NP', ['us'],  ['nos']],
-      ['NP', ['them'],['les']],
-    ])
+def choose_object(features)
+  new_features = { question: false }
+  if features[:reflexive]
+    l1, l2 = if features[:person] == 1 && features[:number] == 'S'
+      ['myself', 'me']
+    elsif features[:person] == 2 && features[:number] == 'S'
+      ['yourself', 'te']
+    elsif features[:person] == 3 && features[:number] == 'S'
+      case features[:gender]
+        when 'M' then ['himself',    'se']
+        when 'F' then ['herself',    'se']
+        when 'N' then ['itself',     'se']
+        else raise "Unknown gender #{features[:gender]}"
+      end
+    elsif features[:person] == 1 && features[:number] == 'P'
+      ['ourselves', 'nos']
+    elsif features[:person] == 2 && features[:number] == 'P'
+      ['yourselves', 'vos']
+    elsif features[:person] == 3 && features[:number] == 'P'
+      ['themselves', 'se']
+    end
+    [[l1], [l2], new_features]
+  elsif features[:prefix_pronoun]
+    choices = []
+    pair = [features[:gender], features[:number]]
+    if pair != [1, 'S'] then choices.push ['me',  'me'] end
+    if pair != [2, 'S'] then choices.push ['you', 'te'] end
+    choices.push ['him', 'le'] # can't be sure it's reflexive
+    choices.push ['her', 'le'] # can't be sure it's reflexive
+    choices.push ['it',  'le'] # can't be sure it's reflexive
+    if pair != [1, 'P'] then choices.push ['us',  'nos'] end
+    if pair != [3, 'P'] then choices.push ['them','les'] end
+    l1, l2 = one_of(choices)
+    [[l1], [l2], new_features]
   else
     one_of([
-      ['NP', ['money'], ['dinero']],
-      ['NP', ['a', 'jacket'], ['una', 'chaqueta']],
+      [['money'], ['dinero'], {question:false}],
+      [['a', 'jacket'], ['una', 'chaqueta'], {question:false}],
+      [['whom'], ['a', 'quien'], {question:true}],
     ])
   end
 end
@@ -118,28 +108,25 @@ def choose_vp(features)
     else raise "Can't handle #{selector}"
   end
 
-  prefix_pronoun = one_of([true, false])
-  object = choose_object(prefix_pronoun)
-  if prefix_pronoun
-    ['VP', [l1] + object[1], object[2] + [l2_conjugated]]
+  case rand(3)
+    when 0 then features.update({reflexive: true, prefix_pronoun: true})
+    when 1 then features.update({prefix_pronoun: true})
+    when 2 then nil
+  end
+  object_l1, object_l2, object_features = choose_object(features)
+  if features[:prefix_pronoun]
+    [[l1] + object_l1, object_l2 + [l2_conjugated], object_features]
   else
-    ['VP', [l1] + object[1], [l2_conjugated] + object[2]]
+    [[l1] + object_l1, [l2_conjugated] + object_l2, object_features]
   end
 end
 
 def choose_sentence
-  features = one_of([
-    {person:1, number:'S'},
-    {person:2, number:'S'},
-    {person:3, number:'S'},
-    {person:1, number:'P'},
-    {person:3, number:'P'},
-  ])
-  features[:question] = one_of([true, false])
-  agent = choose_agent(features.merge({object:false}))
-  vp = choose_vp(features)
-  end_punctuation = features[:question] ? ['?'] : ['.']
-  ['S', agent[1] + vp[1] + end_punctuation, agent[2] + vp[2] + end_punctuation]
+  agent_l1, agent_l2, agent_features = choose_agent
+  vp_l1, vp_l2, vp_features = choose_vp(agent_features)
+  is_question = agent_features[:question] || vp_features[:question] || rand(2) == 1
+  end_punctuation = is_question ? ['?'] : ['.']
+  ['S', agent_l1 + vp_l1 + end_punctuation, agent_l2 + vp_l2 + end_punctuation]
 end
 
 10.times do
