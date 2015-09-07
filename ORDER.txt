@@ -1,0 +1,248 @@
+OPTIMIZING LANGUAGE LEARNING ORDER FOR MAXIMAL EXPANSIVENESS/GENERATIVITY/USEFULNESS
+
+==========================
+VERY LIMITED, BUT MAKE COMMUNICATION NOT SO PAINFUL
+
+Social transition politeness:
+- Excuse me.
+- Can you help me?
+- Hello.
+- Thank you.
+- Goodbye.
+
+_________________
+To expand vocabulary:
+- In L1, please?
+- How do you say L1-PHRASE?
+- What's the word for L1-PHRASE?
+- The word is L2.
+- What does that say/mean?
+- That means L2.
+- What is that?
+- That is L2.
+- What does L2-PHRASE mean?
+- L2-PHRASE means L1-PHRASE.
+
+_________________
+Communication flow control responses:
+- Okay.
+- Yes.
+- No.
+- I don't know.
+- Wait.
+- Slow down.
+- Stop.
+- Continue.
+- Repeat/again.
+- I understand.
+- I don't understand.
+
+=========================
+VERY GENERATIVE, FOCUSED ON AGENCY/POSSIBILITY
+
+Essential pronouns:
+- this
+- that
+- I
+- you
+- he
+- she
+- it
+- who + ?
+- what + ?
+
+Extended noun booleans:
+- N and N
+- N or N
+- not N
+
+Ownership
+- A's
+- my
+- your
+- his
+- her
+- its
+- their
+
+_____________
+Necessary objects:
+- ride (to DESTINATION)
+- ticket (to DESTINATION)
+- dictionary
+- water
+- something to drink
+- food
+- place to stay
+- money
+- passport
+- visa
+- gun
+- bullets
+- phone
+- laptop
+- wifi
+- school
+- paper
+- pen
+
+Copula sentences: (and their negations)
+- OBJECT is ADJECTIVE.
+- OBJECT is called NAME.
+
+#Intransitive verbs:
+#- A survives.
+#- A sleeps.
+#- A eats.
+#- A drinks.
+#- A arrives.
+#- A leaves.
+#- A returns home.
+
+Transitive verbs for VPs: (learn with all conjugations!)
+- A is located at DESTINATION (for VP)
+- A visits/goes/travels to DESTINATION (for VP)
+- A stays at DESTINATION (for VP)
+- A calls PERSON (to VP)
+- A reads OBJECT (to VP)
+- A writes (PHRASE) (to PERSON) (to VP)
+- A drinks OBJECT (to VP)
+- A eats OBJECT (to VP)
+- A studies OBJECT (to VP)
+- A learns OBJECT (to VP)
+- A remembers OBJECT (for VP)
+- A forgets OBJECT
+- A throws away OBJECT
+- A loses OBJECT
+- A likes OBJECT (for VP)
+- A dislikes OBJECT (for VP)
+- A loves OBJECT (for VP)
+- A hates OBJECT (for VP)
+- A gets OBJECT (for VP)
+- A has OBJECT (for VP)
+- A wants OBJECT (for VP)
+- A needs OBJECT (for VP)
+- A gives OBJECT to A2 (for VP)
+- A sends OBJECT to A2 (for VP)
+- A uses OBJECT (for VP)
+- A buys OBJECT (from PERSON) (for AMOUNT) (for VP)
+- A sells OBJECT (to PERSON) (for AMOUNT) (for VP)
+
+Meta-verbs for VPs: (or negation) (or WHAT for object) (or WHO)
+- A can VP
+- A will VP
+- A attempts/tries to VP
+- A learns to VP
+- A studies to VP
+- A helps A2 (to VP)
+- A stops/prevents A2 (from VP)
+
+Tenses:
+- present
+- past
+- future
+- conditional/hypothetical
+- past perfect
+- present perfect
+
+___________
+Unary transformations:
+- S?
+- S -- is that right?
+- Why does S?
+- How does S?
+- When does S?
+- Where does S?
+
+Binary conjunctions:
+- S, so S.
+- S, so that S.
+- S, and S.
+- S, but/however/although S
+- S, because S
+- If S-INFINTIVE, then S-WOULD.
+- S-WOULD if S-INFINTIVE.
+- S before S.
+- S after S.
+- S while S.
+
+___________
+Meta-verbs for S: (or their negation)
+- A says (to A2) that S
+- A knows that S
+- A wants for S
+- A needs for S
+- A asks A2 to/whether/if S
+- A tells A2 that S
+- A learns (from A2) that S
+- A thinks that S
+- A agrees (with A2) that S
+- A realizes that S
+- A dreams that S
+- A likes that S
+- A loves that S
+- A dislikes that S
+- A hates that S
+
+==============================
+MINIMAL USEFUL VOCABULARY
+
+___________
+Adjectives:
+- good
+- bad
+- ready
+- available
+- expensive
+- big
+- okay/acceptable
+- awesome/great/cool
+- powerful
+- broken
+- old
+- necessary
+- dead
+
+________
+Relatives:
+- brother
+- sister
+- family
+- mother
+- father
+- parents
+- son
+- daughter
+- children
+- teacher
+- student
+- host
+- guest
+
+Numbers:
+- 1-9
+- 10-90
+- dollars
+- cents
+
+Times:
+- HH:MM
+- # minutes
+- # hours
+- now
+
+Time orientiation:
+- What time is it?
+- The time is TIME.
+- Is it at TIME?
+- It is at TIME.
+
+General daily time words:
+- yesterday
+- today
+- now
+- morning
+- afternoon
+- evening
+- night
+- tomorrow
