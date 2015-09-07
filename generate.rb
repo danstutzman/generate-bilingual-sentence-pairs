@@ -4,41 +4,12 @@ def one_of(list)
   list[rand(list.size)]
 end
 
-def to_l1(ast)
-  case ast[0]
-    when 'S'
-      agent, vp = ast[1], ast[2]
-      punctuation = ast[3][:question] ? '?' : '.'
-      to_l1(agent) + to_l1(vp) + [punctuation]
-    when 'NP'
-      ast[1]
-    when 'V'
-      [ast[1]]
-    when 'VP'
-      to_l1(ast[1]) + to_l1(ast[2])
-    else raise "Can't handle #{ast[0]}"
-  end
-end
-
-def to_l2(ast)
-  case ast[0]
-    when 'S'
-      agent, vp = ast[1], ast[2]
-      punctuation = ast[3][:question] ? '?' : '.'
-      to_l2(agent) + to_l2(vp) + [punctuation]
-    when 'NP'
-      ast[2]
-    when 'V'
-      [ast[2]]
-    when 'VP'
-      to_l2(ast[1]) + to_l2(ast[2])
-    else
-      raise "Can't handle #{ast[0]}"
-  end
-end
-
 def to_sentence(words)
-  words[0] = words[0][0].upcase + words[0][1..-1]
+  if words[0][0] == '('
+    words[0] = '(' + words[0][1].upcase + words[0][2..-1]
+  else
+    words[0] = words[0][0].upcase + words[0][1..-1]
+  end
   words[0...-1].join(' ') + words[-1]
 end
 
@@ -65,8 +36,7 @@ def choose_agent(features)
         ['NP', ['it(m)'], ['el']],
         ['NP', ['it(f)'], ['ella']],
         ['NP', ['(he/she/it)'], []],
-        ['NP', ['who'], ['quien']],
-      ])
+      ] + (features[:question] ? [['NP', ['who'], ['quien']]] : []))
     when [3, 'S', true]
       one_of([
         ['NP', ['him'],  ['el']],
@@ -97,18 +67,23 @@ def choose_agent(features)
   end
 end
 
-def choose_object
-  one_of([
-    ['NP', ['money'], ['dinero']],
-    ['NP', ['a', 'jacket'], ['una', 'chaqueta']],
-    choose_agent(one_of([
-      {person:1, number:'S', object:true},
-      {person:2, number:'S', object:true},
-      {person:3, number:'S', object:true},
-      {person:1, number:'P', object:true},
-      {person:3, number:'P', object:true},
-    ])),
-  ])
+def choose_object(prefix_pronoun)
+  if prefix_pronoun
+    one_of([
+      ['NP', ['me'],  ['me']],
+      ['NP', ['you'], ['te']],
+      ['NP', ['him'], ['le(m)']],
+      ['NP', ['her'], ['le(f)']],
+      ['NP', ['it'],  ['le']],
+      ['NP', ['us'],  ['nos']],
+      ['NP', ['them'],['les']],
+    ])
+  else
+    one_of([
+      ['NP', ['money'], ['dinero']],
+      ['NP', ['a', 'jacket'], ['una', 'chaqueta']],
+    ])
+  end
 end
 
 def choose_vp(features)
@@ -143,7 +118,13 @@ def choose_vp(features)
     else raise "Can't handle #{selector}"
   end
 
-  ['VP', ['V', l1, l2_conjugated], choose_object]
+  prefix_pronoun = one_of([true, false])
+  object = choose_object(prefix_pronoun)
+  if prefix_pronoun
+    ['VP', [l1] + object[1], object[2] + [l2_conjugated]]
+  else
+    ['VP', [l1] + object[1], [l2_conjugated] + object[2]]
+  end
 end
 
 def choose_sentence
@@ -155,12 +136,15 @@ def choose_sentence
     {person:3, number:'P'},
   ])
   features[:question] = one_of([true, false])
-  ['S', choose_agent(features.merge({object:false})), choose_vp(features), features]
+  agent = choose_agent(features.merge({object:false}))
+  vp = choose_vp(features)
+  end_punctuation = features[:question] ? ['?'] : ['.']
+  ['S', agent[1] + vp[1] + end_punctuation, agent[2] + vp[2] + end_punctuation]
 end
 
 10.times do
   s = choose_sentence
-  l1 = to_sentence(to_l1(s))
-  l2 = to_sentence(to_l2(s))
+  l1 = to_sentence(s[1])
+  l2 = to_sentence(s[2])
   puts sprintf('%-40s %-40s', l1, l2)
 end
