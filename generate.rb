@@ -13,12 +13,10 @@ def to_sentence(words, features)
 
   if features[:question]
     words += ['?']
+  elsif features[:exclamation]
+    words += ['!']
   else
-    if rand(10) == 0
-      words += ['!']
-    else
-      words += ['.']
-    end
+    words += ['.']
   end
 
   words.join(' ').gsub(/ ([!?,.])/, '\1')
@@ -263,6 +261,11 @@ end
 
 10.times do
   s = choose_sentence
+  unless s[2][:question]
+    if rand(5) == 0
+      s[2][:exclamation] = true
+    end
+  end
   l1 = to_sentence(s[0], s[2])
   l2 = to_sentence(s[1], s[2])
   if l1.size < 40 && l2.size < 40
