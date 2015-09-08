@@ -14,10 +14,14 @@ def to_sentence(words, features)
   if features[:question]
     words += ['?']
   else
-    words += ['.']
+    if rand(10) == 0
+      words += ['!']
+    else
+      words += ['.']
+    end
   end
 
-  words.join(' ').gsub(/ ([?,.])/, '\1')
+  words.join(' ').gsub(/ ([!?,.])/, '\1')
 end
 
 def choose_agent
