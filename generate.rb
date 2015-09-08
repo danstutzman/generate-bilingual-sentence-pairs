@@ -68,11 +68,21 @@ def choose_object(features)
     l1, l2 = one_of(choices)
     [[l1], [l2], new_features]
   else
-    one_of([
-      [['money'], ['dinero'], {question:false}],
-      [['a', 'jacket'], ['una', 'chaqueta'], {question:false}],
-      [['whom'], ['a', 'quien'], {question:true}],
-    ])
+    choices = []
+    if features[:actor] != false
+      choices += [
+        [['whom'], ['quien'], {question:true}],
+        [['Bill'], ['Bill'], {}],
+        [['Kim'],  ['Kim'], {}],
+      ]
+    end
+    if features[:actor] != true
+      choices += [
+        [['money'], ['dinero'], {question:false}],
+        [['a', 'jacket'], ['una', 'chaqueta'], {question:false}],
+      ]
+    end
+    one_of(choices)
   end
 end
 
@@ -106,26 +116,52 @@ def conjugate_l2_verb(l2, features)
 end
 
 def choose_vp(features)
-  if rand(4) == 0
-    l1, l2 = one_of([
-      ['try',   'probar'],
-      ['learn', 'aprender'],
-    ])
+  case rand(4)
+    when 0
+      l1, l2 = one_of([
+        ['try',   'probar'],
+        ['learn', 'aprender'],
+      ])
 
-    object_l1, object_l2, object_features =
-      choose_vp(features.merge({infinitive:true}))
-  else
-    l1, l2 = one_of([
-      ['need', 'necesitar'],
-      ['want', 'querer'],
-    ])
+      object_l1, object_l2, object_features =
+        choose_vp(features.merge({infinitive:true}))
+    when 1
+      l1, l2 = one_of([
+        ['give', 'dar'],
+      ])
 
-    case rand(3)
-      when 0 then features.update({reflexive: true, prefix_pronoun: true})
-      when 1 then features.update({prefix_pronoun: true})
-      when 2 then nil
-    end
-    object_l1, object_l2, object_features = choose_object(features)
+      receiver_l1, receiver_l2, receiver_features =
+        choose_object(features.merge({actor:true}))
+      transferable_l1, transferable_l2, transferable_features =
+        choose_object(features.merge({actor:false}))
+      object_l1 = receiver_l1 + transferable_l1
+      object_l2 = transferable_l2 + ['a'] + receiver_l2
+      object_features = receiver_features
+
+      if rand(2) == 0
+        vp_l1, vp_l2, vp_features = choose_vp(features.merge({infinitive:true}))
+        object_l1 += vp_l1
+        object_l2 += ['para'] + vp_l2
+        if vp_features[:question]
+          object_features[:question] = true
+        end
+      end
+
+    when 2...4
+      l1, l2, actor = one_of([
+        ['need', 'necesitar', false],
+        ['want', 'querer',    false],
+      ])
+
+      if actor != false
+        case rand(3)
+          when 0 then features.update({reflexive: true, prefix_pronoun: true})
+          when 1 then features.update({prefix_pronoun: true})
+          when 2 then nil
+        end
+      end
+      object_l1, object_l2, object_features =
+        choose_object(features.merge({actor:actor}))
   end
 
   if features[:infinitive]
