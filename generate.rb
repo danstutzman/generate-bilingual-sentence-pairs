@@ -112,6 +112,8 @@ def conjugate_l2_verb(l2, features)
   selector = [features[:person], features[:number], l2[-2..-1]]
   if features[:infinitive]
     return l2
+  elsif l2 == 'dar' && selector == [1, 'S', 'ar']
+    'doy'
   else
     l2_base = l2[0...-2]
     unless features[:person] == 1 && features[:number] == 'P'
