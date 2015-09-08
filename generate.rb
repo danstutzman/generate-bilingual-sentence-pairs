@@ -57,7 +57,7 @@ def choose_object(features)
     [[l1], [l2], new_features]
   elsif features[:prefix_pronoun]
     choices = []
-    pair = [features[:gender], features[:number]]
+    pair = [features[:person], features[:number]]
     if pair != [1, 'S'] then choices.push ['me',  'me'] end
     if pair != [2, 'S'] then choices.push ['you', 'te'] end
     choices.push ['him', 'le'] # can't be sure it's reflexive
@@ -76,48 +76,72 @@ def choose_object(features)
   end
 end
 
-def choose_vp(features)
-  l1, l2 = one_of([
-    ['need', 'necesitar'],
-    ['want', 'querer'],
-  ])
-
-  if features[:person] == 3 && features[:number] == 'S'
-    l1 += 's'
-  end
-
+def conjugate_l2_verb(l2, features)
   selector = [features[:person], features[:number], l2[-2..-1]]
-  l2_base = l2[0...-2]
-  unless features[:person] == 1 && features[:number] == 'P'
-    l2_base = case l2_base
-      when 'quer' then 'quier'
-      else l2_base
+  if features[:infinitive]
+    return l2
+  else
+    l2_base = l2[0...-2]
+    unless features[:person] == 1 && features[:number] == 'P'
+      l2_base = case l2
+        when 'querer' then 'quier'
+        when 'probar' then 'prueb'
+        else l2_base
+      end
+    end
+    l2_conjugated = case selector
+      when [1, 'S', 'ar'] then l2_base + 'o'
+      when [2, 'S', 'ar'] then l2_base + 'as'
+      when [3, 'S', 'ar'] then l2_base + 'a'
+      when [1, 'P', 'ar'] then l2_base + 'amos'
+      when [3, 'P', 'ar'] then l2_base + 'an'
+      when [1, 'S', 'er'] then l2_base + 'o'
+      when [2, 'S', 'er'] then l2_base + 'es'
+      when [3, 'S', 'er'] then l2_base + 'e'
+      when [1, 'P', 'er'] then l2_base + 'emos'
+      when [3, 'P', 'er'] then l2_base + 'en'
+      else raise "Can't handle #{selector}"
     end
   end
-  l2_conjugated = case selector
-    when [1, 'S', 'ar'] then l2_base + 'o'
-    when [2, 'S', 'ar'] then l2_base + 'as'
-    when [3, 'S', 'ar'] then l2_base + 'a'
-    when [1, 'P', 'ar'] then l2_base + 'amos'
-    when [3, 'P', 'ar'] then l2_base + 'an'
-    when [1, 'S', 'er'] then l2_base + 'o'
-    when [2, 'S', 'er'] then l2_base + 'es'
-    when [3, 'S', 'er'] then l2_base + 'e'
-    when [1, 'P', 'er'] then l2_base + 'emos'
-    when [3, 'P', 'er'] then l2_base + 'en'
-    else raise "Can't handle #{selector}"
+end
+
+def choose_vp(features)
+  if rand(4) == 0
+    l1, l2 = one_of([
+      ['try',   'probar'],
+      ['learn', 'aprender'],
+    ])
+
+    object_l1, object_l2, object_features =
+      choose_vp(features.merge({infinitive:true}))
+  else
+    l1, l2 = one_of([
+      ['need', 'necesitar'],
+      ['want', 'querer'],
+    ])
+
+    case rand(3)
+      when 0 then features.update({reflexive: true, prefix_pronoun: true})
+      when 1 then features.update({prefix_pronoun: true})
+      when 2 then nil
+    end
+    object_l1, object_l2, object_features = choose_object(features)
   end
 
-  case rand(3)
-    when 0 then features.update({reflexive: true, prefix_pronoun: true})
-    when 1 then features.update({prefix_pronoun: true})
-    when 2 then nil
-  end
-  object_l1, object_l2, object_features = choose_object(features)
-  if features[:prefix_pronoun]
-    [[l1] + object_l1, object_l2 + [l2_conjugated], object_features]
+  if features[:infinitive]
+    l1 = ['to', l1]
+  elsif features[:person] == 3 && features[:number] == 'S'
+    l1.gsub! /y$/, 'ie'
+    l1 = [l1 + 's']
   else
-    [[l1] + object_l1, [l2_conjugated] + object_l2, object_features]
+    l1 = [l1]
+  end
+  l2_conjugated = [conjugate_l2_verb(l2, features)]
+
+  if features[:prefix_pronoun]
+    [l1 + object_l1, object_l2 + l2_conjugated, object_features]
+  else
+    [l1 + object_l1, l2_conjugated + object_l2, object_features]
   end
 end
 
