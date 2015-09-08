@@ -24,8 +24,8 @@ def to_sentence(words, features)
   words.join(' ').gsub(/ ([!?,.])/, '\1')
 end
 
-def choose_agent
-  l1, l2, features = one_of([
+def choose_agent(features)
+  choices = [
     ['I',         'yo', {gender:'?', person:1, number:'S', question:false}],
     ['I',          nil, {gender:'?', person:1, number:'S', question:false}],
     ['you',       'tu', {gender:'?', person:2, number:'S', question:false}],
@@ -39,13 +39,21 @@ def choose_agent
     ['they',   'ellos', {gender:'?', person:3, number:'P', question:false}],
     ['they',   'ellas', {gender:'?', person:3, number:'P', question:false}],
     ['they',       nil, {gender:'?', person:3, number:'P', question:false}],
-    ['who',    'quien', {gender:'N', person:3, number:'S', question:true}],
-  ])
-  [[l1], l2 ? [l2] : [], features]
+  ]
+  if features[:question] != true # if it's not already a question
+    choices += [
+      ['who',    'quien', {gender:'N', person:3, number:'S', question:true}],
+    ]
+  end
+  l1, l2, agent_features = one_of(choices)
+  if features[:question]
+    agent_features[:question] = true # pass along question:true down the sentence
+  end
+  [[l1], l2 ? [l2] : [], agent_features]
 end
 
 def choose_object(features)
-  new_features = { question: false }
+  new_features = { question: features[:question] }
   if features[:reflexive]
     l1, l2 = if features[:person] == 1 && features[:number] == 'S'
       ['myself', 'me']
@@ -81,8 +89,10 @@ def choose_object(features)
   else
     choices = []
     if features[:actor] != false
+      if !features[:question]
+        choices.push [['whom'], ['quien'], {question:true}]
+      end
       choices += [
-        [['whom'], ['quien'], {question:true}],
         [['Bill'], ['Bill'], {}],
         [['Kim'],  ['Kim'], {}],
       ]
@@ -100,6 +110,12 @@ end
 def conjugate_l1_verb(l1, features)
   if features[:infinitive]
     ['to', l1]
+  elsif features[:needs_auxiliary]
+    if features[:person] == 3 && features[:number] == 'S'
+      ['does', l1]
+    else
+      ['do', l1]
+    end
   elsif features[:person] == 3 && features[:number] == 'S'
     l1.gsub! /y$/, 'ie'
     [l1 + 's']
@@ -140,7 +156,7 @@ def conjugate_l2_verb(l2, features)
 end
 
 def choose_vp(features)
-  case rand(4)
+  case rand(10)
     when 0
       l1, l2 = one_of([
         ['try',   'probar'],
@@ -171,7 +187,7 @@ def choose_vp(features)
         end
       end
 
-    when 2...4
+    else
       l1, l2, actor = one_of([
         ['need', 'necesitar', false],
         ['want', 'querer',    false],
@@ -199,27 +215,48 @@ def choose_vp(features)
 end
 
 def choose_sentence
-  agent_l1, agent_l2, agent_features = choose_agent
   case rand(10)
-  when 0...8 # Agent VP
-    agent_l1, agent_l2, agent_features = choose_agent
+  when 0..5 # Agent VP
+    agent_l1, agent_l2, agent_features = choose_agent({})
     vp_l1, vp_l2, vp_features = choose_vp(agent_features)
-    features = {:question =>
-      agent_features[:question] || vp_features[:question] || rand(5) == 0
-    }
+    features = {question: agent_features[:question] || vp_features[:question]}
     [agent_l1 + vp_l1, agent_l2 + vp_l2, features]
+  when 6 # Transform statement into a question by prepending
+    features = {question: true}
+    agent_l1, agent_l2, agent_features = choose_agent(features)
+    vp_l1, vp_l2, vp_features =
+      choose_vp(agent_features.merge({needs_auxiliary: true}))
+    auxiliary_l1 = [vp_l1.shift]
+    verb_l2 = [vp_l2.shift]
+    s_l1 = auxiliary_l1 + agent_l1 + vp_l1
+    s_l2 = verb_l2 + agent_l2 + vp_l2
+    s_l1, s_l2 = case rand(3)
+    when 0 then [s_l1, s_l2]
+    when 1 then [['why'] + s_l1, ['porque'] + s_l2]
+    when 2 then [['how'] + s_l1, ['como'] + s_l2]
+    end
+    [s_l1, s_l2, features]
+  when 7 # Transform statement into a question by appending
+    l1, l2, features = choose_sentence
+    features.update({question: true})
+    l1, l2 = case rand(2)
+    when 0 then [l1, l2]
+    when 1 then [l1 + [',', 'right'], l2 + [',', 'de', 'veras']]
+    end
+    [l1, l2, features]
   when 8 # Agent knows that S
+    agent_l1, agent_l2, agent_features = choose_agent({})
     vp_l1, vp_l2, vp_features = 'know', 'saber', {}
     vp_l1 = conjugate_l1_verb(vp_l1, agent_features)
     vp_l2 = conjugate_l2_verb(vp_l2, agent_features)
     independent_clause = choose_sentence
-    features = {:question => independent_clause[2][:question] || rand(5) == 0 }
+    features = {question: independent_clause[2][:question] || rand(5) == 0 }
     [agent_l1 + [vp_l1] + ['that'] + independent_clause[0],
      agent_l2 + [vp_l2] + ['que'] + independent_clause[1], features]
   when 9 # S, and S
     s1_l1, s1_l2, s1_features = choose_sentence
     s2_l1, s2_l2, s2_features = choose_sentence
-    features = {:question => s1_features[:question] || s2_features[:question]}
+    features = {question: s1_features[:question] || s2_features[:question]}
     [s1_l1 + [',', 'and'] + s2_l1, s1_l2 + [',', 'y'] + s2_l2, features]
   end
 end
