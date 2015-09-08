@@ -86,6 +86,17 @@ def choose_object(features)
   end
 end
 
+def conjugate_l1_verb(l1, features)
+  if features[:infinitive]
+    ['to', l1]
+  elsif features[:person] == 3 && features[:number] == 'S'
+    l1.gsub! /y$/, 'ie'
+    [l1 + 's']
+  else
+    [l1]
+  end
+end
+
 def conjugate_l2_verb(l2, features)
   selector = [features[:person], features[:number], l2[-2..-1]]
   if features[:infinitive]
@@ -110,7 +121,7 @@ def conjugate_l2_verb(l2, features)
       when [3, 'S', 'er'] then l2_base + 'e'
       when [1, 'P', 'er'] then l2_base + 'emos'
       when [3, 'P', 'er'] then l2_base + 'en'
-      else raise "Can't handle #{selector}"
+      else raise "Can't handle #{selector} for verb #{l2}"
     end
   end
 end
@@ -164,14 +175,7 @@ def choose_vp(features)
         choose_object(features.merge({actor:actor}))
   end
 
-  if features[:infinitive]
-    l1 = ['to', l1]
-  elsif features[:person] == 3 && features[:number] == 'S'
-    l1.gsub! /y$/, 'ie'
-    l1 = [l1 + 's']
-  else
-    l1 = [l1]
-  end
+  l1 = conjugate_l1_verb(l1, features)
   l2_conjugated = [conjugate_l2_verb(l2, features)]
 
   if features[:prefix_pronoun]
@@ -183,15 +187,25 @@ end
 
 def choose_sentence
   agent_l1, agent_l2, agent_features = choose_agent
-  vp_l1, vp_l2, vp_features = choose_vp(agent_features)
-  is_question = agent_features[:question] || vp_features[:question] || rand(2) == 1
-  end_punctuation = is_question ? ['?'] : ['.']
-  ['S', agent_l1 + vp_l1 + end_punctuation, agent_l2 + vp_l2 + end_punctuation]
+  if rand(2) == 0
+    agent_l1, agent_l2, agent_features = choose_agent
+    vp_l1, vp_l2, vp_features = choose_vp(agent_features)
+    is_question = agent_features[:question] || vp_features[:question] || rand(2) == 1
+    end_punctuation = is_question ? ['?'] : ['.']
+    [agent_l1 + vp_l1 + end_punctuation, agent_l2 + vp_l2 + end_punctuation]
+  else
+    vp_l1, vp_l2, vp_features = 'know', 'saber', {}
+    vp_l1 = conjugate_l1_verb(vp_l1, agent_features)
+    vp_l2 = conjugate_l2_verb(vp_l2, agent_features)
+    independent_clause = choose_sentence
+    [agent_l1 + [vp_l1] + ['that'] + independent_clause[0],
+     agent_l2 + [vp_l2] + ['que'] + independent_clause[1]]
+  end
 end
 
 10.times do
   s = choose_sentence
-  l1 = to_sentence(s[1])
-  l2 = to_sentence(s[2])
+  l1 = to_sentence(s[0])
+  l2 = to_sentence(s[1])
   puts sprintf('%-40s %-40s', l1, l2)
 end
