@@ -4,13 +4,20 @@ def one_of(list)
   list[rand(list.size)]
 end
 
-def to_sentence(words)
+def to_sentence(words, features)
   if words[0][0] == '('
     words[0] = '(' + words[0][1].upcase + words[0][2..-1]
   else
     words[0] = words[0][0].upcase + words[0][1..-1]
   end
-  words[0...-1].join(' ') + words[-1]
+
+  if features[:question]
+    words += ['?']
+  else
+    words += ['.']
+  end
+
+  words.join(' ').gsub(/ ([?,.])/, '\1')
 end
 
 def choose_agent
@@ -187,25 +194,37 @@ end
 
 def choose_sentence
   agent_l1, agent_l2, agent_features = choose_agent
-  if rand(2) == 0
+  case rand(10)
+  when 0...8 # Agent VP
     agent_l1, agent_l2, agent_features = choose_agent
     vp_l1, vp_l2, vp_features = choose_vp(agent_features)
-    is_question = agent_features[:question] || vp_features[:question] || rand(2) == 1
-    end_punctuation = is_question ? ['?'] : ['.']
-    [agent_l1 + vp_l1 + end_punctuation, agent_l2 + vp_l2 + end_punctuation]
-  else
+    features = {:question =>
+      agent_features[:question] || vp_features[:question] || rand(5) == 0
+    }
+    [agent_l1 + vp_l1, agent_l2 + vp_l2, features]
+  when 8 # Agent knows that S
     vp_l1, vp_l2, vp_features = 'know', 'saber', {}
     vp_l1 = conjugate_l1_verb(vp_l1, agent_features)
     vp_l2 = conjugate_l2_verb(vp_l2, agent_features)
     independent_clause = choose_sentence
+    features = {:question => independent_clause[2][:question] || rand(5) == 0 }
     [agent_l1 + [vp_l1] + ['that'] + independent_clause[0],
-     agent_l2 + [vp_l2] + ['que'] + independent_clause[1]]
+     agent_l2 + [vp_l2] + ['que'] + independent_clause[1], features]
+  when 9 # S, and S
+    s1_l1, s1_l2, s1_features = choose_sentence
+    s2_l1, s2_l2, s2_features = choose_sentence
+    features = {:question => s1_features[:question] || s2_features[:question]}
+    [s1_l1 + [',', 'and'] + s2_l1, s1_l2 + [',', 'y'] + s2_l2, features]
   end
 end
 
 10.times do
   s = choose_sentence
-  l1 = to_sentence(s[0])
-  l2 = to_sentence(s[1])
-  puts sprintf('%-40s %-40s', l1, l2)
+  l1 = to_sentence(s[0], s[2])
+  l2 = to_sentence(s[1], s[2])
+  if l1.size < 40 && l2.size < 40
+    puts sprintf('%-40s %-40s', l1, l2)
+  else
+    puts sprintf("%s\n    %s", l1, l2)
+  end
 end
