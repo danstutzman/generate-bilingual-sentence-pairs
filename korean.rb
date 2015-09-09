@@ -20,6 +20,8 @@ def ask_about_part_arcs(arc)
   end
 end
 
+connect_to_db! false
+
 arcs_to_review = $arc_by_id.values.select { |arc| !arc.was_correct }
 if arcs_to_review.size == 0
   raise "No failed cards to review"
