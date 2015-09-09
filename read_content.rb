@@ -13,6 +13,53 @@ WORD_TRANSLATION_HANGUL_HEIGHT = 8
 
 connect_to_db! true
 
+new_prompt 'jamo', 'jamo-mnemonic',
+  'Think of the mnemonic word for:'
+new_prompt 'jamo-pronunciation', 'jamo',
+  'Write the jamo for the sound:'
+new_prompt 'jamo-pronunciation', 'composition',
+  'Write the hangul for the sounds:'
+new_prompt 'jamo-pronunciation', 'jamo-mnemonic',
+  'Think of the mnemonic word for the sound:'
+new_prompt 'jamo-mnemonic', 'jamo',
+  'Write the jamo for the mnemonic word:'
+new_prompt 'jamo-mnemonic', 'jamo-pronunciation',
+  'Say the sound intended by the mnemonic word:'
+new_prompt 'jamo-mnemonic', 'jamo-mnemonic-phrase',
+  "Think of the phrase for the mnemonic word:"
+new_prompt 'jamo-mnemonic-phrase', 'jamo-mnemonic',
+  'Isolate the key word in the mnemonic phrase:'
+new_prompt 'jamo-mnemonic-phrase', 'jamo',
+  'Write the jamo for the mnemonic phrase:'
+new_prompt 'jamo', 'jamo-pronunciation',
+  'Say the sound that this jamo makes'
+new_prompt 'composition', 'sound',
+  'Read this character aloud'
+new_prompt 'l1_transliteration', 'l2_word',
+  'Write the hanguls for the word:'
+new_prompt 'l2_word', 'l1_transliteration',
+  'Read this word aloud:'
+new_prompt 'composition', 'syllable-rrk',
+  'Read this syllable aloud:'
+new_prompt 'syllable-rrk', 'composition',
+  'Write the hangul for the syllable:'
+new_prompt 'word', 'word-transcription',
+  'Read this word aloud:'
+new_prompt 'word-transcription', 'word',
+  'Write the hanguls for the transcription:'
+new_prompt 'word', 'word-translation',
+  'Translate to English aloud:'
+new_prompt 'word-translation', 'word',
+  'Write this word in Korean:'
+new_prompt 'word-translation', 'word-mnemonic',
+  'Translate this word to Korean:'
+new_prompt 'word-translation', 'word-transcription',
+  'Translate this word to Romanized Korean:'
+new_prompt 'word-transcription', 'word-translation',
+  'Translate the Romanized Korean:'
+new_prompt 'word-mnemonic', 'word-translation',
+  'Extract the translation part out of the mnemonic:'
+
 %q[
    1 ㄱ gun         g
    2 ㅣ tree        i

@@ -28,6 +28,9 @@ class Arc < ActiveRecord::Base
   end
 end
 
+class Prompt < ActiveRecord::Base
+end
+
 def connect_to_db! drop_and_create_tables
   ActiveRecord::Base.establish_connection({
     adapter: 'sqlite3',
@@ -57,6 +60,14 @@ def connect_to_db! drop_and_create_tables
       was_correct       boolean not null,
       level             integer not null
     )'
+
+    db.execute 'drop table if exists prompts'
+    db.execute 'create table if not exists prompts(
+      id                integer primary key not null,
+      from_concept_type varchar not null,
+      to_concept_type   varchar not null,
+      content           varchar not null
+    )'
   end
 
   $concept_by_id = {}
@@ -72,6 +83,12 @@ def connect_to_db! drop_and_create_tables
     $arc_by_id[arc.id] = arc
     $arc_by_from_concept_and_to_concept_type[
       [arc.from_concept, arc.to_concept.type]] = arc
+  end
+
+  $prompt_by_from_and_to_concept_types = {}
+  for prompt in Prompt.all
+    $prompt_by_from_and_to_concept_types[
+      [prompt.from_concept_type, prompt.to_concept_type]] = prompt
   end
 end
 
@@ -108,6 +125,16 @@ def new_arc height, from, to
     [arc2.from_concept, arc2.to_concept.type]] = arc2
 
   arc1
+end
+
+def new_prompt from_concept_type, to_concept_type, content
+  prompt = Prompt.create({
+    from_concept_type: from_concept_type,
+    to_concept_type:   to_concept_type,
+    content:           content,
+  })
+  $prompt_by_from_and_to_concept_types[
+    [prompt.from_concept_type, prompt.to_concept_type]] = prompt
 end
 
 def reverse_arc arc

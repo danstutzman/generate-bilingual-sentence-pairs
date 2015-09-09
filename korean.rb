@@ -49,57 +49,13 @@ arcs_sorted = $arc_by_id.values.sort_by { |arc|
 
 while arcs_sorted.size > 0
   arc = arcs_sorted.shift
-
-  case [arc.from_concept.type, arc.to_concept.type]
-    when ['jamo', 'jamo-mnemonic']
-      puts 'Think of the mnemonic word for:'
-    when ['jamo-pronunciation', 'jamo']
-      puts 'Write the jamo for the sound:'
-    when ['jamo-pronunciation', 'composition']
-      puts 'Write the hangul for the sounds:'
-    when ['jamo-pronunciation', 'jamo-mnemonic']
-      puts 'Think of the mnemonic word for the sound:'
-    when ['jamo-mnemonic', 'jamo']
-      puts 'Write the jamo for the mnemonic word:'
-    when ['jamo-mnemonic', 'jamo-pronunciation']
-      puts 'Say the sound intended by the mnemonic word:'
-    when ['jamo-mnemonic', 'jamo-mnemonic-phrase']
-      puts "Think of the phrase for the mnemonic word:"
-    when ['jamo-mnemonic-phrase', 'jamo-mnemonic']
-      puts 'Isolate the key word in the mnemonic phrase:'
-    when ['jamo-mnemonic-phrase', 'jamo']
-      puts 'Write the jamo for the mnemonic phrase:'
-    when ['jamo', 'jamo-pronunciation']
-      puts 'Say the sound that this jamo makes'
-    when ['composition', 'sound']
-      puts 'Read this character aloud'
-    when ['l1_transliteration', 'l2_word']
-      puts 'Write the hanguls for the word:'
-    when ['l2_word', 'l1_transliteration']
-      puts 'Read this word aloud:'
-    when ['composition', 'syllable-rrk']
-      puts 'Read this syllable aloud:'
-    when ['syllable-rrk', 'composition']
-      puts 'Write the hangul for the syllable:'
-    when ['word', 'word-transcription']
-      puts 'Read this word aloud:'
-    when ['word-transcription', 'word']
-      puts 'Write the hanguls for the transcription:'
-    when ['word', 'word-translation']
-      puts 'Translate to English aloud:'
-    when ['word-translation', 'word']
-      puts 'Write this word in Korean:'
-    when ['word-translation', 'word-mnemonic']
-      puts 'Translate this word to Korean:'
-    when ['word-translation', 'word-transcription']
-      puts 'Translate this word to Romanized Korean:'
-    when ['word-transcription', 'word-translation']
-      puts 'Translate the Romanized Korean:'
-    when ['word-mnemonic', 'word-translation']
-      puts 'Extract the translation part out of the mnemonic:'
-    else
-      raise "Don't know how to ask for #{arc.from_concept.type}, #{arc.to_concept.type}"
+  content_types = [arc.from_concept.type, arc.to_concept.type]
+  prompt = $prompt_by_from_and_to_concept_types[content_types]
+  if prompt.nil?
+    raise "Don't know how to ask for #{content_types.inspect}"
   end
+
+  puts prompt.content
   puts "   #{arc.from_concept.content}"
   puts "Press enter to show answer."
   readline
