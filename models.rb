@@ -108,7 +108,7 @@ def new_arc height, from, to
     level: level,
     is_from_l2_script: from.is_l2_script,
     is_to_l2_script: to.is_l2_script,
-    was_correct: false
+    was_correct: true
   $arc_by_id[arc1.id] = arc1
   $arc_by_from_concept_and_to_concept_type[
     [arc1.from_concept, arc1.to_concept.type]] = arc1
@@ -119,7 +119,7 @@ def new_arc height, from, to
     level: level,
     is_from_l2_script: to.is_l2_script,
     is_to_l2_script: from.is_l2_script,
-    was_correct: false
+    was_correct: true
   $arc_by_id[arc2.id] = arc2
   $arc_by_from_concept_and_to_concept_type[
     [arc2.from_concept, arc2.to_concept.type]] = arc2
