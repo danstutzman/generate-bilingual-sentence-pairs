@@ -52,44 +52,87 @@ end
   reverse_arc(arc).add_part_arcs! \
     [reverse_arc(determiner_l1_arc), reverse_arc(noun_l1_arc)]
 end
+$l1_infinitive_to_l1_past = {}
+def new_infinitives table
+  arcs = table.split("\n").reject { |line| line.strip == '' }.map do |line|
+    _, level, l1, l1_past, l2,  = line.split(/\s+/)
 
-%q[
-  3  eat  comer
-].split("\n").reject { |line| line == '' }.each do |line|
-  _, infinitive_level, infinitive_l1, infinitive_l2 = line.split(/\s+/)
+    $l1_infinitive_to_l1_past[l1] = l1_past
 
-  infinitive_l1 = new_concept 'vocab_l1', infinitive_l1, infinitive_level, false
-  infinitive_l2 = new_concept 'vocab_l2', infinitive_l2, infinitive_level, true
-  infinitive_arc = new_arc VOCAB_HEIGHT, infinitive_l1, infinitive_l2
-
-  %q[
-    11 1 s -o
-    12 2 s -es
-    13 3 s -e
-    14 1 p -emos
-    15 3 p -en
-  ].split("\n").reject { |line2| line2.strip == '' }.each do |line2|
-    _, suffix_level, person, number, suffix = line2.split(/\s+/)
-
-    features = "(#{person},#{number}) for -er verb"
-    features = $concept_by_type_and_content[['features_l2', features]] ||
-      new_concept('features_l2', features, suffix_level, false)
-    suffix_description = "#{suffix} for -er verb"
-    suffix_description = $concept_by_type_and_content[['suffix_l2', suffix]] ||
-      new_concept('suffix_l2', suffix_description, suffix_level, true)
-    suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description
-
-    conjugation_level = [infinitive_level, suffix_level].max
-    conjugation_l1 = new_concept 'conjugation_l1',
-      "#{infinitive_l1.content}(#{person},#{number})", conjugation_level, false
-    conjugation_l2 = new_concept 'conjugation_l2',
-      infinitive_l2.content[0...-2] + suffix[1..-1], conjugation_level, true
-    conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2
-    conjugation_arc.add_part_arcs! [infinitive_arc, suffix_arc]
-    reverse_arc(conjugation_arc).add_part_arcs!(
-      [reverse_arc(infinitive_arc), reverse_arc(suffix_arc)])
+    l1 = new_concept 'vocab_l1', l1, level, false
+    l2 = new_concept 'vocab_l2', l2, level, true
+    new_arc VOCAB_HEIGHT, l1, l2
   end
 end
+
+regular_infinitive_arcs = {
+  '-ar' => new_infinitives(%q[
+    3  talk  talked  hablar
+  ]),
+  '-er' => new_infinitives(%q[
+    3  eat   ate     comer
+  ]),
+  '-ir' => new_infinitives(%q[
+    3  live  lived   vivir
+  ]),
+}
+
+[[regular_infinitive_arcs['-ar'], '-ar verb', %q[
+    11 pres 1 s -o
+    12 pres 2 s -as
+    13 pres 3 s -a
+    14 pres 1 p -amos
+    15 pres 3 p -an
+    21 pret 1 s -é
+    22 pret 2 s -aste
+    23 pret 3 s -ó
+    24 pret 1 p -amos
+    25 pret 3 p -aron
+ ]],
+ [regular_infinitive_arcs['-er'] + regular_infinitive_arcs['-ir'],
+  '-er and -ir verbs', %q[
+    11 pres 1 s -o
+    12 pres 2 s -es
+    13 pres 3 s -e
+    14 pres 3 p -en
+    11 pret 1 s -í
+    12 pret 2 s -iste
+    13 pret 3 s -ió
+    11 pret 1 p -imos
+    13 pret 1 p -ieron]],
+ [regular_infinitive_arcs['-er'], '-er verb', %q[ 14 pres 1 p -emos]],
+ [regular_infinitive_arcs['-er'], '-ir verb', %q[ 14 pres 1 p -imos]],
+].each do |infinitive_arcs, verb_type, conjugation_table|
+  for infinitive_arc in infinitive_arcs
+    conjugation_table.split("\n").reject { |line2| line2.strip == '' }.each do |line2|
+      _, suffix_level, tense, person, number, suffix = line2.split(/\s+/)
+
+      features = "(#{tense},#{person},#{number}) for #{verb_type}"
+      features = $concept_by_type_and_content[['features_l2', features]] ||
+        new_concept('features_l2', features, suffix_level, false)
+      suffix_description = "#{suffix} for #{verb_type}"
+      suffix_description = $concept_by_type_and_content[['suffix_l2', suffix]] ||
+        new_concept('suffix_l2', suffix_description, suffix_level, true)
+      suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description
+
+      conjugation_level = [infinitive_arc.level, suffix_level.to_i].max
+      conjugation_l1 = case tense
+        when 'pres' then infinitive_arc.from_concept.content
+        when 'pret' then $l1_infinitive_to_l1_past[infinitive_arc.from_concept.content]
+        else raise "Don't know tense #{tense}"
+      end
+      conjugation_l1 = new_concept 'conjugation_l1',
+        "#{conjugation_l1}(#{person},#{number})", conjugation_level, false
+      conjugation_l2 = new_concept 'conjugation_l2',
+        infinitive_arc.to_concept.content[0...-2] + suffix[1..-1],
+        conjugation_level, true
+      conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2
+      conjugation_arc.add_part_arcs! [infinitive_arc, suffix_arc]
+      reverse_arc(conjugation_arc).add_part_arcs!(
+        [reverse_arc(infinitive_arc), reverse_arc(suffix_arc)])
+    end # next conjugation
+  end # next verb
+end # next verb type
 
 # the(f) apple -> la manzana
 # a(f) apple -> una manzana
