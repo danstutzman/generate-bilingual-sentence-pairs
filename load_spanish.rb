@@ -3,6 +3,7 @@ require './models'
 
 VOCAB_HEIGHT       = 1
 SUFFIX_HEIGHT      = 1
+STEM_HEIGHT        = 1
 CONJUGATION_HEIGHT = 2
 PHRASE_HEIGHT      = 3
 
@@ -14,6 +15,12 @@ new_prompt 'conjugation_l1', 'conjugation_l2', 'Translate to Spanish:'
 new_prompt 'conjugation_l2', 'conjugation_l1', 'Translate to English:'
 new_prompt 'phrase_l1', 'phrase_l2', 'Translate to Spanish:'
 new_prompt 'phrase_l2', 'phrase_l1', 'Translate to English:'
+new_prompt 'vocab_l2', 'l2_irregular_stem', "What's the irregular stem for:"
+new_prompt 'l2_irregular_stem', 'vocab_l2', "What verb does this irregular stem go to?"
+new_prompt 'suffix_l2', 'features_l2',
+  "What tense, person, and number does this verb suffix mean?"
+new_prompt 'features_l2', 'suffix_l2',
+  "What's the suffix for this tense, person, and number?"
 
 %q[
   1 the(m) el
@@ -52,6 +59,7 @@ end
   reverse_arc(arc).add_part_arcs! \
     [reverse_arc(determiner_l1_arc), reverse_arc(noun_l1_arc)]
 end
+
 $l1_infinitive_to_l1_past = {}
 def new_infinitives table
   arcs = table.split("\n").reject { |line| line.strip == '' }.map do |line|
@@ -64,32 +72,50 @@ def new_infinitives table
     new_arc VOCAB_HEIGHT, l1, l2
   end
 end
-
-regular_infinitive_arcs = {
+infinitive_arcs = {
   '-ar' => new_infinitives(%q[
-    3  talk  talked  hablar
+    3  talk   talked  hablar
   ]),
   '-er' => new_infinitives(%q[
-    3  eat   ate     comer
+    3  eat    ate     comer
   ]),
   '-ir' => new_infinitives(%q[
-    3  live  lived   vivir
+    3  live   lived   vivir
   ]),
+  '-ar irregular' => new_infinitives(%q[
+    3  walk   walked  andar
+  ])
 }
 
-[[regular_infinitive_arcs['-ar'], '-ar verb', %q[
+%q[
+  3 andar anduv-
+].split("\n").reject { |line| line == '' }.each do |line|
+  _, level, l2_infinitive, l2_irregular_stem = line.split(/\s+/)
+  l2_infinitive = $concept_by_type_and_content[['vocab_l2', l2_infinitive]]
+  l2_irregular_stem = new_concept 'l2_irregular_stem', l2_irregular_stem,
+    level, true
+  new_arc STEM_HEIGHT, l2_infinitive, l2_irregular_stem
+end
+
+[[infinitive_arcs['-ar'] + infinitive_arcs['-ar irregular'], '-ar verb', %q[
     11 pres 1 s -o
     12 pres 2 s -as
     13 pres 3 s -a
     14 pres 1 p -amos
-    15 pres 3 p -an
+    15 pres 3 p -an]],
+ [infinitive_arcs['-ar'], '-ar verb', %q[
     21 pret 1 s -é
     22 pret 2 s -aste
     23 pret 3 s -ó
     24 pret 1 p -amos
-    25 pret 3 p -aron
- ]],
- [regular_infinitive_arcs['-er'] + regular_infinitive_arcs['-ir'],
+    25 pret 3 p -aron]],
+ [infinitive_arcs['-ar irregular'], '-ar irregular verb', %q[
+    21 pret 1 s -e
+    22 pret 2 s -iste
+    23 pret 3 s -o
+    24 pret 1 p -imos
+    25 pret 3 p -ieron]],
+ [infinitive_arcs['-er'] + infinitive_arcs['-ir'],
   '-er and -ir verbs', %q[
     11 pres 1 s -o
     12 pres 2 s -es
@@ -99,9 +125,9 @@ regular_infinitive_arcs = {
     12 pret 2 s -iste
     13 pret 3 s -ió
     11 pret 1 p -imos
-    13 pret 1 p -ieron]],
- [regular_infinitive_arcs['-er'], '-er verb', %q[ 14 pres 1 p -emos]],
- [regular_infinitive_arcs['-er'], '-ir verb', %q[ 14 pres 1 p -imos]],
+    13 pret 3 p -ieron]],
+ [infinitive_arcs['-er'], '-er verb', %q[ 14 pres 1 p -emos]],
+ [infinitive_arcs['-er'], '-ir verb', %q[ 14 pres 1 p -imos]],
 ].each do |infinitive_arcs, verb_type, conjugation_table|
   for infinitive_arc in infinitive_arcs
     conjugation_table.split("\n").reject { |line2| line2.strip == '' }.each do |line2|
@@ -117,19 +143,27 @@ regular_infinitive_arcs = {
 
       conjugation_level = [infinitive_arc.level, suffix_level.to_i].max
       conjugation_l1 = case tense
-        when 'pres' then infinitive_arc.from_concept.content
-        when 'pret' then $l1_infinitive_to_l1_past[infinitive_arc.from_concept.content]
+        when 'pres'
+          infinitive_arc.from_concept.content
+        when 'pret'
+          $l1_infinitive_to_l1_past[infinitive_arc.from_concept.content]
         else raise "Don't know tense #{tense}"
       end
       conjugation_l1 = new_concept 'conjugation_l1',
         "#{conjugation_l1}(#{person},#{number})", conjugation_level, false
-      conjugation_l2 = new_concept 'conjugation_l2',
-        infinitive_arc.to_concept.content[0...-2] + suffix[1..-1],
+      possible_l2_irregular_stem = $arc_by_from_concept_and_to_concept_type[
+        [infinitive_arc.to_concept, 'l2_irregular_stem']]
+      l2_stem = possible_l2_irregular_stem ?
+        possible_l2_irregular_stem.to_concept.content[0...-1] :
+        infinitive_arc.to_concept.content[0...-2]
+      conjugation_l2 = new_concept 'conjugation_l2', l2_stem + suffix[1..-1],
         conjugation_level, true
       conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2
-      conjugation_arc.add_part_arcs! [infinitive_arc, suffix_arc]
+      part_arcs = [infinitive_arc, possible_l2_irregular_stem, suffix_arc].compact
+      part_arcs2 = [possible_l2_irregular_stem, infinitive_arc, suffix_arc].compact
+      conjugation_arc.add_part_arcs! part_arcs
       reverse_arc(conjugation_arc).add_part_arcs!(
-        [reverse_arc(infinitive_arc), reverse_arc(suffix_arc)])
+        part_arcs2.map { |arc| reverse_arc(arc) })
     end # next conjugation
   end # next verb
 end # next verb type
