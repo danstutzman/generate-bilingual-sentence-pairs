@@ -5,7 +5,8 @@ VOCAB_HEIGHT       = 1
 SUFFIX_HEIGHT      = 1
 STEM_HEIGHT        = 1
 CONJUGATION_HEIGHT = 2
-PHRASE_HEIGHT      = 3
+TEMPLATE_HEIGHT    = 3
+PHRASE_HEIGHT      = 4
 
 connect_to_db! true
 
@@ -23,14 +24,18 @@ new_prompt 'suffix_l2', 'features_l2',
   "What tense, person, and number does this verb suffix mean?"
 new_prompt 'features_l2', 'suffix_l2',
   "What's the suffix for this tense, person, and number?"
+new_prompt 'l1_vp_template', 'l2_vp_template', 'Translate to Spanish:'
+new_prompt 'l2_vp_template', 'l1_vp_template', 'Translate to English:'
 
 %q[
   1 the(m) el
   1 the(f) la
   1 a(m)   un
   1 a(f)   una
-  2 ticket billete
-  2 jacket chaqueta
+  1 ticket billete
+  1 jacket chaqueta
+  1 something algo
+  1 someone   alguien
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, level, vocab_l1, vocab_l2 = line.split(/\s+/)
   vocab_l1 = new_concept 'vocab_l1', vocab_l1, level, false
@@ -79,12 +84,14 @@ $l2_verbs_ending_with = {}
   1  ver     see    saw
   1  dar     give   gave
   1  saber   know   knew
-  1  poner   put    put
   1  venir   come   came
   1  salir   leave  left
-  1  parecer appear appeared
-  1  conocer know   knew
   1  querer  want   wanted
+  1  poner   put    put
+  1  leer    read   read
+  1  parecer   appear  appeared
+  1  conocer   know    knew
+  1  escribir  write   wrote
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, level, l2, l1, l1_past = line.split(/\s+/)
   $l1_infinitive_to_l1_past[l1] = l1_past
@@ -306,16 +313,28 @@ end
   end # next verb
 end # next verb type
 
-# the(f) apple -> la manzana
-# a(f) apple -> una manzana
+%q[
+  1 | leer algo               | to read something
+  1 | escribir algo a alguien | to write something to someone
+].split("\n").reject { |line| line == '' }.each do |line|
+  level, l2_vp_template, l1_vp_template = line.split('|').map { |part| part.strip }
 
-#%q[
-#  11 walk andar
-#]
-# walked(1,S)
-# -> {l1_infinitive:walk,tense:pret,per:1,num:S)
-# -> {l2_infinitive:andar,irreg:true,tense:pret,per:1,num:S,stem:anduv}
-# -> anduve
+  part_arcs = []
+  l2_words = l2_vp_template.split(' ')
+  l2_verb = $concept_by_type_and_content.fetch(['vocab_l2', l2_words.first])
+  part_arcs.push reverse_arc(
+    $arc_by_from_concept_and_to_concept_type.fetch([l2_verb, 'vocab_l1']))
 
-# I see(I,S)
-# -> (I,S) voy
+  for template_word in ['algo', 'alguien']
+    if l2_words.include? template_word
+      part_arcs.push reverse_arc($arc_by_from_concept_and_to_concept_type.fetch(
+        [$concept_by_type_and_content.fetch(['vocab_l2', template_word]), 'vocab_l1']))
+    end
+  end
+
+  l1_vp_template = new_concept 'l1_vp_template', l1_vp_template, level, false
+  l2_vp_template = new_concept 'l2_vp_template', l2_vp_template, level, true
+  arc = new_arc TEMPLATE_HEIGHT, l1_vp_template, l2_vp_template
+  arc.add_part_arcs! part_arcs
+  reverse_arc(arc).add_part_arcs! part_arcs.map { |arc| reverse_arc(arc) }
+end
