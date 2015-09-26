@@ -338,3 +338,5 @@ end # next verb type
   arc.add_part_arcs! part_arcs
   reverse_arc(arc).add_part_arcs! part_arcs.map { |arc| reverse_arc(arc) }
 end
+
+persist_to_db!
