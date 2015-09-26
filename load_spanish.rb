@@ -1,5 +1,5 @@
 require 'pp'
-require './models'
+require './models_fast'
 
 VOCAB_HEIGHT       = 1
 SUFFIX_HEIGHT      = 1
