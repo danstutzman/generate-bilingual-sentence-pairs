@@ -7,6 +7,11 @@ STEM_HEIGHT        = 1
 CONJUGATION_HEIGHT = 2
 TEMPLATE_HEIGHT    = 3
 PHRASE_HEIGHT      = 4
+SENTENCE_HEIGHT    = 5
+
+def to_sentence s
+  s[0].upcase + s[1..-1] + '.'
+end
 
 connect_to_db! true
 
@@ -26,21 +31,30 @@ new_prompt 'features_l2', 'suffix_l2',
   "What's the suffix for this tense, person, and number?"
 new_prompt 'l1_vp_template', 'l2_vp_template', 'Translate to Spanish:'
 new_prompt 'l2_vp_template', 'l1_vp_template', 'Translate to English:'
+new_prompt 'l1_sentence', 'l2_sentence', 'Translate to Spanish:'
+new_prompt 'l2_sentence', 'l1_sentence', 'Translate to English:'
 
+$nouns_that_are_written = []
+$nouns_that_are_persons = []
+$nouns_that_need_determiner = {}
 %q[
-  1 the(m) el
-  1 the(f) la
-  1 a(m)   un
-  1 a(f)   una
-  1 ticket billete
-  1 jacket chaqueta
-  1 something algo
-  1 someone   alguien
+  1 el        the(m)     . . .
+  1 la        the(f)     . . .
+  1 un        a(m)       . . .
+  1 una       a(f)       . . .
+  1 billete   ticket     x . x
+  1 chaqueta  jacket     . . x
+  1 algo      something  x . .
+  1 alguien   someone    . x .
 ].split("\n").reject { |line| line == '' }.each do |line|
-  _, level, vocab_l1, vocab_l2 = line.split(/\s+/)
+  _, level, vocab_l2, vocab_l1, is_writing, is_person, needs_determiner =
+    line.split(/\s+/)
   vocab_l1 = new_concept 'vocab_l1', vocab_l1, level, false
   vocab_l2 = new_concept 'vocab_l2', vocab_l2, level, true
   arc = new_arc VOCAB_HEIGHT, vocab_l1, vocab_l2
+  $nouns_that_are_written.push arc if is_writing == 'x'
+  $nouns_that_are_persons.push arc if is_person == 'x'
+  $nouns_that_need_determiner[vocab_l2.content] = true if needs_determiner == 'x'
 end
 
 %q[
@@ -314,10 +328,13 @@ end
 end # next verb type
 
 %q[
-  1 | leer algo               | to read something
-  1 | escribir algo a alguien | to write something to someone
+  1 | leer algo               | to read something             |x
+  1 | escribir algo a alguien | to write something to someone |x
 ].split("\n").reject { |line| line == '' }.each do |line|
-  level, l2_vp_template, l1_vp_template = line.split('|').map { |part| part.strip }
+  level, l2_vp_template, l1_vp_template, something_written =
+    line.split('|').map { |part| part.strip }
+
+  l1_words = l1_vp_template.split(' ')
 
   part_arcs = []
   l2_words = l2_vp_template.split(' ')
@@ -337,6 +354,45 @@ end # next verb type
   arc = new_arc TEMPLATE_HEIGHT, l1_vp_template, l2_vp_template
   arc.add_part_arcs! part_arcs
   reverse_arc(arc).add_part_arcs! part_arcs.map { |arc| reverse_arc(arc) }
+
+  %q[
+    1 s I
+    2 s you
+    3 s he/she
+    1 p we
+    3 p they
+  ].split("\n").reject { |line| line.strip == '' }.each do |line|
+    _, person, number, l1_pronoun = line.split(/\s+/)
+    l1_conjugation = "#{l1_words[1]}(#{person},#{number})"
+    l1_conjugation = $concept_by_type_and_content.fetch(
+      ['conjugation_l1', l1_conjugation])
+    l2_conjugation_arc = $arc_by_from_concept_and_to_concept_type.fetch(
+      [l1_conjugation, 'conjugation_l2'])
+    l2_conjugation = l2_conjugation_arc.to_concept.content
+
+    if something_written == 'x'
+      for noun_arc in $nouns_that_are_written
+        l1_verb = l1_words[1]
+        l1_verb += 's' if [person, number] == ['3', 's']
+        l1_noun = noun_arc.from_concept.content
+        l2_noun = noun_arc.to_concept.content
+        if $nouns_that_need_determiner[l2_noun]
+          l1_noun = "a #{l1_noun}"
+          l2_noun = "un/una #{l2_noun}"
+        end
+
+        l1_sentence = to_sentence([l1_pronoun, l1_verb, l1_noun].join(' '))
+        l1_sentence = new_concept 'l1_sentence', l1_sentence, 1, false
+        l2_sentence = to_sentence([l2_conjugation, l2_noun].join(' '))
+        l2_sentence = new_concept 'l2_sentence', l2_sentence, 1, true
+        sentence_arc = new_arc SENTENCE_HEIGHT, l1_sentence, l2_sentence
+
+        sentence_arc.add_part_arcs! [l2_conjugation_arc, noun_arc]
+        reverse_arc(sentence_arc).add_part_arcs! [reverse_arc(l2_conjugation_arc),
+          reverse_arc(noun_arc)]
+      end
+    end
+  end
 end
 
 persist_to_db!
