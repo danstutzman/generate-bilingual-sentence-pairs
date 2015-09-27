@@ -1,0 +1,22 @@
+kind_of_verb      |tense person number suffix
+-ar verb          |pres 1 1 -o
+-ar verb          |pres 2 1 -as
+-ar verb          |pres 3 1 -a
+-ar verb          |pres 1 2 -amos
+-ar verb          |pres 3 2 -an
+-ar verb          |pret 1 1 -é
+-ar verb          |pret 2 1 -aste
+-ar verb          |pret 3 1 -ó
+-ar verb          |pret 1 2 -amos
+-ar verb          |pret 3 2 -aron
+-er and -ir verbs |pres 1 1 -o
+-er and -ir verbs |pres 2 1 -es
+-er and -ir verbs |pres 3 1 -e
+-er and -ir verbs |pres 3 2 -en
+-er and -ir verbs |pret 1 1 -í
+-er and -ir verbs |pret 2 1 -iste
+-er and -ir verbs |pret 3 1 -ió
+-er and -ir verbs |pret 1 2 -imos
+-er and -ir verbs |pret 3 2 -ieron
+-er verbs         |pres 1 2 -emos
+-ir verbs         |pres 1 2 -imos

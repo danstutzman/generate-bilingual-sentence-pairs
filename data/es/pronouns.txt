@@ -1,0 +1,16 @@
+l2       l1        person number gender is_object question
+yo       I         1 1 ? F F
+mi       me        1 1 ? T F
+tú       you       2 1 ? F F
+ti       you       2 1 ? T F
+él       he        3 1 M F F
+ella     she       3 1 F F F
+este     this      3 1 ? F F
+algo     something 3 1 M F F
+alguien  someone   3 1 M F F
+quién    who       3 1 ? F T
+nosotros we        1 2 ? F F
+nos      us        1 2 ? T F
+ellos    they(m)   3 2 M F F
+ellas    they(f)   3 2 F F F
+quiénes  who(pl)   3 2 ? F T

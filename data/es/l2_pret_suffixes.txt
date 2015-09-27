@@ -1,0 +1,5 @@
+person number suffix
+1 1 -e
+2 1 -iste
+3 1 -o
+1 2 -imos
