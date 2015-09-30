@@ -18,8 +18,8 @@ kind_of_verb       |tense person number suffix
 -er and -ir verbs  |pret 3 1 -ió
 -er and -ir verbs  |pret 1 2 -imos
 -er and -ir verbs  |pret 3 2 -ieron
--er verbs          |pres 1 2 -emos
--ir verbs          |pres 1 2 -imos
+-er verb           |pres 1 2 -emos
+-ir verb           |pres 1 2 -imos
 irregular preterite|pret 1 1 -e
 irregular preterite|pret 2 1 -iste
 irregular preterite|pret 3 1 -o

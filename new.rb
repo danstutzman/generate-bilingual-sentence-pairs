@@ -135,6 +135,7 @@ for stem in $arc_type_to_arcs['l2_irregular_stem']
         arc = Arc.new 'conjugated_verb'
         arc.l1 = "#{verb.l1}(#{pattern.person},#{pattern.number})"
         next if $arc_type_to_l1_to_arc['conjugated_verb'][arc.l1]
+        next if pattern.person == '1' && pattern.number == '2'
         arc.l2 = stem.stem.sub(/-$/, '') + pattern.suffix.sub(/^-/, '')
         arc.person = pattern.person
         arc.number = pattern.number
