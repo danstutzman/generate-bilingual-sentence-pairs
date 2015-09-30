@@ -180,6 +180,71 @@ for verb in $arc_type_to_arcs['verb']
   end
 end
 
+def decorate_sentence string
+  string[0].upcase + string[1..-1] + '.'
+end
+
+while ($arc_type_to_arcs['sentence'] || []).size < 6
+  verb_phrase = choose($arc_type_to_arcs['verb_phrase'])
+  l1_words = verb_phrase.l1.split(' ')
+  l2_words = verb_phrase.l2.split(' ')
+  verb = $arc_type_to_l2_to_arc['verb'][l2_words[0]]
+  verb = verb.dup
+  tense = choose(%w[pres pret])
+  person, number = choose([%w[1 1], %w[2 1], %w[3 1], %w[1 2], %w[3 2]])
+  if tense == 'pres'
+    l1 = "#{verb.l1}(#{person},#{number})"
+  elsif tense == 'pret'
+    l1 = "#{verb.l1_past}(#{person},#{number})"
+  end
+  conjugated_verb = $arc_type_to_l1_to_arc['conjugated_verb'][l1]
+  l2_words[0] = conjugated_verb.l2
+  if [person, number] == %w[1 1]
+    l1_words[0] = 'I'
+  elsif [person, number] == %w[2 1]
+    l1_words[0] = 'you'
+  elsif [person, number] == %w[3 1]
+    l1_words[0] = 'he/she'
+  elsif [person, number] == %w[1 2]
+    l1_words[0] = 'we'
+  elsif [person, number] == %w[3 2]
+    l1_words[0] = 'they'
+  end
+  if tense == 'pret'
+    l1_words[1] = verb.l1_past
+  elsif tense == 'pres'
+    # even the word is already in pres, replace in case it's ambiguous past vs. pres
+    if [person, number] == %w[3 1]
+      l1_words[1] = verb.l1 + 's'
+    else
+      l1_words[1] = verb.l1 # in case it's ambiguous past vs. pres
+    end
+  end
+
+  if l2_words.include?('algo')
+    object = choose($arc_type_to_arcs['noun'].select { |noun| noun.is_writing == 'T' })
+    object = object.dup
+    object_number, add_determiner = choose([['1', true], ['2', true], ['2', false]])
+    if add_determiner
+      determiner = choose($arc_type_to_arcs['determiner'].select { |determiner|
+        determiner.gender == object.gender && determiner.number == object_number })
+      object.l1 = "#{determiner.l1} #{object.l1}"
+      object.l2 = "#{determiner.l2} #{object.l2}"
+    end
+    if object_number == '2'
+      object.l1 += 's'
+      object.l2 += 's'
+    end
+    l2_words.map! { |word| (word == 'algo') ?  object.l2 : word }
+    l1_words.map! { |word| (word == 'something') ?  object.l1 : word }
+  end
+  sentence = Arc.new 'sentence'
+  sentence.l1 = decorate_sentence(l1_words.join(' '))
+  sentence.l2 = decorate_sentence(l2_words.join(' '))
+  p sentence
+  add_arc sentence
+end
+
 File.open 'persist.sql', 'w' do |file|
   column_names = $arc_features.join(', ')
   column_definitions = $arc_features.map { |col| "#{col} varchar" }.join(",\n")
