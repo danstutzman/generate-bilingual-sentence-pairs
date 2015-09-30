@@ -215,7 +215,15 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
     l1_words[1] = verb.l1_past
   elsif tense == 'pres'
     # even the word is already in pres, replace in case it's ambiguous past vs. pres
-    if [person, number] == %w[3 1]
+    if verb.l1 == 'be'
+      l1_words[1] = {
+        %w[1 1] => 'am',
+        %w[2 1] => 'are',
+        %w[3 1] => 'is',
+        %w[1 2] => 'are',
+        %w[3 2] => 'are',
+      }[[person, number]]
+    elsif [person, number] == %w[3 1]
       l1_words[1] = verb.l1 + 's'
     else
       l1_words[1] = verb.l1 # in case it's ambiguous past vs. pres
