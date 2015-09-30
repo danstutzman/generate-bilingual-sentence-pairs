@@ -55,6 +55,7 @@ def read_data(base_dir)
     File.open path do |file|
       headers = file.readline.strip
       file.each_line do |line|
+        next if line.start_with?('#')
         arc = Arc.new arc_type
         headers.split('|').each_with_index do |header_part, i|
           line_part = line.strip.split('|')[i].strip
