@@ -3,7 +3,7 @@ require 'pp'
 
 $arc_features = %i[l1 l2 arc_type gender number kind_of_verb tense person suffix
   infinitive conjugation stem is_writing is_person is_countable is_object question
-  l1_past
+  l1_past agent_is_person
 ]
 
 $next_arc_id = 1

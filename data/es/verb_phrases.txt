@@ -1,3 +1,38 @@
-l2                      |l1
-leer algo               |to read something
-escribir algo a alguien |to write something to someone
+l2                      |l1                            |agent_is_person
+leer algo               |to read something             |T
+escribir algo a alguien |to write something to someone |T
+beber algo              |to drink something            |T
+comer algo              |to eat something              |T
+estudiar algo           |to study something            |T
+aprender a hablar       |to learn to                   |T
+aprender algo           |to learn something            |T
+recordar a alguien      |to remember someone           |T
+recordar algo           |to remember something         |T
+olvidar algo            |to forget something           |T
+querer algo             |to want something             |T
+gustar a alguien        |to please someone             |M
+encantar a alguien      |to enchant someone            |M
+odiar algo              |to hate something             |T
+dar algo a alguien      |to give something to someone  |T
+necesitar algo          |to need something             |T
+enviar algo a alguien   |to send someone something     |T
+ir a algún lugar        |to go somewhere               |T
+estar a algún lugar     |to be somewhere               |M
+usar algo               |to use something              |T
+tener algo              |to have something             |T
+viajar a algún lugar    |to travel somewhere           |T
+ayudar a alguien        |to help someone               |T
+comprar algo a alguien  |to buy someone something      |T
+llamar a alguien        |to call someone               |T
+llamar algo a alguien   |to call someone something     |T
+#tratar de hacer algo    |to to try to do something     |T
+#poder hacer algo        |to can do something           |T
+decir algo a alguien    |to say something to someone   |T
+preguntar algo a alguien|to ask someone something      |T
+pedir algo a alguien    |to request something from someone|T
+contar algo a alguien   |to tell someone something     |T
+pensar en algo          |to think about something      |T
+#ir a hacer algo         |to go to do something         |T
+#tener que hacer algo    |to have to do something       |T
+importar a alguien      |to matter to someone          |M
+significar algo         |to mean something             |F
