@@ -26,7 +26,25 @@ class Arc
 end
 
 $arc_type_to_arcs = {}
+$arc_type_to_l1_to_arc = {}
 $arc_type_to_l2_to_arc = {}
+def add_arc arc
+  arc_type = arc.arc_type
+
+  $arc_type_to_arcs[arc_type] ||= []
+  $arc_type_to_arcs[arc_type].push arc
+
+  if arc.l1
+    $arc_type_to_l1_to_arc[arc_type] ||= {}
+    $arc_type_to_l1_to_arc[arc_type][arc.l1] = arc
+  end
+
+  if arc.l2
+    $arc_type_to_l2_to_arc[arc_type] ||= {}
+    $arc_type_to_l2_to_arc[arc_type][arc.l2] = arc
+  end
+end
+
 def read_data(base_dir)
   Dir.entries(base_dir).each do |filename|
     next if %w[. ..].include?(filename)
@@ -34,8 +52,6 @@ def read_data(base_dir)
     arc_type = filename.split('.')[0].sub(/xes$/, 'xs').sub(/s$/, '')
     path = "#{base_dir}/#{filename}"
   
-    arcs = []
-    l2_to_arc = {}
     File.open path do |file|
       headers = file.readline.strip
       file.each_line do |line|
@@ -53,12 +69,9 @@ def read_data(base_dir)
             arc.send "#{key}=", line_part
           end
         end
-        arcs.push arc
-        l2_to_arc[arc.l2] = arc if arc.l2
+        add_arc arc
       end
     end
-    $arc_type_to_arcs[arc_type] = arcs
-    $arc_type_to_l2_to_arc[arc_type] = l2_to_arc
   end
 end
 
@@ -77,8 +90,7 @@ def choose(list)
   list[rand(list.size)]
 end
 
-$arc_type_to_arcs['noun_phrase'] = []
-while $arc_type_to_arcs['noun_phrase'].size < 6
+while ($arc_type_to_arcs['noun_phrase'] || []).size < 6
   determiner = choose($arc_type_to_arcs['determiner'])
   noun = choose($arc_type_to_arcs['noun'].select {
     |noun| noun.gender == determiner.gender })
@@ -92,15 +104,11 @@ while $arc_type_to_arcs['noun_phrase'].size < 6
     arc.l2 = "#{determiner.l2} #{noun.l2}s"
   else raise "Unknown number #{determiner.number}"
   end
-  unless $arc_type_to_arcs['noun_phrase'].find {
-      |np| np.l1 == arc.l1 && np.l2 == arc.l2 }
-    $arc_type_to_arcs['noun_phrase'].push arc
-  end
+  add_arc arc unless ($arc_type_to_l1_to_arc['noun_phrase'] || {})[arc.l1]
 end
 
-$arc_type_to_arcs['conjugated_verb'] = []
 for irregular in $arc_type_to_arcs['l2_irregular_conjugation']
-  verb = $arc_type_to_l2_to_arc['verb'][irregular.infinitive]
+  verb = $arc_type_to_l2_to_arc['verb'].fetch(irregular.infinitive)
   arc = Arc.new 'conjugated_verb'
   if irregular.tense == 'pres'
     arc.l1 = "#{verb.l1}(#{irregular.person},#{irregular.number})"
@@ -112,8 +120,63 @@ for irregular in $arc_type_to_arcs['l2_irregular_conjugation']
   arc.tense, arc.person, arc.number =
     irregular.tense, irregular.person, irregular.number
   arc.child_arc_ids = [verb.arc_id, irregular.arc_id].join(',')
-  p arc
-  $arc_type_to_arcs['conjugated_verb'].push arc
+  add_arc arc
+end
+
+for stem in $arc_type_to_arcs['l2_irregular_stem']
+  verb = $arc_type_to_l2_to_arc['verb'].fetch(stem.infinitive)
+  for pattern in $arc_type_to_arcs['l2_conjugation_pattern']
+    if stem.tense == 'pres' && pattern.tense == 'pres'
+      if pattern.kind_of_verb == '-ar verb' && stem.infinitive.end_with?('ar') ||
+         pattern.kind_of_verb == '-er verb' && stem.infinitive.end_with?('er') ||
+         pattern.kind_of_verb == '-ir verb' && stem.infinitive.end_with?('ir') ||
+         pattern.kind_of_verb == '-er and -ir verbs' &&
+           (stem.infinitive.end_with?('er') || stem.infinitive.end_with?('ir'))
+        arc = Arc.new 'conjugated_verb'
+        arc.l1 = "#{verb.l1}(#{pattern.person},#{pattern.number})"
+        next if $arc_type_to_l1_to_arc['conjugated_verb'][arc.l1]
+        arc.l2 = stem.stem.sub(/-$/, '') + pattern.suffix.sub(/^-/, '')
+        arc.person = pattern.person
+        arc.number = pattern.number
+        arc.tense = pattern.tense
+        arc.child_arc_ids = [stem.arc_id, pattern.arc_id]
+        add_arc arc
+      end
+    elsif stem.tense == 'pret' && pattern.tense == 'pret' &&
+        pattern.kind_of_verb == 'irregular preterite'
+      arc = Arc.new 'conjugated_verb'
+      arc.l1 = "#{verb.l1_past}(#{pattern.person},#{pattern.number})"
+      arc.l2 = stem.stem.sub(/-$/, '') + pattern.suffix.sub(/^-/, '')
+      arc.person = pattern.person
+      arc.number = pattern.number
+      arc.tense = pattern.tense
+      arc.child_arc_ids = [stem.arc_id, pattern.arc_id]
+      add_arc arc
+    end
+  end
+end
+
+for verb in $arc_type_to_arcs['verb']
+  for pattern in $arc_type_to_arcs['l2_conjugation_pattern']
+    if pattern.kind_of_verb == '-ar verb' && verb.l2.end_with?('ar') ||
+       pattern.kind_of_verb == '-er verb' && verb.l2.end_with?('er') ||
+       pattern.kind_of_verb == '-ir verb' && verb.l2.end_with?('ir') ||
+       pattern.kind_of_verb == '-er and -ir verbs' &&
+         (verb.l2.end_with?('er') || verb.l2.end_with?('ir'))
+      arc = Arc.new 'conjugated_verb'
+      if pattern.tense == 'pres'
+        arc.l1 = "#{verb.l1}(#{pattern.person},#{pattern.number})"
+      elsif pattern.tense == 'pret'
+        arc.l1 = "#{verb.l1_past}(#{pattern.person},#{pattern.number})"
+      end
+      next if $arc_type_to_l1_to_arc['conjugated_verb'][arc.l1]
+      arc.l2 = verb.l2[0...-2] + pattern.suffix.sub(/^-/, '')
+      arc.person = pattern.person
+      arc.number = pattern.number
+      arc.tense = pattern.tense
+      add_arc arc
+    end
+  end
 end
 
 File.open 'persist.sql', 'w' do |file|

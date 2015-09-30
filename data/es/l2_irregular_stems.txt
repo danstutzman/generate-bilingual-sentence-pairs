@@ -10,10 +10,13 @@ pres  volver     vuelv-
 pres  sentir     sient-
 pres  contar     cuent-
 pres  empezar    empiez-
-pres  decir      di-
+pres  decir      dic-
 pret  andar      anduv-
 pret  saber      sup-
 pret  querer     quis-
 pret  poner      pus-
 pret  venir      vin-
 pret  decir      dij-
+pret  tener      tuv-
+pret  hacer      hic-
+pret  poder      pud-
