@@ -185,7 +185,7 @@ def decorate_sentence string
   string[0].upcase + string[1..-1] + '.'
 end
 
-while ($arc_type_to_arcs['sentence'] || []).size < 600
+while ($arc_type_to_arcs['sentence'] || []).size < 6
   verb_phrase = choose($arc_type_to_arcs['verb_phrase'])
   l1_words = verb_phrase.l1.split(' ')
   l2_words = verb_phrase.l2.split(' ')
@@ -230,6 +230,20 @@ while ($arc_type_to_arcs['sentence'] || []).size < 600
     end
   end
 
+  if l2_words.include?('alguien')
+    indirect_object_person, indirect_object_number,
+      indirect_object_l1, indirect_object_l2 = choose([
+         %w[1 1 me me],
+         %w[2 1 you te],
+         %w[3 1 him/her le],
+         %w[1 2 us nos],
+         %w[3 2 them les],
+      ])
+    l2_words = [indirect_object_l2] + l2_words
+    l2_words = l2_words.join(' ').gsub(/(a )?alguien ?/, '').split(' ')
+    l1_words.map! { |word| (word == 'someone') ? indirect_object_l1 : word }
+  end
+
   if l2_words.include?('algo')
     object = choose($arc_type_to_arcs['noun'].select { |noun| noun.is_writing == 'T' })
     object = object.dup
@@ -247,6 +261,7 @@ while ($arc_type_to_arcs['sentence'] || []).size < 600
     l2_words.map! { |word| (word == 'algo') ?  object.l2 : word }
     l1_words.map! { |word| (word == 'something') ?  object.l1 : word }
   end
+
   sentence = Arc.new 'sentence'
   sentence.l1 = decorate_sentence(l1_words.join(' '))
   sentence.l2 = decorate_sentence(l2_words.join(' '))
