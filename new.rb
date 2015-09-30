@@ -185,11 +185,11 @@ def decorate_sentence string
   string[0].upcase + string[1..-1] + '.'
 end
 
-while ($arc_type_to_arcs['sentence'] || []).size < 6
+while ($arc_type_to_arcs['sentence'] || []).size < 600
   verb_phrase = choose($arc_type_to_arcs['verb_phrase'])
   l1_words = verb_phrase.l1.split(' ')
   l2_words = verb_phrase.l2.split(' ')
-  verb = $arc_type_to_l2_to_arc['verb'][l2_words[0]]
+  verb = $arc_type_to_l2_to_arc['verb'].fetch(l2_words[0])
   verb = verb.dup
   tense = choose(%w[pres pret])
   person, number = choose([%w[1 1], %w[2 1], %w[3 1], %w[1 2], %w[3 2]])
