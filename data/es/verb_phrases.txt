@@ -1,10 +1,9 @@
 l2                      |l1                            |agent_is_person
 leer algo               |to read something             |T
-escribir algo a alguien |to write something to someone |T
+escribir algo a alguien |to write someone something    |T
 beber algo              |to drink something            |T
 comer algo              |to eat something              |T
 estudiar algo           |to study something            |T
-aprender a hablar       |to learn to                   |T
 aprender algo           |to learn something            |T
 recordar a alguien      |to remember someone           |T
 recordar algo           |to remember something         |T
