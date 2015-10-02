@@ -11,6 +11,8 @@ pres  sentir     sient-
 pres  contar     cuent-
 pres  empezar    empiez-
 pres  decir      dic-
+pres  recordar   recuerd-
+pres  pedir      pid-
 pret  andar      anduv-
 pret  saber      sup-
 pret  querer     quis-
