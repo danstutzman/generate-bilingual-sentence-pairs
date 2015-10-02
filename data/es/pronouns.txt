@@ -1,16 +1,43 @@
-l2       l1        person number gender is_object question
-yo       I         1 1 ? F F
-mi       me        1 1 ? T F
-tú       you       2 1 ? F F
-ti       you       2 1 ? T F
-él       he        3 1 M F F
-ella     she       3 1 F F F
-este     this      3 1 ? F F
-algo     something 3 1 M F F
-alguien  someone   3 1 M F F
-quién    who       3 1 ? F T
-nosotros we        1 2 ? F F
-nos      us        1 2 ? T F
-ellos    they(m)   3 2 M F F
-ellas    they(f)   3 2 F F F
-quiénes  who(pl)   3 2 ? F T
+pronoun_type       l2       l1         person number gender
+
+subject            yo       I          1 1 ?
+indirect_object    me       me         1 1 ?
+direct_object      me       me         1 1 ?
+reflexive_object   me       myself     1 1 ?
+preposition_object me       me         1 1 ?
+
+subject            tú       you        2 1 ?
+indirect_object    te       you        2 1 ?
+direct_object      te       you        2 1 ?
+reflexive_object   te       yourself   2 1 ?
+preposition_object ti       you        2 1 ?
+
+subject            él       he         3 1 M
+indirect_object    le       him        3 1 M
+direct_object      lo       him        3 1 M
+reflexive_object   se       himself    3 1 M
+preposition_object él       you        3 1 M
+
+subject            ella     she        3 1 F
+indirect_object    le       her        3 1 F
+direct_object      la       her        3 1 F
+reflexive_object   se       herself    3 1 F
+preposition_object ella     her        3 1 F
+
+subject            nosotros we         1 2 ?
+indirect_object    nos      us         1 2 ?
+direct_object      nos      us         1 2 ?
+reflexive_object   nos      ourselves  1 2 ?
+preposition_object nosotros us         1 2 ?
+
+subject            ellos    they       3 2 M
+indirect_object    les      them       3 2 M
+direct_object      los      them       3 2 M
+reflexive_object   se       themselves 3 2 M
+preposition_object ellos    them       3 2 M
+
+subject            ellas    they       3 2 F
+indirect_object    les      them       3 2 F
+direct_object      las      them       3 2 F
+reflexive_object   se       themselves 3 2 F
+preposition_object ellas    them       3 2 F

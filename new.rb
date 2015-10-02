@@ -3,7 +3,7 @@ require 'pp'
 
 $arc_features = %i[l1 l2 arc_type gender number kind_of_verb tense person suffix
   infinitive conjugation stem is_writing is_person is_countable is_object question
-  l1_past agent_is_person
+  l1_past agent_is_person pronoun_type
 ]
 
 $next_arc_id = 1
@@ -55,7 +55,7 @@ def read_data(base_dir)
     File.open path do |file|
       headers = file.readline.strip
       file.each_line do |line|
-        next if line.start_with?('#')
+        next if line.start_with?('#') || line == "\n"
         arc = Arc.new arc_type
         headers.split('|').each_with_index do |header_part, i|
           line_part = line.strip.split('|')[i].strip
@@ -186,6 +186,7 @@ def decorate_sentence string
 end
 
 while ($arc_type_to_arcs['sentence'] || []).size < 6
+  child_arc_ids = []
   verb_phrase = choose($arc_type_to_arcs['verb_phrase'])
   l1_words = verb_phrase.l1.split(' ')
   l2_words = verb_phrase.l2.split(' ')
@@ -193,24 +194,21 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
   verb = verb.dup
   tense = choose(%w[pres pret])
   person, number = choose([%w[1 1], %w[2 1], %w[3 1], %w[1 2], %w[3 2]])
+  reflexive = (rand >= 0.8)
   if tense == 'pres'
     l1 = "#{verb.l1}(#{person},#{number})"
   elsif tense == 'pret'
     l1 = "#{verb.l1_past}(#{person},#{number})"
   end
   conjugated_verb = $arc_type_to_l1_to_arc['conjugated_verb'][l1]
+  child_arc_ids.push conjugated_verb.arc_id.to_s
+
+  subject_pronoun = $arc_type_to_arcs['pronoun'].find { |arc|
+    arc.pronoun_type == 'subject' &&
+    arc.person == person && arc.number == number
+  } or raise "Couldn't find subject pronoun for #{person},#{number}"
   l2_words[0] = conjugated_verb.l2
-  if [person, number] == %w[1 1]
-    l1_words[0] = 'I'
-  elsif [person, number] == %w[2 1]
-    l1_words[0] = 'you'
-  elsif [person, number] == %w[3 1]
-    l1_words[0] = 'he/she'
-  elsif [person, number] == %w[1 2]
-    l1_words[0] = 'we'
-  elsif [person, number] == %w[3 2]
-    l1_words[0] = 'they'
-  end
+  l1_words[0] = subject_pronoun.l1
   if tense == 'pret'
     l1_words[1] = verb.l1_past
   elsif tense == 'pres'
@@ -229,30 +227,36 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
       l1_words[1] = verb.l1 # in case it's ambiguous past vs. pres
     end
   end
+  child_arc_ids.push subject_pronoun.arc_id.to_s
 
   if l2_words.include?('alguien')
-    indirect_object_person, indirect_object_number,
-      indirect_object_l1, indirect_object_l2 = choose([
-         %w[1 1 me me],
-         %w[2 1 you te],
-         %w[3 1 him/her le],
-         %w[1 2 us nos],
-         %w[3 2 them les],
-      ])
-    l2_words = [indirect_object_l2] + l2_words
+    if reflexive
+      pronoun = $arc_type_to_arcs['pronoun'].find { |arc|
+        arc.pronoun_type == 'reflexive_object' &&
+        arc.person == person && arc.number == number
+      } or raise "Couldn't find reflexive pronoun for #{person},#{number}"
+    else
+      pronoun = choose($arc_type_to_arcs['pronoun']\
+        .select { |arc| arc.pronoun_type == 'indirect_object' }\
+        .reject { |arc| arc.person == person && arc.number == number })
+    end
+    l2_words = [pronoun.l2] + l2_words
     l2_words = l2_words.join(' ').gsub(/(a )?alguien ?/, '').split(' ')
-    l1_words.map! { |word| (word == 'someone') ? indirect_object_l1 : word }
+    l1_words.map! { |word| (word == 'someone') ? pronoun.l1 : word }
+    child_arc_ids.push pronoun
   end
 
   if l2_words.include?('algo')
     object = choose($arc_type_to_arcs['noun'].select { |noun| noun.is_writing == 'T' })
     object = object.dup
+    child_arc_ids.push object.arc_id.to_s
     object_number, add_determiner = choose([['1', true], ['2', true], ['2', false]])
     if add_determiner
       determiner = choose($arc_type_to_arcs['determiner'].select { |determiner|
         determiner.gender == object.gender && determiner.number == object_number })
       object.l1 = "#{determiner.l1} #{object.l1}"
       object.l2 = "#{determiner.l2} #{object.l2}"
+      child_arc_ids.push determiner.arc_id.to_s
     end
     if object_number == '2'
       object.l1 += 's'
@@ -265,8 +269,9 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
   sentence = Arc.new 'sentence'
   sentence.l1 = decorate_sentence(l1_words.join(' '))
   sentence.l2 = decorate_sentence(l2_words.join(' '))
-  p sentence
+  sentence.child_arc_ids = child_arc_ids.join(',')
   add_arc sentence
+  p sentence
 end
 
 File.open 'persist.sql', 'w' do |file|
