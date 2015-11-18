@@ -1,3 +1,4 @@
+require 'json'
 require 'pp'
 require './models_fast'
 
@@ -41,13 +42,14 @@ Hello.               你好hello
   Did you say hello? 你you 说say 你好hello 吗question-particle
 *Yes.                说say
 ].split("\n\n").each do |paragraph|
+  utterances = []
   paragraph.split("\n").reject { |line| line == '' }.each do |line|
     if match = line.match(/^(  )?(\*)?([A-Za-z.? ]+?) +(\p{Han}.*)$/)
-      is_2nd_speaker = (match[1] == '  ')
+      speaker_num = (match[1] == '  ') ? 2 : 1
       leave_out = (match[2] == '*')
       english = match[3]
       hanzi_gloss_pairs = match[4]
-      p [is_2nd_speaker, leave_out, english, hanzi_gloss_pairs]
+      #p [is_2nd_speaker, leave_out, english, hanzi_gloss_pairs]
 
       gloss_table = []
       hanzi_gloss_pairs.split(' ').each do |hanzi_gloss_pair|
@@ -70,7 +72,13 @@ Hello.               你好hello
         raise "No match: #{english}"
       end
 
-      puts gloss_table.map { |entry| entry[1] }.join(' ').gsub(/ ([.?])$/, '\1')
+      utterance = {
+        'speaker_num' => speaker_num,
+        'english'     => english,
+        'gloss_table' => gloss_table,
+      }
+      #puts gloss_table.map { |entry| entry[1] }.join(' ').gsub(/ ([.?])$/, '\1')
+      puts JSON.dump(utterance)
     else
       raise "No match: #{line}"
     end
