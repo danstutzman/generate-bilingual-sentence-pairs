@@ -19,6 +19,11 @@ hanzi_to_pinyin = {}
   你好 nǐhǎo
   说   shūo
   吗   ma
+  不   bù
+  什么 shénme
+  怎么 zěnme
+  对   duì
+  好的 hǎode
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, hanzi, pinyin = line.split(/\s+/)
   hanzi_to_pinyin[hanzi] = pinyin
@@ -41,10 +46,28 @@ end
 Hello.               你好hello
   Did you say hello? 你you 说say 你好hello 吗question-particle
 *Yes.                说say
+
+Hello.               你好hello
+  Did you say hello? 你you 说say 不not 说say 你好hello
+*Yes.                说say
+
+Hello.               你好hello
+  What did you say?  你you 说say 什么what
+I said hello.        我I 说say 你好hello
+
+*How do I say hello?     我I 怎么how 说say -hello
+  *You say hello.        你you 说say 你好hello
+*Hello?                  你好hello
+  Incorrect.             不not 对correct
+  *You don't say hello;  你you 不not 说say 你好hello
+  You say hello.         你you 说say 你好hello
+Okay.                    好的okay
+Hello.                   你好hello
+  Correct!               对correct
 ].split("\n\n").each do |paragraph|
   utterances = []
   paragraph.split("\n").reject { |line| line == '' }.each do |line|
-    if match = line.match(/^(  )?(\*)?([A-Za-z.? ]+?) +(\p{Han}.*)$/)
+    if match = line.match(/^(  )?(\*)?([A-Za-z.?';! ]+?) +(\p{Han}.*)$/)
       speaker_num = (match[1] == '  ') ? 2 : 1
       leave_out = (match[2] == '*')
       english = match[3]
@@ -53,20 +76,29 @@ Hello.               你好hello
 
       gloss_table = []
       hanzi_gloss_pairs.split(' ').each do |hanzi_gloss_pair|
-        if match = hanzi_gloss_pair.match(/^(\p{Han}+)([a-z -]+)$/)
+        if match = hanzi_gloss_pair.match(/^(\p{Han}+|-)([A-Za-z -]+)$/)
           hanzi = match[1]
           gloss = match[2]
-          pinyin = hanzi_to_pinyin.fetch(hanzi)
-          gloss_table.push [hanzi, pinyin, gloss]
+          if hanzi == '-' # code-switching so it was an english word not chinese
+            gloss_table.push ['', '', gloss]
+          else
+            pinyin = hanzi_to_pinyin.fetch(hanzi)
+            gloss_table.push [hanzi, pinyin, gloss]
+          end
         else
           raise "No match: #{hanzi_gloss_pairs}"
         end
       end
 
       # Look for english punctuation
-      if match = english.match(/([.?])$/)
+      if match = english.match(/([.?;!])$/)
         punctuation = match[1]
-        wide_punctuation = {'.'=>'。', '?'=>'？', '!'=>'！'}.fetch(punctuation)
+        wide_punctuation = {
+          '.'=>'。',
+          '?'=>'？',
+          '!'=>'！',
+          ';'=>'；',
+        }.fetch(punctuation)
         gloss_table.push [wide_punctuation, punctuation, punctuation]
       else
         raise "No match: #{english}"
@@ -84,5 +116,17 @@ Hello.               你好hello
     end
   end
 end
+
+=begin
+what comes before say: I, you, how
+what comes after say: hello, what
+what comes before how-to: say, _____
+what comes after how-to: say, _______
+what comes before bu: nothing, ni
+what comes after bu: correct, say
+what comes before correct: nothing, bu, ____
+what comes before okay: nothing
+what comes after okay: nothing
+=end
 
 persist_to_db!
