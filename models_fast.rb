@@ -2,23 +2,22 @@ require 'logger'
 require 'sqlite3'
 
 class Concept
-  attr_accessor :id, :type, :content, :level, :is_l2_script
+  attr_accessor :id, :type, :content, :level, :script
 
   def initialize a
-    self.id, self.type, self.content, self.level, self.is_l2_script =
-      a[:id], a[:type], a[:content], a[:level].to_i, a[:is_l2_script]
+    self.id, self.type, self.content, self.level, self.script =
+      a[:id], a[:type], a[:content], a[:level].to_i, a[:script]
   end
 end
 
 class Arc
-  attr_accessor :id, :from_concept_id, :to_concept_id, :is_from_l2_script,
-    :is_to_l2_script, :height, :part_arc_ids, :was_correct, :level
+  attr_accessor :id, :from_concept_id, :to_concept_id,
+    :height, :part_arc_ids, :was_correct, :level
 
   def initialize a
-    self.id, self.from_concept_id, self.to_concept_id, self.is_from_l2_script,
-      self.is_to_l2_script, self.height, self.part_arc_ids, self.was_correct,
+    self.id, self.from_concept_id, self.to_concept_id,
+      self.height, self.part_arc_ids, self.was_correct,
       self.level = a[:id], a[:from_concept_id], a[:to_concept_id],
-      a[:is_from_l2_script], a[:is_to_l2_script],
       a[:height].to_i, a[:part_arc_ids], a[:was_correct], a[:level].to_i
   end
 
@@ -59,7 +58,7 @@ def connect_to_db! drop_and_create_tables
       type         varchar not null,
       content      varchar not null,
       level        integer not null,
-      is_l2_script boolean not null
+      script       varchar not null
     )'
 
     $db.execute 'drop table if exists arcs'
@@ -67,8 +66,6 @@ def connect_to_db! drop_and_create_tables
       id                integer primary key not null,
       from_concept_id   integer not null,
       to_concept_id     integer not null,
-      is_from_l2_script boolean not null,
-      is_to_l2_script   boolean not null,
       height            integer not null,
       part_arc_ids      varchar,
       was_correct       boolean not null,
@@ -99,10 +96,9 @@ def next_id
 end
 
 $new_concepts = []
-def new_concept type, content, level, is_l2_script
+def new_concept type, content, level, script
   concept = Concept.new id: next_id,
-    type: type, content: content, level: level,
-    is_l2_script: is_l2_script
+    type: type, content: content, level: level, script: script
   $concept_by_id[concept.id] = concept
   $concept_by_type_and_content[[type, content]] = concept
   $new_concepts.push concept
@@ -110,7 +106,7 @@ def new_concept type, content, level, is_l2_script
 end
 
 $new_arcs = []
-def new_arc height, from, to
+def new_arc height, from, to, both_ways
   level = [from.level, to.level].max
 
   arc1 = Arc.new id: next_id,
@@ -118,26 +114,24 @@ def new_arc height, from, to
     to_concept_id: to.id,
     height: height,
     level: level,
-    is_from_l2_script: from.is_l2_script,
-    is_to_l2_script: to.is_l2_script,
     was_correct: true
   $arc_by_id[arc1.id] = arc1
   $arc_by_from_concept_and_to_concept_type[
     [arc1.from_concept, arc1.to_concept.type]] = arc1
   $new_arcs.push arc1
 
-  arc2 = Arc.new id: next_id,
-    from_concept_id: to.id,
-    to_concept_id: from.id,
-    height: height,
-    level: level,
-    is_from_l2_script: to.is_l2_script,
-    is_to_l2_script: from.is_l2_script,
-    was_correct: true
-  $arc_by_id[arc2.id] = arc2
-  $arc_by_from_concept_and_to_concept_type[
-    [arc2.from_concept, arc2.to_concept.type]] = arc2
-  $new_arcs.push arc2
+  if both_ways
+    arc2 = Arc.new id: next_id,
+      from_concept_id: to.id,
+      to_concept_id: from.id,
+      height: height,
+      level: level,
+      was_correct: true
+    $arc_by_id[arc2.id] = arc2
+    $arc_by_from_concept_and_to_concept_type[
+      [arc2.from_concept, arc2.to_concept.type]] = arc2
+    $new_arcs.push arc2
+  end
 
   arc1
 end
@@ -181,18 +175,17 @@ def persist_to_db!
 
     $new_concepts.each do |concept|
       file.write "insert into concepts
-        (id, type, content, level, is_l2_script)
+        (id, type, content, level, script)
         values (%s);\n" % [concept.id, concept.type, concept.content, concept.level,
-          concept.is_l2_script].map { |value| quote(value) }.join(',')
+          concept.script].map { |value| quote(value) }.join(',')
     end
 
     $new_arcs.each do |arc|
       file.write "insert into arcs
-        (id, from_concept_id, to_concept_id, is_from_l2_script, is_to_l2_script,
+        (id, from_concept_id, to_concept_id,
         height, part_arc_ids, was_correct, level)
         values (%s);\n" % [arc.id, arc.from_concept_id, arc.to_concept_id,
-        arc.is_from_l2_script, arc.is_to_l2_script, arc.height,
-        arc.part_arc_ids, arc.was_correct, arc.level].map { |value|
+        arc.height, arc.part_arc_ids, arc.was_correct, arc.level].map { |value|
         quote(value) }.join(',')
     end
 

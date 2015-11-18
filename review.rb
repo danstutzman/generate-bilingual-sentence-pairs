@@ -40,8 +40,6 @@ arcs_sorted = arcs_to_review.sort_by { |arc|
     was_correct,
     was_correct * -arc.level,
     was_correct * -arc.height,
-    was_correct * (arc.is_to_l2_script ? -1 : 1),
-    was_correct * (arc.is_from_l2_script ? -1 : 1),
     rand,
   ]
 }
