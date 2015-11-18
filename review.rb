@@ -1,3 +1,4 @@
+require 'timeout'
 require './models'
 
 def ask_about_part_arcs(arc)
@@ -56,8 +57,16 @@ while arcs_sorted.size > 0
 
   puts prompt.content
   puts "   #{arc.from_concept.content}"
-  puts "Press enter to show answer."
-  readline
+  puts "Press enter to show answer or wait 3 seconds."
+
+  start = Time.now
+  timeout = false
+  begin
+    Timeout.timeout(3) { readline }
+  rescue Timeout::Error
+    timeout = true
+  end
+  p [timeout, Time.now - start]
 
   puts "The answer is:"
   puts "   #{arc.to_concept.content}"
