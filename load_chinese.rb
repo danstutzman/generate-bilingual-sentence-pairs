@@ -1,9 +1,36 @@
 require 'json'
 require 'pp'
+require 'wavefile'
 require './models_fast'
 
 PINYIN_HEIGHT = 1
+SAMPLES_PER_BUFFER = 4096
 level = 1
+NONSILENCE_THRESHOLD = 200
+
+def locate_nonsilent_span path
+  reader = WaveFile::Reader.new path
+  first_nonzero_sample_num = nil
+  last_nonzero_sample_num = nil
+  num_samples_so_far = 0
+  reader.each_buffer(SAMPLES_PER_BUFFER) do |buffer|
+    buffer.samples.each_with_index do |sample, sample_num_relative|
+      sample_num = num_samples_so_far + sample_num_relative
+      if first_nonzero_sample_num.nil? &&
+        (sample < -NONSILENCE_THRESHOLD || sample > NONSILENCE_THRESHOLD)
+        first_nonzero_sample_num = sample_num
+      end
+      if (sample < -NONSILENCE_THRESHOLD || sample > NONSILENCE_THRESHOLD)
+        last_nonzero_sample_num = sample_num
+      end
+    end
+    num_samples_so_far += buffer.samples.size
+  end
+  sample_rate = WaveFile::Reader.info(path).sample_rate.to_f
+  [first_nonzero_sample_num / sample_rate,
+   last_nonzero_sample_num / sample_rate,
+   num_samples_so_far / sample_rate]
+end
 
 connect_to_db! true
 
@@ -65,9 +92,12 @@ I said hello.        我I 说say 你好hello
 Okay.                    好的okay
 Hello.                   你好hello
   Correct!               对correct
-].split("\n\n").each do |paragraph|
+].split("\n\n").each_with_index do |dialog, dialog_num|
   utterances = []
-  paragraph.split("\n").reject { |line| line == '' }.each do |line|
+  lines = dialog.split("\n").reject { |line| line == '' }
+  wav_spans = []
+  durations = []
+  lines.each_with_index do |line, line_num|
     if match = line.match(/^(  )?(\*)?([A-Za-z.?';! ]+?) +(\p{Han}.*)$/)
       speaker_num = (match[1] == '  ') ? 2 : 1
       leave_out = (match[2] == '*')
@@ -110,13 +140,70 @@ Hello.                   你好hello
         'english'     => english,
         'gloss_table' => gloss_table,
       }
+      utterances.push utterance
       #puts gloss_table.map { |entry| entry[1] }.join(' ').gsub(/ ([.?])$/, '\1')
-      puts JSON.dump(utterance)
+
+      all_hanzi = gloss_table.map { |entry| entry[0] }.join
+      all_hanzi.gsub! /？/, '?' # bug with 'say' command
+      if speaker_num == 1
+        `say -v Ting-Ting -o temp.aiff '#{all_hanzi}' && sox -S temp.aiff -C 192 #{line_num}.wav pitch -400`
+      else
+        `say -v Ting-Ting -o temp.aiff '#{all_hanzi}' && sox temp.aiff #{line_num}.wav`
+      end
+      File.delete 'temp.aiff'
+
+      path = "#{line_num}.wav"
+      wav_spans.push locate_nonsilent_span("#{line_num}.wav")
+
+      command_line = 'sox ' + \
+        (0..line_num).map { |i| "#{i}.wav" }.join(' ') + ' total.wav'
+      system command_line
+      durations.push locate_nonsilent_span('total.wav')[2]
+      File.delete "total.wav"
     else
       raise "No match: #{line}"
     end
+  end # next utterance
+
+  last_line_num = lines.size - 1
+  if last_line_num > -1
+    path_wav = "dialog#{dialog_num}.wav"
+    path_mp3 = "dialog#{dialog_num}.mp3"
+    command_line = 'sox ' + \
+      (0..last_line_num).map { |line_num| "#{line_num}.wav" }.join(' ') + \
+      ' ' + path_wav
+    puts command_line
+    system command_line
+    0.upto(last_line_num).each do |line_num|
+      File.delete "#{line_num}.wav"
+    end
+
+    `lame #{path_wav} -V 9 -B 24 #{path_mp3}`
+    File.delete path_wav
+
+    `lame --decode --decode-mp3delay -9999999999 #{path_mp3} #{path_mp3}.wav`
+    mp3_all_span = locate_nonsilent_span("#{path_mp3}.wav")
+    File.delete "#{path_mp3}.wav"
+    p ['mp3_offset', mp3_all_span[0], wav_spans[0][0]]
+    mp3_offset = mp3_all_span[0] - wav_spans[0][0]
+    (0...wav_spans.size).each do |i|
+      if i > 0
+        this_span = wav_spans[i]
+        this_span[0] += durations[i - 1]
+        this_span[1] += durations[i - 1]
+        this_span[2] += durations[i - 1]
+      end
+    end
+    mp3_spans = wav_spans.map.with_index do |wav_span, i|
+      utterances[i]['mp3_milliseconds'] = [
+        ((wav_span[0] + mp3_offset) * 1000).floor,
+        ((wav_span[1] + mp3_offset) * 1000).ceil
+      ]
+    end
+
+    puts JSON.dump(utterances)
   end
-end
+end # next dialog
 
 =begin
 what comes before say: I, you, how
