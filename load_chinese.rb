@@ -168,7 +168,7 @@ Hello.                   你好hello
   last_line_num = lines.size - 1
   if last_line_num > -1
     path_wav = "dialog#{dialog_num}.wav"
-    path_mp3 = "dialog#{dialog_num}.mp3"
+    path_m4a = "dialog#{dialog_num}.m4a"
     command_line = 'sox ' + \
       (0..last_line_num).map { |line_num| "#{line_num}.wav" }.join(' ') + \
       ' ' + path_wav
@@ -178,14 +178,14 @@ Hello.                   你好hello
       File.delete "#{line_num}.wav"
     end
 
-    `lame #{path_wav} -V 9 -B 24 #{path_mp3}`
+    `/usr/local/Cellar/ffmpeg/2.8.2/bin/ffmpeg -i #{path_wav} -c:a libfdk_aac -b:a 8k -cutoff 20000 -movflags +faststart -y #{path_m4a}`
     File.delete path_wav
 
-    `lame --decode --decode-mp3delay -9999999999 #{path_mp3} #{path_mp3}.wav`
-    mp3_all_span = locate_nonsilent_span("#{path_mp3}.wav")
-    File.delete "#{path_mp3}.wav"
-    p ['mp3_offset', mp3_all_span[0], wav_spans[0][0]]
-    mp3_offset = mp3_all_span[0] - wav_spans[0][0]
+    `/usr/local/Cellar/ffmpeg/2.8.2/bin/ffmpeg -i #{path_m4a} #{path_m4a}.wav`
+    m4a_all_span = locate_nonsilent_span("#{path_m4a}.wav")
+    File.delete "#{path_m4a}.wav"
+    p ['m4a_offset', m4a_all_span[0], wav_spans[0][0]]
+    m4a_offset = m4a_all_span[0] - wav_spans[0][0]
     (0...wav_spans.size).each do |i|
       if i > 0
         this_span = wav_spans[i]
@@ -194,10 +194,10 @@ Hello.                   你好hello
         this_span[2] += durations[i - 1]
       end
     end
-    mp3_spans = wav_spans.map.with_index do |wav_span, i|
-      utterances[i]['mp3_milliseconds'] = [
-        ((wav_span[0] + mp3_offset) * 1000).floor,
-        ((wav_span[1] + mp3_offset) * 1000).ceil
+    m4a_spans = wav_spans.map.with_index do |wav_span, i|
+      utterances[i]['m4a_milliseconds'] = [
+        ((wav_span[0] + m4a_offset) * 1000).floor,
+        ((wav_span[1] + m4a_offset) * 1000).ceil
       ]
     end
 
