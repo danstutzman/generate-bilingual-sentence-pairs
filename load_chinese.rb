@@ -24,6 +24,7 @@ hanzi_to_pinyin = {}
   怎么 zěnme
   对   duì
   好的 hǎode
+  你耗 nǐhào
 ].split("\n").reject { |line| line == '' }.each do |line|
   _, hanzi, pinyin = line.split(/\s+/)
   hanzi_to_pinyin[hanzi] = pinyin
@@ -57,9 +58,9 @@ I said hello.        我I 说say 你好hello
 
 *How do I say hello?     我I 怎么how 说say -hello
   *You say hello.        你you 说say 你好hello
-*Hello?                  你好hello
+*Hello?                  你耗bad-hello
   Incorrect.             不not 对correct
-  *You don't say hello;  你you 不not 说say 你好hello
+  *You don't say hello;  你you 不not 说say 你耗bad-hello
   You say hello.         你you 说say 你好hello
 Okay.                    好的okay
 Hello.                   你好hello
