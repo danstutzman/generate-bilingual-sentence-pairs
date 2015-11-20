@@ -111,7 +111,7 @@ Hello.                   你好hello
           hanzi = match[1]
           gloss = match[2]
           if hanzi == '-' # code-switching so it was an english word not chinese
-            gloss_table.push ['', '', gloss]
+            gloss_table.push [gloss, gloss, gloss]
           else
             pinyin = hanzi_to_pinyin.fetch(hanzi)
             gloss_table.push [hanzi, pinyin, gloss]
