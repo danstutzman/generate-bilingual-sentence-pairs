@@ -1,0 +1,54 @@
+grammar Calc
+  rule term
+    (level ' - ' title:/.+/ [\n]* utterance+ lines) {
+      {:level => capture(:level),
+       :title => capture(:title),
+       :utterances => captures(:utterance).map { |utterance| utterance.value },
+       :text => capture(:lines).value,
+      }
+    }
+  end
+
+  rule utterance
+    (speaker? ("(" /A[0-9]{4}/ ")" "\n\n")? speaker? hanzi_line pinyin_line english_line [\n]) {
+      {
+        :speaker => (capture(:speaker) ? capture(:speaker).value : nil),
+        :hanzi => capture(:hanzi_line).value,
+        :pinyin => capture(:pinyin_line).value,
+        :english => capture(:english_line).value,
+      }
+    }
+  end
+
+  rule hanzi_line
+    /(A：)?(\p{Han}|！|!|？|,|，|、|。 ?|一|“|”|[A-Za-z0-9])+\.*\??…*/ [\n]
+  end
+
+  rule pinyin_line
+    /(\p{L}|\p{Mn}| |!|\?|,|.|“|”)+/ [\n]
+  end
+
+  rule english_line
+    /[A-Za-z !?,’.0-9“”()]+…?/ [\n]
+  end
+
+  rule speaker
+    [AB]? ":\n\n"
+  end
+
+  rule level
+    'Newbie'
+  end
+
+  rule lines
+    (line [\n]* lines_or_line:(lines | line)) {
+      capture(:line).value + capture(:lines_or_line).value
+    }
+  end
+
+  rule line
+    (/.+/) {
+      [to_str]
+    }
+  end
+end
