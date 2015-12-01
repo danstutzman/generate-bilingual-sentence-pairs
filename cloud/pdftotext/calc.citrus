@@ -10,34 +10,29 @@ grammar Calc
   end
 
   rule utterance
-    (speaker? ("(" /A[0-9]{4}/ ")" "\n\n")? speaker? hanzi_line pinyin_line english_line [\n]) {
+    (speaker? ("(" /[A-E][0-9]{4}/ ")" "\n\n")? speaker? hanzi_line pinyin_or_english_lines [\n]) {
       {
         :speaker => (capture(:speaker) ? capture(:speaker).value : nil),
         :hanzi => capture(:hanzi_line).value,
-        :pinyin => capture(:pinyin_line).value,
-        :english => capture(:english_line).value,
+        :pinyin_or_english => capture(:pinyin_or_english_lines).value,
       }
     }
   end
 
   rule hanzi_line
-    /(A：)?(\p{Han}|！|!|？|,|，|、|。 ?|一|“|”|[A-Za-z0-9])+\.*\??…*/ [\n]
+    /((\p{Han}|！|!|？|,|，|、|。 ?|一|“|”|：|\?|…|\.\.\.|[A-Za-z0-9])+\n)+/
   end
 
-  rule pinyin_line
-    /(\p{L}|\p{Mn}| |!|\?|,|.|“|”)+/ [\n]
-  end
-
-  rule english_line
-    /[A-Za-z !?,’.0-9“”()]+…?/ [\n]
+  rule pinyin_or_english_lines
+    /((\p{L}|\p{Mn}| |!|\?|,|.|“|”)+\n)+/
   end
 
   rule speaker
-    [AB]? ":\n\n"
+    [A-E]? ":\n\n"
   end
 
   rule level
-    'Newbie'
+    /(Newbie|Elementary|Intermediate|Upper Intermediate|Upper-Intermediate|Advanced)/
   end
 
   rule lines
