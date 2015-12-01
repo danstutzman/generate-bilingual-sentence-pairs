@@ -1,0 +1,128 @@
+Run once per project:
+gcloud compute firewall-rules create mosh --allow udp:60001-60010
+
+Run once per workstation:
+gcloud config set compute/zone us-central1-b
+gcloud config set project chinese-language-resources
+---------------------
+
+gcloud compute disks create media --size 20GB
+
+gcloud compute disks create nlp --image ubuntu-15-10
+
+gcloud compute instances create nlp \
+  --machine-type g1-small \
+  --disk name=nlp,boot=yes,auto-delete=no \
+  --disk name=media,device-name=media \
+  --tags http-server,https-server \
+  --metadata startup-script='sudo /usr/share/google/safe_format_and_mount -m "mkfs.ext4 -F" /dev/disk/by-id/google-media /mnt'
+
+gcloud compute ssh nlp <<EOF
+sudo apt-get install -y mosh ruby
+EOF
+
+gcloud compute ssh nlp <<EOF
+sudo apt-get install -y transmission-cli transmission-common transmission-daemon
+sudo service transmission-daemon stop
+if [ ! -e /etc/transmission-daemon/settings.json.default ]; then
+  sudo cp -a /etc/transmission-daemon/settings.json \
+    /etc/transmission-daemon/settings.json.default
+fi
+sudo usermod -m -d /mnt/transmission-daemon debian-transmission
+sudo mkdir -p /mnt/transmission-daemon/incomplete
+sudo chown debian-transmission:debian-transmission /mnt/transmission-daemon/incomplete
+sudo cat /etc/transmission-daemon/settings.json.default \
+  | ruby -pe '$_.gsub! %r{"rpc-whitelist-enabled": .*,},
+                       %q{"rpc-whitelist-enabled": false,}' \
+  | ruby -pe '$_.gsub! %r{"incomplete-dir": .*,},
+                       %q{"incomplete-dir": "/mnt/transmission-daemon/incomplete",}' \
+  | ruby -pe '$_.gsub! %r{"incomplete-dir-enabled": .*,},
+                       %q{"incomplete-dir-enabled": true,}' \
+  | ruby -pe '$_.gsub! %r{"download-dir": .*,},
+                       %q{"download-dir": "/mnt/transmission-daemon/downloads",}' \
+  | ruby -pe '$_.gsub! %r{"rpc-whitelist-enabled": .*,},
+                       %q{"rpc-whitelist-enabled": false,}' \
+  | sudo tee /etc/transmission-daemon/settings.json
+sudo diff -u /etc/transmission-daemon/settings.json.default /etc/transmission-daemon/settings.json
+EOF
+
+----------
+
+gcloud compute ssh nlp <<EOF
+sudo service transmission-daemon start
+EOF
+
+---------------
+
+#"rpc-authentication-required": true,
+#"rpc-bind-address": "0.0.0.0",
+#"rpc-enabled": true,
+#"rpc-password": "password",
+#"rpc-port": 9091,
+#"rpc-username": "username",
+#"rpc-whitelist": "127.0.0.1,*.*.*.*",
+#"rpc-whitelist-enabled": true,
+#...
+#"umask": 2,
+#...
+#"watch-dir": "/media/datadrive/downloads",
+#"watch-dir-enabled": true
+#
+
+
+------------
+sudo apt-get install poppler-utils # for pdftotext
+
+----------
+sudo mkdir -p /mnt/pyAudioAnalysis
+sudo chown daniel:daniel /mnt/pyAudioAnalysis
+cd /mnt
+git clone https://github.com/tyiannak/pyAudioAnalysis.git
+cd /mnt/pyAudioAnalysis
+mkdir chinesepod
+mkdir chinesepod/train
+sudo apt-get install -y python-numpy python-scipy python-matplotlib python-mlpy \
+  python-eyed3 python-pip libgsl0-dev python-sklearn
+pip install eyed3
+wget http://sourceforge.net/projects/mlpy/files/mlpy%203.5.0/mlpy-3.5.0.tar.gz
+tar xvf mlpy-3.5.0.tar.gz
+cd mlpy-3.5.0
+sudo python setup.py install
+cd ..
+sudo easy_install simplejson
+sudo pip install scikits.talkbox
+sudo apt-get install -y sox lame
+
+lame --decode --decode-mp3delay -9999999999 /mnt/transmission-daemon/downloads/ChinesePod_Newbie/A0001pr\ -\ Intro\ 1\ Good\ morning.mp3 chinesepod/train/a0001.wav
+sox chinesepod/train/a0001.wav chinesepod/train/a0001mono.wav channels 1
+mv chinesepod/train/a0001mono.wav chinesepod/train/a0001.wav
+tee chinesepod/train/a0001.segments <<EOF
+0,79.9,talking
+79.7,82.0,dialog-music
+82.0,149.4,talking
+149.4,150.7,dialog-music
+150.7,583.4,talking
+583.4,585.7,dialog-music
+585.7,653,talking
+653,655,dialog-music
+EOF
+python audioAnalysis.py trainHMMsegmenter_fromdir \
+  -i chinesepod/train -o chinesepod/output -mw 1.0 -ms 1.0
+
+lame --decode --decode-mp3delay -9999999999 /mnt/transmission-daemon/downloads/ChinesePod_Newbie/A0002pr\ -\ Intro\ 2\ What\'s\ your\ name.mp3 chinesepod/a0002.wav
+sox chinesepod/a0002.wav chinesepod/a0002mono.wav channels 1
+mv chinesepod/a0002mono.wav chinesepod/a0002.wav
+python audioAnalysis.py segmentClassifyFileHMM -i chinesepod/a0002.wav --hmm chinesepod/output
+
+
+---------
+sudo apt-get install -y mp3splt
+#sudo apt-get install -y treetop
+sudo gem install citrus
+---------
+For kaldi:
+sudo apt-get install -y automake autoconf libtool subversion 
+sudo apt-get install -y g++ zlib1g-dev make
+sudo apt-get install -y libatlas3-base
+sudo ln -s -f bash /bin/sh
+
