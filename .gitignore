@@ -1,5 +1,7 @@
-/.DS_Store
+.*.swp
+.DS_Store
+
 /media
 /test.db
 /cacert.pem
-.*.swp
+/vendor
