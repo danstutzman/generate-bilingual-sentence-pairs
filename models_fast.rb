@@ -67,7 +67,7 @@ def connect_to_db! drop_and_create_tables
       from_concept_id   integer not null,
       to_concept_id     integer not null,
       height            integer not null,
-      part_arc_ids      varchar,
+      part_arc_ids      varchar not null,
       was_correct       boolean not null,
       level             integer not null
     )'

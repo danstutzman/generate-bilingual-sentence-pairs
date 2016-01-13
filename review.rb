@@ -2,7 +2,7 @@ require 'timeout'
 require './models'
 
 def ask_about_part_arcs(arc)
-  if arc.part_arc_ids != nil
+  if arc.part_arc_ids != ''
     puts "Which part arc(s) did you get wrong? (Separate numbers with commas)"
     for part_arc_id in arc.part_arc_ids.split(',')
       part_arc = Arc.find(part_arc_id.to_i)
