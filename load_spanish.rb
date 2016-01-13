@@ -51,7 +51,7 @@ $nouns_that_need_determiner = {}
     line.split(/\s+/)
   vocab_l1 = new_concept 'vocab_l1', vocab_l1, level, false
   vocab_l2 = new_concept 'vocab_l2', vocab_l2, level, true
-  arc = new_arc VOCAB_HEIGHT, vocab_l1, vocab_l2
+  arc = new_arc VOCAB_HEIGHT, vocab_l1, vocab_l2, true
   $nouns_that_are_written.push arc if is_writing == 'x'
   $nouns_that_are_persons.push arc if is_person == 'x'
   $nouns_that_need_determiner[vocab_l2.content] = true if needs_determiner == 'x'
@@ -74,7 +74,7 @@ end
 
   phrase_l1 = new_concept 'phrase_l1', phrase_l1, level, false
   phrase_l2 = new_concept 'phrase_l2', phrase_l2, level, true
-  arc = new_arc PHRASE_HEIGHT, phrase_l1, phrase_l2
+  arc = new_arc PHRASE_HEIGHT, phrase_l1, phrase_l2, true
   noun_l1_arc = $arc_by_from_concept_and_to_concept_type[[noun_l1, 'vocab_l2']]
   arc.add_part_arcs! [determiner_l1_arc, noun_l1_arc]
   reverse_arc(arc).add_part_arcs! \
@@ -112,7 +112,7 @@ $l2_verbs_ending_with = {}
 
   l1 = new_concept 'vocab_l1', l1, level, false
   l2 = new_concept 'vocab_l2', l2, level, true
-  arc = new_arc VOCAB_HEIGHT, l1, l2
+  arc = new_arc VOCAB_HEIGHT, l1, l2, true
 
   suffix = '-' + l2.content[-2..-1]
   $l2_verbs_ending_with[suffix] ||= []
@@ -171,7 +171,7 @@ end
   conjugation_l1 = "#{conjugation_l1}(#{person},#{number})"
   conjugation_l1 = new_concept 'conjugation_l1', conjugation_l1, level, false
   conjugation_l2 = new_concept 'conjugation_l2', conjugation_l2, level, true
-  arc = new_arc STEM_HEIGHT, conjugation_l1, conjugation_l2
+  arc = new_arc STEM_HEIGHT, conjugation_l1, conjugation_l2, true
 
   # Probably memorized directly without falling back to infinitive
   #arc.add_part_arcs! [infinitive_arc]
@@ -205,7 +205,7 @@ end
     l2_irregular_infinitive, level, true
   l2_irregular_stem = new_concept 'l2_irregular_stem', l2_irregular_stem,
     level, true
-  stem_arc = new_arc STEM_HEIGHT, l2_irregular_infinitive, l2_irregular_stem
+  stem_arc = new_arc STEM_HEIGHT, l2_irregular_infinitive, l2_irregular_stem, true
 
   if tense == 'pret'
     %q[
@@ -223,7 +223,7 @@ end
       suffix_description = "#{suffix} for irregular verbs"
       suffix_description = $concept_by_type_and_content[['suffix_l2', suffix]] ||
         new_concept('suffix_l2', suffix_description, suffix_level, true)
-      suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description
+      suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description, true
 
       l2_infinitive_concept =
         $concept_by_type_and_content.fetch(['vocab_l2', l2_infinitive])
@@ -238,7 +238,8 @@ end
       conjugation_l2 = new_concept 'conjugation_l2',
         l2_irregular_stem.content[0...-1] + suffix[1..-1], level, true
 
-      conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2
+      conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2,
+        true
       part_arcs = [infinitive_arc, stem_arc, suffix_arc].compact
       part_arcs2 = [stem_arc, infinitive_arc, suffix_arc].compact
       conjugation_arc.add_part_arcs! part_arcs
@@ -282,7 +283,7 @@ end
       suffix_description = "#{suffix} for #{verb_type}"
       suffix_description = $concept_by_type_and_content[['suffix_l2', suffix]] ||
         new_concept('suffix_l2', suffix_description, suffix_level, true)
-      suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description
+      suffix_arc = new_arc SUFFIX_HEIGHT, features, suffix_description, true
 
       conjugation_level = [infinitive_arc.level, suffix_level.to_i].max
 
@@ -316,7 +317,8 @@ end
         conjugation_l2 = new_concept 'conjugation_l2', l2_stem + suffix[1..-1],
           conjugation_level, true
 
-        conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2
+        conjugation_arc = new_arc CONJUGATION_HEIGHT, conjugation_l1, conjugation_l2,
+          true
         part_arcs = [infinitive_arc, possible_l2_irregular_stem, suffix_arc].compact
         part_arcs2 = [possible_l2_irregular_stem, infinitive_arc, suffix_arc].compact
         conjugation_arc.add_part_arcs! part_arcs
@@ -351,7 +353,7 @@ end # next verb type
 
   l1_vp_template = new_concept 'l1_vp_template', l1_vp_template, level, false
   l2_vp_template = new_concept 'l2_vp_template', l2_vp_template, level, true
-  arc = new_arc TEMPLATE_HEIGHT, l1_vp_template, l2_vp_template
+  arc = new_arc TEMPLATE_HEIGHT, l1_vp_template, l2_vp_template, true
   arc.add_part_arcs! part_arcs
   reverse_arc(arc).add_part_arcs! part_arcs.map { |arc| reverse_arc(arc) }
 
@@ -385,7 +387,7 @@ end # next verb type
         l1_sentence = new_concept 'l1_sentence', l1_sentence, 1, false
         l2_sentence = to_sentence([l2_conjugation, l2_noun].join(' '))
         l2_sentence = new_concept 'l2_sentence', l2_sentence, 1, true
-        sentence_arc = new_arc SENTENCE_HEIGHT, l1_sentence, l2_sentence
+        sentence_arc = new_arc SENTENCE_HEIGHT, l1_sentence, l2_sentence, true
 
         sentence_arc.add_part_arcs! [l2_conjugation_arc, noun_arc]
         reverse_arc(sentence_arc).add_part_arcs! [reverse_arc(l2_conjugation_arc),
