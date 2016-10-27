@@ -274,23 +274,25 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
   p sentence
 end
 
-File.open 'persist.sql', 'w' do |file|
-  column_names = $arc_features.join(', ')
-  column_definitions = $arc_features.map { |col| "#{col} varchar" }.join(",\n")
-  file.write "drop table if exists arcs;\n"
-  file.write "create table if not exists arcs (arc_id int not null,
-    child_arc_ids varchar,
-    #{column_definitions});\n"
-  for arc_type, arcs in $arc_type_to_arcs
-    for arc in arcs
-      file.write "insert into arcs (arc_id, child_arc_ids, arc_type, #{column_names})
-        values (%s);\n" % 
-        ([escape(arc.arc_id), escape(arc.child_arc_ids), escape(arc_type)] +
-        $arc_features.map { |col| escape(arc.send(col))
-        }).join(', ')
+if false
+  File.open 'persist.sql', 'w' do |file|
+    column_names = $arc_features.join(', ')
+    column_definitions = $arc_features.map { |col| "#{col} varchar" }.join(",\n")
+    file.write "drop table if exists arcs;\n"
+    file.write "create table if not exists arcs (arc_id int not null,
+      child_arc_ids varchar,
+      #{column_definitions});\n"
+    for arc_type, arcs in $arc_type_to_arcs
+      for arc in arcs
+        file.write "insert into arcs (arc_id, child_arc_ids, arc_type, #{column_names})
+          values (%s);\n" %
+          ([escape(arc.arc_id), escape(arc.child_arc_ids), escape(arc_type)] +
+          $arc_features.map { |col| escape(arc.send(col))
+          }).join(', ')
+      end
     end
   end
+  `rm -f test.db`
+  `cat persist.sql | sqlite3 test.db`
+  File.delete('persist.sql')
 end
-`rm -f test.db`
-`cat persist.sql | sqlite3 test.db`
-File.delete('persist.sql')
