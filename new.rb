@@ -141,7 +141,7 @@ for stem in $arc_type_to_arcs['l2_irregular_stem']
         arc.person = pattern.person
         arc.number = pattern.number
         arc.tense = pattern.tense
-        arc.child_arc_ids = [stem.arc_id, pattern.arc_id]
+        arc.child_arc_ids = [stem.arc_id, pattern.arc_id].join(',')
         add_arc arc
       end
     elsif stem.tense == 'pret' && pattern.tense == 'pret' &&
@@ -152,7 +152,7 @@ for stem in $arc_type_to_arcs['l2_irregular_stem']
       arc.person = pattern.person
       arc.number = pattern.number
       arc.tense = pattern.tense
-      arc.child_arc_ids = [stem.arc_id, pattern.arc_id]
+      arc.child_arc_ids = [stem.arc_id, pattern.arc_id].join(',')
       add_arc arc
     end
   end
@@ -243,7 +243,7 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
     l2_words = [pronoun.l2] + l2_words
     l2_words = l2_words.join(' ').gsub(/(a )?alguien ?/, '').split(' ')
     l1_words.map! { |word| (word == 'someone') ? pronoun.l1 : word }
-    child_arc_ids.push pronoun
+    child_arc_ids.push pronoun.arc_id.to_s
   end
 
   if l2_words.include?('algo')
