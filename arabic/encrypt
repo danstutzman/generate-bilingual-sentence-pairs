@@ -1,5 +1,0 @@
-#!/bin/bash -ex
-cd `dirname $0`
-
-#echo "أَمْجَد كَانَ لَهُ قَصْر إِلَى الْمَمْلَكَة الْمَغْرِبِيَّة" | \
-python ../../buckwalter2unicode/buckwalter2unicode.py -i /dev/stdin -o /dev/stdout
