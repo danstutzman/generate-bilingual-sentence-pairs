@@ -1,0 +1,27 @@
+1. Clean up Git
+2. Rename korean Git repo
+3. Change new.rb to generate one challenge, reveal challenge incrementally,
+   receive translation incrementally with timings
+4. Rename new.rb
+5. From that one challenge, new.rb outputs report with simple memory model
+
+6. When rerun, new.rb can steer toward different challenges, to cover entire language
+   (not smart about recency effect, though)
+7. Improved persistent report with memory model
+  - could be annotations to data/en/* tables? (doesn't compare confusions)
+  - what's red (leave out); what's green (assumed); what's yellow (growing edge)
+
+8. User edits report to delete hard things or focus on important things
+
+9. TOO HARD/LATER:
+- use timings/responses to hone in on success/failures
+- generating the perfectly chosen sentence:
+  (not too hard; doesn't repeat known good/bad)
+
+Unrelated improvements:
+- eliminate unrealistic language (e.g. "learn tickets")
+- add more vocabulary
+- add more sophisticated constructions
+- Rewrite in BuckleScript
+- Automated tests: that certain sentences can be generated
+- Automated tests: that errors can be broken down

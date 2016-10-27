@@ -1,0 +1,53 @@
+S:
+  INTERJECTION? VP SUFFIX?
+
+SUFFIX:
+  ka
+  ne
+  okagesama de
+
+INTERJECTION:
+  sumimasen
+  iie
+  hai
+  ohayou gazaimasu
+  konnichi wa
+  sayounara
+  arigatou
+  demo
+  domou arigatou gozaimasu
+
+VP:
+  (PERSON wa)? ADJ DESU
+  (PERSON wa)? (LANGUAGE ga)? WAKARIMASU
+  (PERSON wa)? NP DESU
+  (PERSON wa)? yoku? HANASERU
+  (PERSON wa)? yoku? HANASHIMASU
+
+PERSON:
+  anata
+  watashi
+  Sato san
+
+ADJ:
+  ikaga
+  dou
+  jouzu
+  genki
+
+NP:
+  COUNTRY-jin
+
+COUNTRY:
+  nihon
+  amerika
+
+DESU:
+  desu
+  ja arimasen
+
+---------------- Unknown:
+shoshite
+mada
+mo
+sukoshi
