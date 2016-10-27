@@ -7,6 +7,7 @@ $arc_features = %i[l1 l2 arc_type gender number kind_of_verb tense person suffix
 ]
 
 $next_arc_id = 1
+$arc_id_to_arc = []
 
 class Arc
   attr_accessor :arc_id, :child_arc_ids
@@ -14,6 +15,7 @@ class Arc
 
   def initialize arc_type
     self.arc_id = $next_arc_id
+    $arc_id_to_arc[$next_arc_id] = self
     $next_arc_id += 1
     self.arc_type = arc_type
   end
@@ -51,7 +53,7 @@ def read_data(base_dir)
     next unless filename.end_with?('.txt')
     arc_type = filename.split('.')[0].sub(/xes$/, 'xs').sub(/s$/, '')
     path = "#{base_dir}/#{filename}"
-  
+
     File.open path do |file|
       headers = file.readline.strip
       file.each_line do |line|
@@ -81,6 +83,21 @@ def escape s
     'null'
   else
     "'%s'" % s.to_s.gsub("'", "''")
+  end
+end
+
+def print_arc arc, indentation
+  if arc.l1 != nil
+    puts "#{'  ' * indentation}#{arc.l1} -> #{arc.l2}"
+  else
+    puts "#{'  ' * indentation}#{arc.inspect}"
+  end
+  (arc.child_arc_ids || '').split(',').each do |child_arc_id|
+    child_arc = $arc_id_to_arc[child_arc_id.to_i]
+    if child_arc.nil?
+      raise "Can't find arc for id #{child_arc_id} (parent arc is #{arc.inspect})"
+    end
+    print_arc child_arc, indentation + 1
   end
 end
 
@@ -185,7 +202,8 @@ def decorate_sentence string
   string[0].upcase + string[1..-1] + '.'
 end
 
-while ($arc_type_to_arcs['sentence'] || []).size < 6
+#while ($arc_type_to_arcs['sentence'] || []).size < 6
+1.times do
   child_arc_ids = []
   verb_phrase = choose($arc_type_to_arcs['verb_phrase'])
   l1_words = verb_phrase.l1.split(' ')
@@ -271,7 +289,8 @@ while ($arc_type_to_arcs['sentence'] || []).size < 6
   sentence.l2 = decorate_sentence(l2_words.join(' '))
   sentence.child_arc_ids = child_arc_ids.join(',')
   add_arc sentence
-  p sentence
+
+  print_arc sentence, 0
 end
 
 if false
