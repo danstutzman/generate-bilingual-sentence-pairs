@@ -136,6 +136,7 @@ Meta-verbs for VPs: (or negation) (or WHAT for object) (or WHO)
 - A studies to VP
 - A helps A2 (to VP)
 - A stops/prevents A2 (from VP)
+- A just came from VP (acabar de)
 
 Tenses:
 - present
@@ -246,3 +247,9 @@ General daily time words:
 - evening
 - night
 - tomorrow
+
+
+-------------
+
+ALSO: todo, todos / todo el mundo, todos partes
+alguien, nigun,
