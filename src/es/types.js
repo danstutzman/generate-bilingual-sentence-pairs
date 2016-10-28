@@ -37,3 +37,9 @@ export type ConjugatedVerb = {|
   number:     Number,
   tense:      Tense,
 |};
+
+export type StemChange = {|
+  tense:       Tense,
+  infinitive:  string,
+  stem:        string,
+|};
