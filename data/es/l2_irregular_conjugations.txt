@@ -44,3 +44,7 @@ salir pres 1 1 salgo
 parecer pres 1 1 parezco
 conocer pres 1 1 conozco
 empezar pret 1 1 empecé
+enviar pres 1 1 envío
+enviar pres 2 1 envías
+enviar pres 3 1 envía
+enviar pres 1 2 envían
