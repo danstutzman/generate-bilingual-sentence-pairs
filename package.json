@@ -1,0 +1,22 @@
+{
+  "name": "generate-bilingual-sentence-pairs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://danstutzman@bitbucket.org/danstutzman/generate-bilingual-sentence-pairs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/danstutzman/generate-bilingual-sentence-pairs#readme",
+  "devDependencies": {
+    "flow-bin": "^0.33.0",
+    "flow-remove-types": "^1.0.4",
+    "flowtype": "^2.0.0",
+    "mocha": "^3.1.2"
+  }
+}

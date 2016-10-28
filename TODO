@@ -1,9 +1,18 @@
-1. Clean up Git
-2. Rename korean Git repo
-3. Change new.rb to generate one challenge, reveal challenge incrementally,
-   receive translation incrementally with timings
-4. Rename new.rb
-5. From that one challenge, new.rb outputs report with simple memory model
+GIVEN he said
+OUTPUT [pronoun(he), conjugated_verb(say, past)]
+
+GIVEN ConjugatedVerb(say(1,1) -> digo,
+  - l2_irregular_conjugation(1,pres,1,decir,digo),
+  - say -> decir)
+AND input=[pronoun(he), conjugated_verb(say, past)]
+OUTPUT:
+  l2_irregular_conjugation(1,pres,1,decir,digo)  -> decir :-) past + 3 :-(
+  say -> decir                                   -> say :-)
+
+1. new.rb receives input keystroke by keystroke, or - for "unknown";
+2  shows in grid with score
+3. outputs JSON objects recording challenge and result
+4. parse JSON; show against grid of entire curriculum
 
 6. When rerun, new.rb can steer toward different challenges, to cover entire language
    (not smart about recency effect, though)

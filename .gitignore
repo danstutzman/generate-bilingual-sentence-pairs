@@ -5,3 +5,5 @@
 /test.db
 /cacert.pem
 /vendor
+/build
+/node_modules
