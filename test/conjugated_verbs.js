@@ -1,5 +1,5 @@
 // @flow
-import type { ConjugationPattern, Verb } from "../src/es/types";
+import type { ConjugationPattern, Infinitive } from "../src/es/types";
 
 var assert = require('assert');
 var suite  = require('mocha').suite;
@@ -13,7 +13,7 @@ var conjugated_verbs = require('../src/es/conjugated_verbs');
 
 suite('conjugated_verbs', function() {
   test('add_regular', function() {
-    var hablar:Verb = {
+    var hablar:Infinitive = {
       l1:     "talk",
       l1Past: "talked",
       l2:     "hablar",

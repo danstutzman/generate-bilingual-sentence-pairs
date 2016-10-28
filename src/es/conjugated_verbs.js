@@ -1,29 +1,31 @@
 // @flow
-import type { ConjugatedVerb, ConjugationPattern, Number, Person, Tense, Verb
+import type { ConjugatedVerb, ConjugationPattern, Infinitive, Number, Person, Tense,
   } from "./types";
 
-var add_regular = function(verb:Verb, pattern:ConjugationPattern) : ConjugatedVerb {
-  if (pattern.kindOfVerb === "-ar verb" && verb.l2.endsWith("ar") ||
-      pattern.kindOfVerb === "-er verb" && verb.l2.endsWith("er") ||
-      pattern.kindOfVerb === "-ir verb" && verb.l2.endsWith("ir") ||
-      pattern.kindOfVerb === "-er and -ir verbs" && verb.l2.endsWith("er") ||
-      pattern.kindOfVerb === "-er and -ir verbs" && verb.l2.endsWith("ir")) {
+var add_regular = function(infinitive:Infinitive, pattern:ConjugationPattern)
+  : ConjugatedVerb {
+  if (pattern.kindOfVerb === "-ar verb" && infinitive.l2.endsWith("ar") ||
+      pattern.kindOfVerb === "-er verb" && infinitive.l2.endsWith("er") ||
+      pattern.kindOfVerb === "-ir verb" && infinitive.l2.endsWith("ir") ||
+      pattern.kindOfVerb === "-er and -ir verbs" && infinitive.l2.endsWith("er") ||
+      pattern.kindOfVerb === "-er and -ir verbs" && infinitive.l2.endsWith("ir")) {
     var l1 = (pattern.tense == "pres") ?
-      (verb.l1     + "(" + pattern.person + "," + pattern.number + ")") :
-      (verb.l1Past + "(" + pattern.person + "," + pattern.number + ")");
-    var l2 = verb.l2.substring(0, verb.l2.length - 2) + pattern.suffix.substring(1);
+      (infinitive.l1     + "(" + pattern.person + "," + pattern.number + ")") :
+      (infinitive.l1Past + "(" + pattern.person + "," + pattern.number + ")");
+    var l2 = infinitive.l2.substring(0, infinitive.l2.length - 2) +
+      pattern.suffix.substring(1);
 // next if $arc_type_to_l1_to_arc['conjugated_verb'][arc.l1]
     return {
       l1:         l1,
       l2:         l2,
-      infinitive: verb.l2,
+      infinitive: infinitive.l2,
       person:     pattern.person,
       number:     pattern.number,
       tense:      pattern.tense,
     }
   } else {
-    throw Error("Don't know how to conjugate '" + verb.l2 + "' with kindOfVerb '" +
-      pattern.kindOfVerb + "'");
+    throw Error("Don't know how to conjugate '" + infinitive.l2 +
+      "' with kindOfVerb '" + pattern.kindOfVerb + "'");
   }
 }
 

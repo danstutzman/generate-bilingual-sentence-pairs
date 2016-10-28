@@ -21,7 +21,7 @@ export type ConjugationPattern = {|
   suffix:     string,
 |};
 
-export type Verb = {|
+export type Infinitive = {|
   l2:     string,
   l1:     string,
   l1Past: string,
