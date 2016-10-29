@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 node_modules/.bin/flow
 JS_FILES=`find src -name '*.js'`
 JS_FILES="$JS_FILES `find test -name *.js`"
@@ -10,9 +10,10 @@ node_modules/.bin/jshint `find build -name '*.js'`
 # Generate popular_verbs.txt
 #OLD_PWD=$PWD
 #pushd ../measure-spanish-word-frequency
-#PYTHONIOENCODING=utf_8 python ppm.py | grep V | tail -5 > $OLD_PWD/popular_verbs.txt
+#PYTHONIOENCODING=utf_8 python ppm.py | grep V > $OLD_PWD/popular_verbs.txt
 #pushd
 
-cat popular_verbs.txt | node build/src/es/quiz_popular_verbs.js
+echo '-------'
+node build/src/es/quiz_popular_verbs.js
 
 #node_modules/.bin/mocha build/test

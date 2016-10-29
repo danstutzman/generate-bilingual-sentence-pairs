@@ -13,6 +13,30 @@ const IdiosyncraticVerbConjugation =
   idiosyncratic_verb_conjugation_table.IdiosyncraticVerbConjugation
 const StemChange = stem_change_table.StemChange
 
+const l1For = function(infinitivePair:InfinitivePair,
+    tense_person_number:[Tense, Person, Number]): string {
+  const [ tense, person, number ] = tense_person_number
+
+  let verb: string
+  switch (tense) {
+    case "pres": verb = infinitivePair.l1; break
+    case "pret": verb = infinitivePair.l1Past; break
+    default: throw new Error("Unknown tense " + tense)
+  }
+
+  let pronoun: string
+  switch (number * 10 + person) {
+    case 11: pronoun = "I"; break
+    case 12: pronoun = "you"; break
+    case 13: pronoun = "he/she/it"; break
+    case 21: pronoun = "we"; break
+    case 23: pronoun = "they"; break
+    default: throw new Error("Unknown number*10 + person " + number*10 + person)
+  }
+
+  return '(' + pronoun + ') ' + verb
+}
+
 class VerbPairIdiosyncratic {
   idiosyncraticVerbConjugation: IdiosyncraticVerbConjugation
   infinitivePair: InfinitivePair
@@ -22,8 +46,8 @@ class VerbPairIdiosyncratic {
     this.idiosyncraticVerbConjugation = idiosyncraticVerbConjugation
     this.infinitivePair               = infinitivePair
   }
-  l1():string {
-    return this.infinitivePair.l1
+  l1(): string {
+    return l1For(this.infinitivePair, this.tense_person_number())
   }
   tense_person_number() : [Tense, Person, Number] {
     return this.idiosyncraticVerbConjugation.tense_person_number()
@@ -39,7 +63,7 @@ class VerbPairRegular {
     this.infinitivePair     = infinitivePair
   }
   l1():string {
-    return this.infinitivePair.l1
+    return l1For(this.infinitivePair, this.tense_person_number())
   }
   tense_person_number() : [Tense, Person, Number] {
     return this.conjugationPattern.tense_person_number()
@@ -58,7 +82,7 @@ class VerbPairStemChange {
     this.infinitivePair     = infinitivePair
   }
   l1():string {
-    return this.stemChange.stem + this.conjugationPattern.suffix
+    return l1For(this.infinitivePair, this.tense_person_number())
   }
   tense_person_number() : [Tense, Person, Number] {
     return this.conjugationPattern.tense_person_number()
