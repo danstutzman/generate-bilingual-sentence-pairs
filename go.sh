@@ -6,4 +6,13 @@ grep ";$" $JS_FILES && exit 1 # don't allow lines to end with semicolons
 rm -rf build
 node_modules/.bin/flow-remove-types --out-dir build $JS_FILES
 node_modules/.bin/jshint `find build -name '*.js'`
-node_modules/.bin/mocha build/test
+
+# Generate popular_verbs.txt
+#OLD_PWD=$PWD
+#pushd ../measure-spanish-word-frequency
+#PYTHONIOENCODING=utf_8 python ppm.py | grep V | tail -5 > $OLD_PWD/popular_verbs.txt
+#pushd
+
+cat popular_verbs.txt | node build/src/es/quiz_popular_verbs.js
+
+#node_modules/.bin/mocha build/test
