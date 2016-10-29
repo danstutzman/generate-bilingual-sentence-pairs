@@ -13,7 +13,7 @@ class StemChange {
   }
 }
 
-var table = [
+const table = [
   new StemChange("pres", "poder",     "pued-"),
   new StemChange("pres", "tener",     "tien-"),
   new StemChange("pres", "querer",    "quier-"),
@@ -39,11 +39,10 @@ var table = [
   new StemChange("pret", "poder",     "pud-"),
 ]
 
-var lookupByL2Prefix = function(l2:string) : Array<StemChange> {
-  var stemChanges = []
-  for (var i = 0; i < table.length; i++) {
-    var stemChange = table[i]
-    var stemWithoutHyphen = stemChange.stem.substring(0, stemChange.stem.length - 1)
+const lookupByL2Prefix = function(l2:string) : Array<StemChange> {
+  const stemChanges = []
+  for (const stemChange of table) {
+    const stemWithoutHyphen = stemChange.stem.substring(0, stemChange.stem.length - 1)
     if (l2.startsWith(stemWithoutHyphen)) {
       stemChanges.push(stemChange)
     }

@@ -21,7 +21,7 @@ class ConjugationPattern {
   }
 }
 
-var table : Array<ConjugationPattern> = [
+const table : Array<ConjugationPattern> = [
   new ConjugationPattern("-ar verbs",         "pres", 1, 1, "-o"),
   new ConjugationPattern("-ar verbs",         "pres", 2, 1, "-as"),
   new ConjugationPattern("-ar verbs",         "pres", 3, 1, "-a"),
@@ -50,11 +50,10 @@ var table : Array<ConjugationPattern> = [
   new ConjugationPattern("stem change pret",  "pret", 3, 2, "-ieron"),
 ]
 
-var lookupByL2 = function(l2:string) : Array<ConjugationPattern> {
-  var patterns = []
-  for (var i = 0; i < table.length; i++) {
-    var pattern = table[i]
-    var suffix = pattern.suffix.substring(1) // remove initial hyphen
+const lookupByL2 = function(l2:string) : Array<ConjugationPattern> {
+  const patterns = []
+  for (const pattern of table) {
+    const suffix = pattern.suffix.substring(1) // remove initial hyphen
     if (l2.endsWith(suffix)) {
       patterns.push(pattern)
     }

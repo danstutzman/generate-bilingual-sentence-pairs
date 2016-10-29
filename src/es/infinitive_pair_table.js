@@ -12,7 +12,7 @@ class InfinitivePair {
   }
 }
 
-var table : Array<InfinitivePair> = [
+const table : Array<InfinitivePair> = [
   new InfinitivePair("hablar", "talk",    "talked"),
   new InfinitivePair("comer",  "eat",     "ate"),
   new InfinitivePair("vivir",  "live",    "lived"),
@@ -64,14 +64,13 @@ var table : Array<InfinitivePair> = [
   new InfinitivePair("encantar",   "enchant",    "enchanted"),
 ]
 
-var tableByL2 : { [l2:string] : InfinitivePair|void } = {}
-for (var i = 0; i < table.length; i++) {
-  var pair = table[i]
+const tableByL2 : { [l2:string] : InfinitivePair|void } = {}
+for (const pair of table) {
   tableByL2[pair.l2] = pair
 }
 
-var lookupByL2 = function(l2:string) : Array<InfinitivePair> {
-  var pair = tableByL2[l2]
+const lookupByL2 = function(l2:string) : Array<InfinitivePair> {
+  const pair = tableByL2[l2]
   return (pair !== undefined) ? [pair] : []
 }
 

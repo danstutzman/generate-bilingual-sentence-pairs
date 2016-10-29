@@ -1,17 +1,17 @@
 // @flow
 import type { Tense, Person, Number } from './types'
 
-var conjugation_pattern_table = require('./conjugation_pattern_table')
-var idiosyncratic_verb_conjugation_table =
+const conjugation_pattern_table = require('./conjugation_pattern_table')
+const idiosyncratic_verb_conjugation_table =
   require('./idiosyncratic_verb_conjugation_table')
-var infinitive_pair_table = require('./infinitive_pair_table')
-var stem_change_table = require('./stem_change_table')
+const infinitive_pair_table = require('./infinitive_pair_table')
+const stem_change_table = require('./stem_change_table')
 
-var ConjugationPattern = conjugation_pattern_table.ConjugationPattern
-var InfinitivePair = infinitive_pair_table.InfinitivePair
-var IdiosyncraticVerbConjugation =
+const ConjugationPattern = conjugation_pattern_table.ConjugationPattern
+const InfinitivePair = infinitive_pair_table.InfinitivePair
+const IdiosyncraticVerbConjugation =
   idiosyncratic_verb_conjugation_table.IdiosyncraticVerbConjugation
-var StemChange = stem_change_table.StemChange
+const StemChange = stem_change_table.StemChange
 
 class VerbPairIdiosyncratic {
   idiosyncraticVerbConjugation: IdiosyncraticVerbConjugation
@@ -67,7 +67,7 @@ class VerbPairStemChange {
 
 export type VerbPair = VerbPairIdiosyncratic | VerbPairRegular | VerbPairStemChange
 
-var only = function<T>(things:Array<T>) : T {
+const only = function<T>(things:Array<T>) : T {
   if (things.length === 0) {
     throw new Error("Unexpected empty list")
   } else if (things.length > 1) {
@@ -78,13 +78,13 @@ var only = function<T>(things:Array<T>) : T {
 }
 
 // returns [infinitive] or [] if not applicable
-var guessInfinitiveFromPattern = function(l2:string, pattern:ConjugationPattern)
+const guessInfinitiveFromPattern = function(l2:string, pattern:ConjugationPattern)
     : Array<string> {
-  var suffix = pattern.suffix.substring(1) // remove hyphen
+  const suffix = pattern.suffix.substring(1) // remove hyphen
   if (!l2.endsWith(suffix)) {
     throw new Error("Assert l2 " + l2 + " endsWith " + suffix)
   }
-  var base = l2.substring(0, l2.length - suffix.length)
+  const base = l2.substring(0, l2.length - suffix.length)
 
   switch (pattern.kindOfVerb) {
     case "-ar verbs": return [base + "ar"]
@@ -96,11 +96,11 @@ var guessInfinitiveFromPattern = function(l2:string, pattern:ConjugationPattern)
   }
 }
 
-var doesStemChangeMatchPattern = function(stemChange: StemChange,
+const doesStemChangeMatchPattern = function(stemChange: StemChange,
     pattern:ConjugationPattern) {
   if (stemChange.tense === pattern.tense) {
-    var stemNoHyphen = stemChange.stem.substring(0, stemChange.stem.length - 1)
-    var infinitive = stemChange.infinitive
+    const stemNoHyphen = stemChange.stem.substring(0, stemChange.stem.length - 1)
+    const infinitive = stemChange.infinitive
     switch (pattern.kindOfVerb) {
       case "-ar verbs": return infinitive.endsWith('ar')
       case "-er verbs": return infinitive.endsWith('er')
@@ -115,37 +115,33 @@ var doesStemChangeMatchPattern = function(stemChange: StemChange,
   }
 }
 
-var lookupByL2 = function(l2:string) : Array<VerbPair> {
-  var verbPairs = []
+const lookupByL2 = function(l2:string) : Array<VerbPair> {
+  const verbPairs = []
 
-  var conjugations = idiosyncratic_verb_conjugation_table.lookupByL2(l2)
-  for (var i = 0; i < conjugations.length; i++) {
-    var conjugation = conjugations[i]
-    var infinitivePair = only(infinitive_pair_table.lookupByL2(conjugation.infinitive))
+  const conjugations = idiosyncratic_verb_conjugation_table.lookupByL2(l2)
+  for (const conjugation of conjugations) {
+    const infinitivePair =
+      only(infinitive_pair_table.lookupByL2(conjugation.infinitive))
     verbPairs.push(new VerbPairIdiosyncratic(conjugation, infinitivePair))
   }
 
-  var patterns = conjugation_pattern_table.lookupByL2(l2)
-  var stemChanges = stem_change_table.lookupByL2Prefix(l2)
-  for (var i = 0; i < patterns.length; i++) {
-    var pattern = patterns[i]
-
-    var infinitives
+  const patterns = conjugation_pattern_table.lookupByL2(l2)
+  const stemChanges = stem_change_table.lookupByL2Prefix(l2)
+  for (const pattern of patterns) {
+    let infinitives
     if (stemChanges.length === 0) {
       infinitives = guessInfinitiveFromPattern(l2, pattern)
     } else if (stemChanges.length === 1) {
-      var stemChange = stemChanges[0]
+      const stemChange = stemChanges[0]
       infinitives = doesStemChangeMatchPattern(stemChange, pattern) ?
         [stemChange.infinitive] : []
     } else {
       throw new Error("Too many stem changes match '" + l2 + "' ")
     }
 
-    for (var j = 0; j < infinitives.length; j++) { // infinitives might be []
-      var infinitive = infinitives[j]
-      var infinitivePairs = infinitive_pair_table.lookupByL2(infinitive) // maybe []
-      for (var k = 0; k < infinitivePairs.length; k++) {
-        var infinitivePair = infinitivePairs[k]
+    for (const infinitive of infinitives) { // infinitives might be []
+      const infinitivePairs = infinitive_pair_table.lookupByL2(infinitive) // maybe []
+      for (const infinitivePair of infinitivePairs) {
         verbPairs.push(new VerbPairRegular(pattern, infinitivePair))
       }
     }

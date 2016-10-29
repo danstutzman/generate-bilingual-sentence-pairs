@@ -25,7 +25,7 @@ class IdiosyncraticVerbConjugation {
   }
 }
 
-var table = [
+const table = [
   new IdiosyncraticVerbConjugation("ser",     "pres", 1, 1, "soy"),
   new IdiosyncraticVerbConjugation("ser",     "pres", 2, 1, "eres"),
   new IdiosyncraticVerbConjugation("ser",     "pres", 3, 1, "es"),
@@ -77,14 +77,13 @@ var table = [
   new IdiosyncraticVerbConjugation("enviar",  "pres", 1, 2, "envían"),
 ]
 
-var tableByL2 : { [l2:string] : IdiosyncraticVerbConjugation|void } = {}
-for (var i = 0; i < table.length; i++) {
-  var conjugation = table[i]
+const tableByL2 : { [l2:string] : IdiosyncraticVerbConjugation|void } = {}
+for (const conjugation of table) {
   tableByL2[conjugation.l2] = conjugation
 }
  
-var lookupByL2 = function(l2:string) : Array<IdiosyncraticVerbConjugation> {
-  var conjugation = tableByL2[l2]
+const lookupByL2 = function(l2:string) : Array<IdiosyncraticVerbConjugation> {
+  const conjugation = tableByL2[l2]
   return (conjugation !== undefined) ? [conjugation] : []
 }
 
