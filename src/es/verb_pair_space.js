@@ -86,13 +86,17 @@ const guessInfinitiveFromPattern = function(l2:string, pattern:ConjugationPatter
   }
   const base = l2.substring(0, l2.length - suffix.length)
 
-  switch (pattern.kindOfVerb) {
-    case "-ar verbs": return [base + "ar"]
-    case "-er verbs": return [base + "er"]
-    case "-ir verbs": return [base + "ir"]
-    case "-er and -ir verbs": return [base + "er", base + "ir"]
-    case "stem change pret": return []
-    default: throw new Error("Unknown kindOfVerb " + pattern.kindOfVerb)
+  if (base === '') {
+    return [] // don't guess the infinitive 'ir', since it's irregular
+  } else {
+    switch (pattern.kindOfVerb) {
+      case "-ar verbs": return [base + "ar"]
+      case "-er verbs": return [base + "er"]
+      case "-ir verbs": return [base + "ir"]
+      case "-er and -ir verbs": return [base + "er", base + "ir"]
+      case "stem change pret": return []
+      default: throw new Error("Unknown kindOfVerb " + pattern.kindOfVerb)
+    }
   }
 }
 
