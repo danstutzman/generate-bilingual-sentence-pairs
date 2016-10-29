@@ -2,6 +2,7 @@
 const fs              = require('fs')
 const readline        = require('readline')
 const verb_pair_space = require('./verb_pair_space')
+const sprintf         = require('sprintf-js').sprintf
 
 const readFromStdin = function(done: (words: Array<string>) => void) {
   const reader = readline.createInterface({
@@ -34,20 +35,14 @@ const askQuestion = function(reader:any, l2Words:Array<string>, numWord:number) 
   let l2 = l2Words[numWord]
   const verbPairs = verb_pair_space.lookupByL2(l2)
 
-  let verbPair
-  if (verbPairs.length === 0) {
-    return askQuestion(reader, l2Words, numWord + 1)
-  } else if (verbPairs.length === 1) {
-    verbPair = verbPairs[0]
-  } else {
-    throw new Error("Too many verbPairs for " + l2)
-  }
-
-  if (answers[l2] !== undefined) {
+  if (verbPairs.length === 0 || answers[l2] !== undefined) {
     return askQuestion(reader, l2Words, numWord + 1)
   }
+  const l1:string = verbPairs.map(function(verbPair) {
+    return verbPair.l1()
+  }).join(' or ')
 
-  const question = "Please translate the following:\n  " + verbPair.l1() + "\n> "
+  const question = "Please translate the following:\n  " + l1 + "\n> "
   reader.question(question, function(answer:string) {
     if (answer === l2) {
       console.log('Correct!')
@@ -59,6 +54,7 @@ const askQuestion = function(reader:any, l2Words:Array<string>, numWord:number) 
   })
 }
 
+/*
 readFromStdin(function(l2Words: Array<string>) {
   l2Words.reverse()
 
@@ -69,3 +65,13 @@ readFromStdin(function(l2Words: Array<string>) {
 
   askQuestion(reader, l2Words, 0)
 })
+*/
+
+for (const expectedL2 in answers) {
+  const givenL2 = answers[expectedL2]
+  const verbPairs = verb_pair_space.lookupByL2(expectedL2)
+  if (expectedL2 !== givenL2) {
+    console.log(sprintf('%20s -> %-20s not %-20s',
+      verbPairs[0].l1(), expectedL2, givenL2))
+  }
+}

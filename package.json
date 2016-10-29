@@ -19,5 +19,8 @@
     "flowtype": "^2.0.0",
     "jshint": "^2.9.4",
     "mocha": "^3.1.2"
+  },
+  "dependencies": {
+    "sprintf-js": "^1.0.3"
   }
 }
