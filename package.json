@@ -17,6 +17,7 @@
     "flow-bin": "^0.33.0",
     "flow-remove-types": "^1.0.4",
     "flowtype": "^2.0.0",
+    "jshint": "^2.9.4",
     "mocha": "^3.1.2"
   }
 }
