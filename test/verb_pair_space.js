@@ -15,29 +15,25 @@ suite('verb_pair_space', function() {
       const verbPairs = verb_pair_space.lookupByL2("tenemos")
       assert.equal(verbPairs.length, 1)
       const v = verbPairs[0]
-      assert.equal(v.l1(), "have")
-      assert.deepEqual(v.tense_person_number(), ["pres", 1, 2])
+      assert.equal(v.l1(), "(we) have")
     })
     test('regular', function() {
       const verbPairs = verb_pair_space.lookupByL2("tengo")
       assert.equal(verbPairs.length, 1)
       const v = verbPairs[0]
-      assert.equal(v.l1(), "have")
-      assert.deepEqual(v.tense_person_number(), ["pres", 1, 1])
+      assert.equal(v.l1(), "(I) have")
     })
     test('stem change pret', function() {
       const verbPairs = verb_pair_space.lookupByL2("tuve")
       assert.equal(verbPairs.length, 1)
       const v = verbPairs[0]
-      assert.equal(v.l1(), "have")
-      assert.deepEqual(v.tense_person_number(), ["pret", 1, 1])
+      assert.equal(v.l1(), "(I) had")
     })
     test('stem change pres', function() {
       const verbPairs = verb_pair_space.lookupByL2("tiene")
       assert.equal(verbPairs.length, 1)
       const v = verbPairs[0]
-      assert.equal(v.l1(), "have")
-      assert.deepEqual(v.tense_person_number(), ["pres", 3, 1])
+      assert.equal(v.l1(), "(he/she/it) have")
     })
   })
 })
