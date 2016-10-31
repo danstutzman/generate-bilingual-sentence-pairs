@@ -13,7 +13,8 @@ node_modules/.bin/jshint `find build -name '*.js'`
 #PYTHONIOENCODING=utf_8 python ppm.py | grep V > $OLD_PWD/popular_verbs.txt
 #pushd
 
-echo '-------'
-node build/src/es/quiz_popular_verbs.js
-
+#echo '-------'
+#node build/src/es/quiz_popular_verbs.js
 #node_modules/.bin/mocha build/test
+node build/src/generate.js
+
