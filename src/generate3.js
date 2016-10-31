@@ -12,9 +12,17 @@ class NounPhrase {
     this.per = per
     this.num = num
   }
+  convertToPronouns(antecedents: Antecedents): NounPhrase {
+    throw new Error("Need overridden by child")
+  }
   out(accusative:bool, possessive:bool): Array<string> {
     throw new Error("Need overridden by child")
   }
+}
+
+function convertToPronoun(object:NounPhrase, antecedents: Antecedents): NounPhrase {
+  if (antecedents.she === object) { return she }
+  else { return object }
 }
 
 class Noun extends NounPhrase {
@@ -25,6 +33,9 @@ class Noun extends NounPhrase {
     super(3, num)
     this.gen = gen
     this.name = name
+  }
+  convertToPronouns(antecedents: Antecedents): NounPhrase {
+    return convertToPronoun(this, antecedents)
   }
   out(accusative:bool, possessive:bool): Array<string> {
     return [this.name]
@@ -43,6 +54,9 @@ class Pronoun extends NounPhrase {
     this.nominative = nominative
     this.accusative = accusative
     this.possessive = possessive
+  }
+  convertToPronouns(antecedents: Antecedents): NounPhrase {
+    return this
   }
   out(accusative:bool, possessive:bool): Array<string> {
     if (possessive) { return [this.possessive] }
@@ -73,6 +87,11 @@ class DirectObjectVerbPhrase {
     this.verb   = verb
     this.object = object
   }
+  convertToPronouns(antecedents: Antecedents): DirectObjectVerbPhrase {
+    const agent  = this.agent.convertToPronouns(antecedents)
+    const object = this.object.convertToPronouns(antecedents)
+    return new DirectObjectVerbPhrase(agent, this.verb, object)
+  }
   out(): Array<string> {
     return this.agent.out(false, false)
       .concat(this.verb.out(this.agent.per, this.agent.num))
@@ -89,6 +108,10 @@ class Owned extends NounPhrase {
     this.owner  = owner
     this.object = object
   }
+  convertToPronouns(antecedents: Antecedents): NounPhrase {
+    const owner = this.owner.convertToPronouns(antecedents)
+    return new Owned(owner, this.object)
+  }
   out(): Array<string> {
     return this.owner.out(true, true)
       .concat(this.object.out(false, false))
@@ -99,10 +122,25 @@ const me = new Pronoun(1, 1, 'I', 'me', 'my')
 const have = new Verb('has', 'have')
 const wallet = new Noun(1, 'N', 'wallet')
 const maria = new Noun(1, 'F', 'Maria')
+const she = new Pronoun(3, 1, 'she', 'her', 'her')
 const stories = [
   new DirectObjectVerbPhrase(me,    have, new Owned(me,    wallet)),
   new DirectObjectVerbPhrase(maria, have, new Owned(maria, wallet)),
+  new DirectObjectVerbPhrase(me,    have, me),
+  new DirectObjectVerbPhrase(maria, have, maria),
 ]
+
+type Antecedents = {
+  she: NounPhrase | void,
+}
+let antecedents: Antecedents = {
+  she: maria,
+}
+const newStories = []
 for (const story of stories) {
-  console.log(story.out())
+  newStories.push(story.convertToPronouns(antecedents))
+}
+
+for (const story of newStories) {
+  console.log(story.out(antecedents))
 }
