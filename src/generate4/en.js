@@ -56,11 +56,11 @@ class EnVerbPhrase {
   agent:        EnObject
   verbSingular: string
   verbPlural:   string
-  indirectObj:  EnObject
+  indirectObj:  EnObject | null
   directObj:    EnObject
 
   constructor(agent:EnObject, verbSingular:string, verbPlural:string,
-      indirectObj:EnObject, directObj:EnObject) {
+      indirectObj:EnObject|null, directObj:EnObject) {
     this.agent        = agent
     this.verbSingular = verbSingular
     this.verbPlural   = verbPlural
@@ -74,12 +74,13 @@ class EnVerbPhrase {
       [this.agent.name, 3, this.agent.preferredPronoun === 'we/they' ? 2 : 1],
       true)
 
-    const indirectObj: Array<string> = (this.indirectObj === this.agent) ?
-      pronouns.ifMatch(this.indirectObj, ['myself'], ['yourself'], ['himself'],
-        ['herself'], ['itself'], ['ourselves'], ['themselves'],
-        this.indirectObj.name, true) :
-      pronouns.ifMatch(this.indirectObj, ['me'], ['you'], ['him'],
-        ['her'], ['it'], ['us'], ['them'], this.indirectObj.name, true)
+    const indirectObj: Array<string> = (this.indirectObj === null) ? [] :
+      (this.indirectObj === this.agent) ?
+        pronouns.ifMatch(this.indirectObj, ['myself'], ['yourself'], ['himself'],
+          ['herself'], ['itself'], ['ourselves'], ['themselves'],
+          this.indirectObj.name, true) :
+        pronouns.ifMatch(this.indirectObj, ['me'], ['you'], ['him'],
+          ['her'], ['it'], ['us'], ['them'], this.indirectObj.name, true)
 
     const directObj: Array<string> = (this.directObj === this.agent) ?
       pronouns.ifMatch(this.directObj, ['myself'], ['yourself'], ['himself'],

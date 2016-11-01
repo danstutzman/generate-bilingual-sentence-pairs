@@ -5,10 +5,10 @@ const { EsObject, EsPronouns, EsVerb, EsVerbPhrase } = require('./es')
 class UniVP3 {
   agent:        string
   enInfinitive: string
-  receiver:     string
+  receiver:     string | null
   object:       string
 
-  constructor(agent:string, enInfinitive:string, receiver:string, object:string) {
+  constructor(agent:string, enInfinitive:string, receiver:string|null, object:string) {
     this.agent        = agent
     this.enInfinitive = enInfinitive
     this.receiver     = receiver
@@ -27,13 +27,18 @@ class UniVP3 {
     return new EnVerbPhrase(
       lookup(this.agent),
       verbSingular, verbPlural,
-      lookup(this.receiver),
+      (this.receiver === null) ? null : lookup(this.receiver),
       lookup(this.object))
   }
   toEs(esObjectByName: {[name: string]: EsObject}): EsVerbPhrase {
     const verb = {
-      give: new EsVerb('doy', 'das', 'da', 'damos', 'dan'),
+      eat:  new EsVerb( 'como',  'comes',  'come', 'comemos',  'comen'),
+      give: new EsVerb('  doy',    'das',    'da',   'damos',    'dan'),
+      have: new EsVerb('tengo', 'tienes', 'tiene', 'tenemos', 'tienen'),
     }[this.enInfinitive]
+    if (verb === undefined) {
+      throw new Error("Can't find EsVerb for " + this.enInfinitive)
+    }
 
     const lookup = function(key:string): EsObject {
       const val = esObjectByName[key]
@@ -44,7 +49,7 @@ class UniVP3 {
     return new EsVerbPhrase(
       lookup(this.agent),
       verb,
-      lookup(this.receiver),
+      (this.receiver === null) ? null : lookup(this.receiver),
       lookup(this.object))
   }
 }

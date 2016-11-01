@@ -19,37 +19,32 @@ class EsObject {
 }
 
 class EsPronouns {
-  yo:    EsObject|void
-  tu:    EsObject|void
-  el:    EsObject|void
-  ella:  EsObject|void
-  _3s:   EsObject|void
-  _3p:   EsObject|void
+  _11:    EsObject|void
+  _21:    EsObject|void
+  _31:    EsObject|void
+  _12:   EsObject|void
+  _32:   EsObject|void
 
   constructor(args:{|
-    yo    ?:EsObject,
-    tu    ?:EsObject,
-    el    ?:EsObject,
-    ella  ?:EsObject,
-    tu    ?:EsObject,
-    _3s   ?:EsObject,
-    _3p   ?:EsObject,
+    _11 ?:EsObject,
+    _21 ?:EsObject,
+    _31 ?:EsObject,
+    _12 ?:EsObject,
+    _32 ?:EsObject,
   |}) {
-    this.yo   = args.yo
-    this.tu   = args.tu
-    this.el   = args.el
-    this.ella = args.ella
-    this._3s  = args._3s
-    this._3p  = args._3p
+    this._11  = args._11
+    this._21  = args._21
+    this._31  = args._31
+    this._12  = args._12
+    this._32  = args._32
   }
-  ifMatch<T>(object:EsObject, yo:T, tu:T, el:T, ella:T, _3s:T, _3p:T,
-      otherwise:T, shouldUpdateOtherwise:bool): T {
-    if (object === this.yo)        { return yo }
-    else if (object === this.tu)   { return tu }
-    else if (object === this.el)   { return el }
-    else if (object === this.ella) { return ella }
-    else if (object === this._3s)  { return _3s }
-    else if (object === this._3p)  { return _3p }
+  ifMatch<T>(object:EsObject, _11:T, _21:T, _31:T, _12:T, _32:T, otherwise:T,
+      shouldUpdateOtherwise:bool): T {
+    if (object === this._11)      { return _11 }
+    else if (object === this._21) { return _21 }
+    else if (object === this._31) { return _31 }
+    else if (object === this._12) { return _12 }
+    else if (object === this._32) { return _32 }
     else {
       if (shouldUpdateOtherwise) {
         this.update(object)
@@ -59,10 +54,16 @@ class EsPronouns {
   }
   update(newObject:EsObject) {
     switch (newObject.preferredPronoun) {
-      case "yo/él":   this._3s = this.el = newObject; break
-      case "yo/ella": this._3s = this.ella = newObject; break
-      case "nosotros/ellos": break
-      case "nosotras/ellas": break
+      case "yo/él": case "yo/ella":
+        if (this._31 === undefined) {
+          this._31 = newObject
+        }
+        break
+      case "nosotros/ellos": case "nosotras/ellas":
+        if (this._32 === undefined) {
+          this._32 = newObject
+        }
+        break
       default: throw new Error("Can't update pronouns with " +
         JSON.stringify(newObject))
     }
@@ -96,10 +97,11 @@ class EsVerb {
 class EsVerbPhrase {
   agent:       EsObject
   verb:        EsVerb
-  indirectObj: EsObject
+  indirectObj: EsObject | null
   directObj:   EsObject
 
-  constructor(agent:EsObject, verb:EsVerb, indirectObj:EsObject, directObj:EsObject) {
+  constructor(agent:EsObject, verb:EsVerb, indirectObj:EsObject|null,
+      directObj:EsObject) {
     this.agent       = agent
     this.verb        = verb
     this.indirectObj = indirectObj
@@ -107,18 +109,18 @@ class EsVerbPhrase {
   }
   toWords(pronouns:EsPronouns): Array<string> {
     const [agent, agentPer, agentNum]: [Array<string>, Per, Num] = pronouns.ifMatch(
-      this.agent, [[], 1, 1], [[], 2, 1], [['él'], 3, 1], [['ella'], 3, 1],
-      [[], 3, 1], [[], 3, 2],
+      this.agent, [[], 1, 1], [[], 2, 1], [[], 3, 1], [[], 1, 2], [[], 3, 2],
       [this.agent.name, 3, this.agent.preferredPronoun.startsWith('n') ? 2 : 1],
       true)
 
-    let indirectObjPronoun = pronouns.ifMatch(this.indirectObj,
-      ['me'], ['te'], [], [], ['le'], ['les'], [], false)
-
-// TODO: add nos and los
+    let indirectObjPronoun = (this.indirectObj === null) ? [] :
+      pronouns.ifMatch(this.indirectObj,
+        ['me'], ['te'], ['le'], ['nos'], ['les'], [], false)
 
     const directObjPronoun = pronouns.ifMatch(this.directObj,
-      ['me'], ['te'], ['lo'], ['la'], [], ['los'], [], false)
+      ['me'], ['te'], [this.directObj.preferredPronoun === 'yo/él' ? 'lo' : 'la'],
+      ['nos'], [this.directObj.preferredPronoun == 'nosotros/ellos' ? 'los' : 'las'],
+      [], false)
 
     if (['le', 'les'].indexOf(indirectObjPronoun) >= 0 &&
         ['lo', 'la', 'los', 'las'].indexOf(directObjPronoun) >= 0) {
@@ -127,12 +129,12 @@ class EsVerbPhrase {
 
     const verb = this.verb.conjugate(agentPer, agentNum)
 
-    const indirectObj = pronouns.ifMatch(this.indirectObj,
-      ['a', 'mí'], ['a', 'ti'], ['a', 'él'], ['a', 'ella'], [], [],
-      ['a'].concat(this.indirectObj.name), true)
+    const indirectObj = (this.indirectObj === null) ? [] :
+      pronouns.ifMatch(this.indirectObj,
+        [], [], [], [], [], ['a'].concat(this.indirectObj.name), true)
 
     const directObj = pronouns.ifMatch(this.directObj,
-      ['a', 'mí'], ['a', 'ti'], ['a', 'él'], ['a', 'ella'], [], [],
+      [], [], [], [], [],
       (this.directObj.needsPersonalA ? ['a'] : []).concat(this.directObj.name),
       true)
 
