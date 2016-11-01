@@ -2,8 +2,8 @@
 const assert = require('assert')
 const { setup, suite, test } = require('mocha')
 
-const generate4 = require('../src/generate4')
-const { EnObject, EnPronouns, EsObject, EsPronouns, UniVP3 } = generate4
+const { EnObject, EnPronouns, EsObject, EsPronouns, UniVP3 } =
+  require('../src/generate4/uni')
 
 suite('generate4', function() {
   suite('english', function() {
