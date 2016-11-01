@@ -32,9 +32,13 @@ class UniVP3 {
   }
   toEs(esObjectByName: {[name: string]: EsObject}): EsVerbPhrase {
     const verb = {
+      call: new EsVerb('llamo', 'llamas', 'llama', 'llamamos','llaman'),
       eat:  new EsVerb( 'como',  'comes',  'come', 'comemos',  'comen'),
       give: new EsVerb('  doy',    'das',    'da',   'damos',    'dan'),
       have: new EsVerb('tengo', 'tienes', 'tiene', 'tenemos', 'tienen'),
+      love: new EsVerb(  'amo',   'amas',   'ama',  'amamos',   'aman'),
+      see:  new EsVerb(  'veo',    'ves',    've',   'vemos',    'ven'),
+      know_person: new EsVerb('conozco', 'conoces', 'concoce', 'conocemos', 'conocen'),
     }[this.enInfinitive]
     if (verb === undefined) {
       throw new Error("Can't find EsVerb for " + this.enInfinitive)
