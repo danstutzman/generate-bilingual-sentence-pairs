@@ -18,4 +18,5 @@ node_modules/.bin/jshint `find build -name '*.js'`
 #node_modules/.bin/mocha build/test
 #node build/src/generate.js
 #node build/src/generate2.js
-node build/src/generate3.js
+#node build/src/generate3.js
+node build/src/generate4.js
