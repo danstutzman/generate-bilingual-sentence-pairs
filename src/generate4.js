@@ -131,21 +131,33 @@ class UniVP3 {
     const verbSingular = {
       give: 'gives'
     }[verbPlural]
+    const lookup = function(key:string): EnObject {
+      const val = enObjectByName[key]
+      if (val === undefined) { throw new Error("Can't find object for key " + key) }
+      return val
+    }
     return new EnVerbPhrase(
-      enObjectByName[this.agent],
+      lookup(this.agent),
       verbSingular, verbPlural,
-      enObjectByName[this.receiver],
-      enObjectByName[this.object])
+      lookup(this.receiver),
+      lookup(this.object))
   }
   toEs(esObjectByName: {[name: string]: EsObject}): EsVerbPhrase {
     const verb = {
       give: new EsVerb('doy', 'das', 'da', 'damos', 'dan'),
     }[this.enInfinitive]
+
+    const lookup = function(key:string): EsObject {
+      const val = esObjectByName[key]
+      if (val === undefined) { throw new Error("Can't find object for key " + key) }
+      return val
+    }
+
     return new EsVerbPhrase(
-      esObjectByName[this.agent],
+      lookup(this.agent),
       verb,
-      esObjectByName[this.receiver],
-      esObjectByName[this.object])
+      lookup(this.receiver),
+      lookup(this.object))
   }
 }
 
