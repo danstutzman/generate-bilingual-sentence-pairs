@@ -24,17 +24,17 @@ suite('generate4', function() {
     const Dan      = new EsObject(['Dan'], 'yo/él', true)
     const Friend   = new EsObject(['un', 'amigo'], 'yo/él', true)
     const Friends  = new EsObject(['amigos'], 'nosotros/ellos', true)
-    const Gifts    = new EsObject(['regalos'], 'nosotros/ellos', false)
     const Libro    = new EsObject(['el', 'libro'], 'yo/él', false)
     const Libros   = new EsObject(['los', 'libros'], 'nosotros/ellos', false)
     const Maria    = new EsObject(['María'], 'yo/ella', true)
     const Pluma    = new EsObject(['la', 'pluma'], 'yo/ella', false)
+    const Regalo   = new EsObject(['un', 'regalo'], 'yo/él', false)
     const Revistas = new EsObject(['las', 'revistas'], 'yo/ella', false)
     const Robot    = new EsObject(['el', 'robot'], 'yo/él', false)
     const Robots   = new EsObject(['los', 'robots'], 'nosotros/ellos', false)
     const Sopa     = new EsObject(['la', 'sopa'], 'yo/ella', false)
-    const objects = { Dan, Friend, Friends, Gifts, Libro, Libros, Maria, Pluma,
-      Revistas, Robot, Robots, Sopa }
+    const objects = { Dan, Friend, Friends, Libro, Libros, Maria, Pluma,
+      Regalo, Revistas, Robot, Robots, Sopa }
 
     for (const [agent, verb, indirectObj, directObj, pronounsInit, expected] of [
       ['Dan', 'have', null, 'Pluma', {}, 'Dan tiene la pluma'],
@@ -42,7 +42,6 @@ suite('generate4', function() {
       ['Dan', 'have', null, 'Libro', { lo: Libro }, 'Dan lo tiene'],
       ['Dan', 'have', null, 'Libros', { los: Libros }, 'Dan los tiene'],
       ['Dan', 'eat', null, 'Sopa', { _11: Dan, la: Sopa }, 'la como'],
-//    ['Friend', 'give', 'Dan', 'Gifts', { _31: Friend}, 'da a Dan regalos'],
       ['Dan', 'have', null, 'Revistas', { _31:Dan, las:Revistas }, 'las tiene'],
       ['Dan', 'know_person', null, 'Maria', { _11:Dan, _21:Maria }, 'te conozco'],
       ['Maria', 'love', null, 'Dan', { ella:Maria, lo:Dan }, 'ella lo ama'],
@@ -52,6 +51,9 @@ suite('generate4', function() {
         'ellos nos llaman'],
       ['Robots', 'call', null, 'Libros', { _12:Robots, los:Libros },
         'los llamamos'],
+      ['Dan', 'give', 'Maria', 'Regalo', { _11: Maria }, 'Dan me da un regalo'],
+      ['Dan', 'give', 'Maria', 'Regalo', { _21: Maria }, 'Dan te da un regalo'],
+      ['Dan', 'give', 'Maria', 'Regalo', { le: Maria }, 'Dan le da un regalo'],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const vp = new UniVP3(agent, verb, indirectObj, directObj).toEs(objects)

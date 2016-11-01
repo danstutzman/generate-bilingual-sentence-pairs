@@ -19,19 +19,20 @@ class EsObject {
 }
 
 type EsPronounsInit<T> = {|
-  _11   ?:T,
-  _21   ?:T,
-  _31   ?:T,
-  el    ?:T,
-  ella  ?:T,
-  lo    ?:T,
-  la    ?:T,
-  _12   ?:T,
-  _32   ?:T,
-  ellos ?:T,
-  ellas ?:T,
-  los   ?:T,
-  las   ?:T,
+  _11   ?:T, // yo, me
+  _21   ?:T, // tú, te, ti
+  _31   ?:T, //                  individual
+  el    ?:T, // masculine person individual
+  ella  ?:T, // feminine  person individual
+  lo    ?:T, // masculine        individual
+  la    ?:T, // feminine         individual
+  le    ?:T, //           person individual
+  _12   ?:T, // nosostros, nos
+  _32   ?:T, //                  group
+  ellos ?:T, // masc/mixd person group
+  ellas ?:T, // feminine  person group
+  los   ?:T, // masc/mixd        group
+  las   ?:T, // feminine         group
 |}
 
 class EsPronouns {
@@ -42,6 +43,7 @@ class EsPronouns {
   ella:   Array<EsObject>
   lo:     Array<EsObject>
   la:     Array<EsObject>
+  le:     Array<EsObject>
   _12:    Array<EsObject>
   _32:    Array<EsObject>
   ellos:  Array<EsObject>
@@ -57,6 +59,7 @@ class EsPronouns {
     this.ella  = args.ella  ? [args.ella]  : []
     this.lo    = args.lo    ? [args.lo]    : []
     this.la    = args.la    ? [args.la]    : []
+    this.le    = args.le    ? [args.le]    : []
     this._12   = args._12   ? [args._12]   : []
     this._32   = args._32   ? [args._32]   : []
     this.ellos = args.ellos ? [args.ellos] : []
@@ -80,6 +83,8 @@ class EsPronouns {
       return args.lo
     } else if (args.la    && this.la.indexOf( object) != -1)   {
       return args.la
+    } else if (args.le    && this.le.indexOf( object) != -1)   {
+      return args.le
     } else if (args._12   && this._12.indexOf(object) != -1)  {
       return args._12
     } else if (args._32   && this._32.indexOf(object) != -1)  {
@@ -106,12 +111,16 @@ class EsPronouns {
         if (this.el  .indexOf(newObject) === -1 && newObject.isPerson) {
           this.el.push(newObject) }
         if (this.lo  .indexOf(newObject) === -1) { this.lo  .push(newObject) }
+        if (this.le  .indexOf(newObject) === -1 && newObject.isPerson) {
+          this.le.push(newObject) }
         break
       case "yo/ella":
         if (this._31 .indexOf(newObject) === -1) { this._31 .push(newObject) }
         if (this.ella.indexOf(newObject) === -1 && newObject.isPerson) {
           this.ella.push(newObject) }
         if (this.la  .indexOf(newObject) === -1) { this.la  .push(newObject) }
+        if (this.le  .indexOf(newObject) === -1 && newObject.isPerson) {
+          this.le.push(newObject) }
         break
       case "nosotros/ellos":
         if (this._32  .indexOf(newObject) === -1) { this._32 .push(newObject) }
@@ -209,6 +218,7 @@ class EsVerbPhrase {
       pronouns.ifMatch(this.indirectObj, {
         _11: [],
         _21: [],
+        le:  [],
       }, ['a'].concat(this.indirectObj.name), true)
 
     const directObj = pronouns.ifMatch(this.directObj, {
