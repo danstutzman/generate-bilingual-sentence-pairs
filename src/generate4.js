@@ -114,27 +114,36 @@ class EsPronouns {
   }
 }
 
-class UniSbGiveSbSth {
-  agent:    string
-  receiver: string
-  object:   string
+class UniVP3 {
+  agent:        string
+  enInfinitive: string
+  receiver:     string
+  object:       string
 
-  constructor(agent:string, receiver:string, object:string) {
-    this.agent    = agent
-    this.receiver = receiver
-    this.object   = object
+  constructor(agent:string, enInfinitive:string, receiver:string, object:string) {
+    this.agent        = agent
+    this.enInfinitive = enInfinitive
+    this.receiver     = receiver
+    this.object       = object
   }
   toEn(enObjectByName: {[name:string]: EnObject}): EnVerbPhrase {
+    const verbPlural = this.enInfinitive
+    const verbSingular = {
+      give: 'gives'
+    }[verbPlural]
     return new EnVerbPhrase(
       enObjectByName[this.agent],
-      'gives', 'give',
+      verbSingular, verbPlural,
       enObjectByName[this.receiver],
       enObjectByName[this.object])
   }
   toEs(esObjectByName: {[name: string]: EsObject}): EsVerbPhrase {
+    const verb = {
+      give: new EsVerb('doy', 'das', 'da', 'damos', 'dan'),
+    }[this.enInfinitive]
     return new EsVerbPhrase(
       esObjectByName[this.agent],
-      'doy', 'das', 'da', 'damos', 'dan',
+      verb,
       esObjectByName[this.receiver],
       esObjectByName[this.object])
   }
@@ -183,26 +192,41 @@ class EnVerbPhrase {
   }
 }
 
+class EsVerb {
+  _11: string
+  _21: string
+  _31: string
+  _12: string
+  _32: string
+
+  constructor(_11: string, _21: string, _31: string, _12: string, _32: string) {
+    this._11 = _11
+    this._21 = _21
+    this._31 = _31
+    this._12 = _12
+    this._32 = _32
+  }
+  conjugate(per:Per, num:Num) {
+    if      (per === 1 && num === 1) { return this._11 }
+    else if (per === 2 && num === 1) { return this._21 }
+    else if (per === 3 && num === 1) { return this._31 }
+    else if (per === 1 && num === 2) { return this._12 }
+    else if (per === 3 && num === 2) { return this._32 }
+    else { throw new Error("Can't conjugate per=" + per + " num=" + num) }
+  }
+}
+
 class EsVerbPhrase {
-  agent: EsObject
-  verb11: string
-  verb21: string
-  verb31: string
-  verb12: string
-  verb32: string
+  agent:       EsObject
+  verb:        EsVerb
   indirectObj: EsObject
   directObj:   EsObject
 
-  constructor(agent: EsObject, verb11: string, verb21: string, verb31: string,
-      verb12: string, verb32: string, indirectObj: EsObject, directObj: EsObject) {
-    this.agent = agent
-    this.verb11 = verb11
-    this.verb21 = verb21
-    this.verb31 = verb31
-    this.verb12 = verb12
-    this.verb32 = verb32
+  constructor(agent:EsObject, verb:EsVerb, indirectObj:EsObject, directObj:EsObject) {
+    this.agent       = agent
+    this.verb        = verb
     this.indirectObj = indirectObj
-    this.directObj = directObj
+    this.directObj   = directObj
   }
   toWords(pronouns:EsPronouns): Array<string> {
     const [agent, agentPer, agentNum]: [Array<string>, Per, Num] = pronouns.ifMatch(
@@ -224,12 +248,7 @@ class EsVerbPhrase {
       indirectObjPronoun = 'se'
     }
 
-    const verb = (agentPer === 1 && agentNum === 1) ? this.verb11 :
-                 (agentPer === 2 && agentNum === 1) ? this.verb21 :
-                 (agentPer === 3 && agentNum === 1) ? this.verb31 :
-                 (agentPer === 1 && agentNum === 2) ? this.verb12 :
-                 (agentPer === 3 && agentNum === 2) ? this.verb32 :
-                 'dar'
+    const verb = this.verb.conjugate(agentPer, agentNum)
 
     const indirectObj = pronouns.ifMatch(this.indirectObj,
       ['a', 'mí'], ['a', 'ti'], ['a', 'él'], ['a', 'ella'], [], [],
@@ -252,4 +271,4 @@ class EsVerbPhrase {
 type Per = 1 | 2 | 3
 type Num = 1 | 2
 
-module.exports = { EnObject, EnPronouns, EsObject, EsPronouns, UniSbGiveSbSth }
+module.exports = { EnObject, EnPronouns, EsObject, EsPronouns, UniVP3 }
