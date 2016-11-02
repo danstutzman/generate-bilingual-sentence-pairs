@@ -34,7 +34,7 @@ class UniVP3 {
     const verb = {
       call: new EsVerb('llamo', 'llamas', 'llama', 'llamamos','llaman'),
       eat:  new EsVerb( 'como',  'comes',  'come', 'comemos',  'comen'),
-      give: new EsVerb('  doy',    'das',    'da',   'damos',    'dan'),
+      give: new EsVerb(  'doy',    'das',    'da',   'damos',    'dan'),
       have: new EsVerb('tengo', 'tienes', 'tiene', 'tenemos', 'tienen'),
       love: new EsVerb(  'amo',   'amas',   'ama',  'amamos',   'aman'),
       see:  new EsVerb(  'veo',    'ves',    've',   'vemos',    'ven'),
