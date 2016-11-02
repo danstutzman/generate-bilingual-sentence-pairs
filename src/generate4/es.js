@@ -51,51 +51,51 @@ class EsPronouns {
   los:    Array<EsObject>
   las:    Array<EsObject>
 
-  constructor(args:EsPronounsInit<EsObject>) {
-    this._11   = args._11   ? [args._11]   : []
-    this._21   = args._21   ? [args._21]   : []
-    this._31   = args._31   ? [args._31]   : []
-    this.el    = args.el    ? [args.el]    : []
-    this.ella  = args.ella  ? [args.ella]  : []
-    this.lo    = args.lo    ? [args.lo]    : []
-    this.la    = args.la    ? [args.la]    : []
-    this.le    = args.le    ? [args.le]    : []
-    this._12   = args._12   ? [args._12]   : []
-    this._32   = args._32   ? [args._32]   : []
-    this.ellos = args.ellos ? [args.ellos] : []
-    this.ellas = args.ellas ? [args.ellas] : []
-    this.los   = args.los   ? [args.los]   : []
-    this.las   = args.las   ? [args.las]   : []
+  constructor(args:{| _11?:EsObject, _21?:EsObject, _12?:EsObject |}) {
+    this._11 = args._11 ? [args._11] : []
+    this._21 = args._21 ? [args._21] : []
+    this._31 = []
+    this.el = []
+    this.ella = []
+    this.lo = []
+    this.la = []
+    this.le = []
+    this._12 = args._12 ? [args._12] : []
+    this._32 = []
+    this.ellos = []
+    this.ellas = []
+    this.los = []
+    this.las = []
   }
   ifMatch<T>(object:EsObject, args:EsPronounsInit<T>, otherwise:T,
       shouldUpdateOtherwise:bool): T {
-    if        (args._11   && this._11.indexOf(object) != -1)  {
+    if        (args._11   && this._11.length===1 && this._11[0]===object)  {
       return args._11
-    } else if (args._21   && this._21.indexOf(object) != -1)  {
+    } else if (args._21   && this._21.length===1 && this._21[0]===object)  {
       return args._21
-    } else if (args._31   && this._31.indexOf(object) != -1)  {
+    } else if (args._31   && this._31.length===1 && this._31[0]===object)  {
       return args._31
-    } else if (args.el    && this.el.indexOf( object) != -1)   {
+    } else if (args.el    && this.el.length===1 && this.el[0]===object)   {
       return args.el
-    } else if (args.ella  && this.ella.indexOf(object) != -1) {
+    } else if (args.ella  && this.ella.length===1 && this.ella[0]===object) {
       return args.ella
-    } else if (args.lo    && this.lo.indexOf( object) != -1)   {
+    } else if (args.lo    && this.lo.length===1 && this.lo[0]===object)   {
       return args.lo
-    } else if (args.la    && this.la.indexOf( object) != -1)   {
+    } else if (args.la    && this.la.length===1 && this.la[0]===object)   {
       return args.la
-    } else if (args.le    && this.le.indexOf( object) != -1)   {
+    } else if (args.le    && this.le.length===1 && this.le[0]===object)   {
       return args.le
-    } else if (args._12   && this._12.indexOf(object) != -1)  {
+    } else if (args._12   && this._12.length===1 && this._12[0]===object)  {
       return args._12
-    } else if (args._32   && this._32.indexOf(object) != -1)  {
+    } else if (args._32   && this._32.length===1 && this._32[0]===object)  {
       return args._32
-    } else if (args.ellos && this.ellos.indexOf( object) != -1)   {
+    } else if (args.ellos && this.ellos.length===1 && this.ellos[0]===object)   {
       return args.ellos
-    } else if (args.ellas && this.ellas.indexOf( object) != -1)   {
+    } else if (args.ellas && this.ellas.length===1 && this.ellas[0]===object)   {
       return args.ellas
-    } else if (args.los   && this.los.indexOf( object) != -1)   {
+    } else if (args.los   && this.los.length===1 && this.los[0]===object)   {
       return args.los
-    } else if (args.las   && this.las.indexOf( object) != -1)   {
+    } else if (args.las   && this.las.length===1 && this.las[0]===object)   {
       return args.las
     } else {
       if (shouldUpdateOtherwise) {
@@ -188,7 +188,7 @@ class EsVerbPhrase {
         ellos: [['ellos'], 3, 2],
         ellas: [['ellas'], 3, 2],
       }, [this.agent.name, 3, this.agent.preferredPronoun.startsWith('n') ? 2 : 1],
-      true)
+      false)
 
     let indirectObjPronoun = (this.indirectObj === null) ? [] :
       pronouns.ifMatch(this.indirectObj, {
@@ -222,16 +222,16 @@ class EsVerbPhrase {
       }, ['a'].concat(this.indirectObj.name), true)
 
     const directObj = pronouns.ifMatch(this.directObj, {
-      _11:  [],
-      _21:  [],
+      _11:[], _21:[], lo:[], la:[], los:[], las:[], _12:[],
+    }, pronouns.ifMatch(this.directObj, {
       el:   ['a', 'él'],
       ella: ['a', 'ella'],
-      lo:   [],
-      la:   [],
-      los:  [],
-      las:  [],
-      _12:  [],
-    }, (this.directObj.needsPersonalA ? ['a'] : []).concat(this.directObj.name), true)
+    }, (this.directObj.needsPersonalA ? ['a'] : []).concat(this.directObj.name),
+       false), true)
+
+    if (agentNum === 3) {
+      pronouns.update(this.agent)
+    }
 
     return agent
       .concat(indirectObjPronoun)
