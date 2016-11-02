@@ -33,6 +33,7 @@ type EsPronounsInit<T> = {|
   ellas ?:T, // feminine  person group
   los   ?:T, // masc/mixd        group
   las   ?:T, // feminine         group
+  les   ?:T, //           person group
 |}
 
 class EsPronouns {
@@ -50,6 +51,7 @@ class EsPronouns {
   ellas:  Array<EsObject>
   los:    Array<EsObject>
   las:    Array<EsObject>
+  les:    Array<EsObject>
 
   constructor(args:{| _11?:EsObject, _21?:EsObject, _12?:EsObject |}) {
     this._11 = args._11 ? [args._11] : []
@@ -66,6 +68,7 @@ class EsPronouns {
     this.ellas = []
     this.los = []
     this.las = []
+    this.les = []
   }
   ifMatch<T>(object:EsObject, args:EsPronounsInit<T>, otherwise:T,
       shouldUpdateOtherwise:bool): T {
@@ -97,6 +100,8 @@ class EsPronouns {
       return args.los
     } else if (args.las   && this.las.length===1 && this.las[0]===object)   {
       return args.las
+    } else if (args.les   && this.les.length===1 && this.les[0]===object)   {
+      return args.les
     } else {
       if (shouldUpdateOtherwise) {
         this.update(object)
@@ -126,11 +131,13 @@ class EsPronouns {
         if (this._32  .indexOf(newObject) === -1) { this._32 .push(newObject) }
         if (this.ellos.indexOf(newObject) === -1) { this.ellos.push(newObject) }
         if (this.los  .indexOf(newObject) === -1) { this.los.push(newObject) }
+        if (this.les  .indexOf(newObject) === -1) { this.les.push(newObject) }
         break
       case "nosotras/ellas":
         if (this._32  .indexOf(newObject) === -1) { this._32 .push(newObject) }
         if (this.ellas.indexOf(newObject) === -1) { this.ellas.push(newObject) }
         if (this.las  .indexOf(newObject) === -1) { this.las.push(newObject) }
+        if (this.les  .indexOf(newObject) === -1) { this.les.push(newObject) }
         break
       default: throw new Error("Can't update pronouns with " +
         JSON.stringify(newObject))
@@ -195,7 +202,9 @@ class EsVerbPhrase {
         _11:  ['me'],
         _21:  ['te'],
         _12:  ['nos'],
-      }, ['le'], false)
+        le:   ['le'],
+        les:  ['les'],
+      }, [this.agent.preferredPronoun.startsWith('n') ? 'les' : 'le'], false)
 
     const directObjPronoun = pronouns.ifMatch(this.directObj, {
       _11: ['me'],
@@ -216,9 +225,7 @@ class EsVerbPhrase {
 
     const indirectObj = (this.indirectObj === null) ? [] :
       pronouns.ifMatch(this.indirectObj, {
-        _11: [],
-        _21: [],
-        le:  [],
+        _11: [], _21: [], _12: [], le: [], les: [],
       }, ['a'].concat(this.indirectObj.name), true)
 
     const directObj = pronouns.ifMatch(this.directObj, {

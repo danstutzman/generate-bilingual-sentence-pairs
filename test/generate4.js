@@ -53,6 +53,9 @@ suite('generate4', function() {
       ['Dan', 'give', 'Maria', 'Regalo', { _11: Maria }, [], 'Dan me da un regalo'],
       ['Dan', 'give', 'Maria', 'Regalo', { _21: Maria }, [], 'Dan te da un regalo'],
       ['Dan', 'give', 'Maria', 'Regalo', {}, [Maria], 'Dan le da un regalo'],
+      ['Dan', 'give', 'Robots', 'Regalo', { _12: Robots }, [], 'Dan nos da un regalo'],
+      ['Dan', 'give', 'Robots', 'Regalo', {}, [Robots], 'Dan les da un regalo'],
+//      ['Dan', 'give', 'Maria', 'Pluma', { _11: Dan }, [Pluma, Maria], 'se lo doy'],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const vp = new UniVP3(agent, verb, indirectObj, directObj).toEs(objects)
