@@ -1,0 +1,18 @@
+# A:  customer
+# B:  representative
+# BB: representative's workplace
+# C:  replacement
+
+ask(B,A,what(want(A,what)))       # What do you need?
+tell(A,B,want(A,C))               # I want C
+tell(A,B,need(A,C))               # I need C
+command(A,B,give(B,A,C))          # Give me C
+tell(B,A,not(need(A,C)))          # You don't need C
+tell(B,A,not(have(BB,C)))         # We don't have C
+ask(B,A,what_is_the_problem)      # What's the problem!
+ask(A,B,why(not(give(B,A,C))))    # Why won't you give me C?
+
+# Step 1: parse s-expressions
+# Step 2: translate into English, discarding ask/tell/command
+# Step 3: translate into Spanish, discarding ask/tell/command
+# Step 4: judge user's attempted translation from English to Spanish
