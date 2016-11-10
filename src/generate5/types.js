@@ -17,8 +17,9 @@ function expectStatement(sexp: Sexp): Sexp {
 
 export type Features = {|
   negative?: bool,
-  remove?:   'what',
   past?:     bool,
+  remove?:   'what' | 'why',
+  short?:    bool,
 |}
 
 function merge(base: Features, additions: Features): Features {

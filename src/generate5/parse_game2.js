@@ -56,7 +56,7 @@ readline.createInterface({
   if (parsed !== undefined) {
     for (const clauses of [enClauses, esClauses]) {
       console.log(clauses.translateIndependentClause(parsed,
-        { negative: false, past: true }).join(' '))
+        { negative: false, past: false, short: true }).join(' '))
     }
   }
 })

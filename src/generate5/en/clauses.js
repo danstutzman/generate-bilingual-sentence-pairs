@@ -1,60 +1,20 @@
 // @flow
-import type { Sexp } from '../types'
+import type { Features, Sexp } from '../types'
 
-function expectString(sexp: Sexp): string {
-  if (typeof sexp !== 'string') {
-    throw new Error("Expected string but got " + JSON.stringify(sexp))
-  }
-  return sexp.toString()
-}
-
-function expectStatement(sexp: Sexp): Sexp {
-  if (typeof sexp === 'string') {
-    throw new Error("Expected Array<string> but got " + sexp.toString())
-  }
-  return sexp
-}
-
-type Features = {|
-  negative?: bool,
-  remove?:   'what',
-  past?:     bool,
-|}
-
-function merge(base: Features, additions: Features): Features {
-  if (typeof base !== 'object') {
-    throw new Error("Expected object for base but got " + JSON.stringify(base))
-  }
-  if (typeof additions !== 'object') {
-    throw new Error("Expected object for additions but got " +
-      JSON.stringify(additions))
-  }
-
-  let output: Features = { negative: false }
-  for (const key in base) {
-    if (base.hasOwnProperty(key)) {
-      output[key] = base[key]
-    }
-  }
-  for (const key in additions) {
-    if (additions.hasOwnProperty(key)) {
-      output[key] = additions[key]
-    }
-  }
-  return output
-}
+const types = require('../types')
+const { expectString, expectStatement, merge } = types
 
 function translateRelativeClause(parsed: Sexp, features: Features): Array<string> {
   const head = expectString(parsed[0])
   if (head === 'that') {
-    const statement = parsed[1]
+    const statement = expectStatement(parsed[1])
     return ['that'].concat(translateIndependentClause(statement, features))
   } else if (head === 'what') {
-    const statement = parsed[1]
+    const statement = expectStatement(parsed[1])
     return ['what'].concat(translateIndependentClause(statement,
-      merge(features, merge(features, { remove: 'what' }))))
+      merge(features, { remove: 'what' })))
   } else if (head === 'why') {
-    const statement = parsed[1]
+    const statement = expectStatement(parsed[1])
     return ['why'].concat(translateIndependentClause(statement, features))
   } else {
     throw new Error("Don't know how to translate head=" + head)
@@ -67,48 +27,78 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
     const speaker  = expectString(parsed[1])
     const audience = expectString(parsed[2])
     const statement = expectStatement(parsed[3])
-    let verb: string
-    if (features.past) {
-      verb = {ask:'asked', tell:'told', command:'commanded'}[head]
+    if (features.short) {
+      return [speaker + ':']
+        .concat(translateIndependentClause(statement, features))
     } else {
-      verb = {ask:'asks', tell:'tells', command:'commands'}[head]
+      let verb: string
+      if (features.past) {
+        verb = {ask:'asked', tell:'told', command:'commanded'}[head]
+      } else {
+        verb = {ask:'asks', tell:'tells', command:'commands'}[head]
+      }
+      return [speaker, verb, audience].concat(
+        translateRelativeClause(statement, features))
     }
-    return [speaker, verb, audience].concat(
-      translateRelativeClause(statement, features))
-  } else if (head === 'want' || head === 'need' || head == 'have') {
+  } else if (head === 'want' || head === 'need' || head == 'have' || head === 'give') {
     const wanter = expectString(parsed[1])
-    const wanted = expectString(parsed[2])
-    let verb: Array<string>
+    let givee: string|null = null
+    if (head === 'give') {
+      givee = expectString(parsed[2])
+    }
+    const wanted = expectString(parsed[(head == 'give') ? 3 : 2])
+
+    let auxilary: string|null = null
     if (features.negative) {
       if (features.past) {
-        verb = ["doesn't", head]
+        auxilary = "doesn't"
       } else {
-        verb = ["didn't", head]
+        auxilary = "didn't"
       }
-    } else {
+    } else if (features.remove) {
       if (features.past) {
-        verb = [ {have:'had'}[head] || (head + 'ed') ]
+        auxilary = "does"
       } else {
-        verb = [ {have:'has'}[head] || (head + 's') ]
+        auxilary = "did"
       }
     }
-    return [wanter]
-      .concat(verb)
-      .concat(features.remove === wanted ? [] : [wanted])
-  } else if (head === 'give') {
-    const giver  = expectString(parsed[1])
-    const givee  = expectString(parsed[2])
-    const object = expectString(parsed[3])
-    let verb
-    if (features.past) {
-      verb = {give:'gave'}[head]
-    } else {
-      verb = {give:'gives'}[head]
+
+    let verb = head
+    if (!features.negative && !features.remove) {
+      if (features.past) {
+        verb = {have:'had', give:'gave'}[head] || (head + 'ed')
+      } else {
+        verb = {have:'has', give:'gives'}[head] || (head + 's')
+      }
     }
-    return [giver, verb, object, 'to', givee]
+    if (features.remove) {
+      return (auxilary !== null ? [auxilary] : [])
+        .concat([wanter, verb])
+        .concat(givee !== null ? [givee] : [])
+        .concat(features.remove === wanted ? [] : [wanted])
+    } else {
+      return [wanter]
+        .concat(auxilary !== null ? [auxilary] : [])
+        .concat([verb])
+        .concat(givee !== null ? [givee] : [])
+        .concat([wanted])
+    }
   } else if (head === 'not') {
     const statement = parsed[1]
     return translateIndependentClause(statement, features)
+  } else if (head === 'what') {
+    const statement = parsed[1]
+    return ['what']
+      .concat(translateIndependentClause(statement, merge(features, {remove: 'what'})))
+      .concat(['?'])
+  } else if (head === 'that') {
+    const statement = expectStatement(parsed[1])
+    return translateIndependentClause(statement, features)
+  } else if (head === 'why') {
+    const statement = expectStatement(parsed[1])
+    return ['why']
+      .concat(translateIndependentClause(statement, merge(features, {remove: 'why'})))
+      .concat(['?'])
   } else {
     throw new Error("Don't know how to translate head=" + head)
   }
