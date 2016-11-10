@@ -1,9 +1,10 @@
 // @flow
 import type { Sexp } from './types'
 
-const fs       = require('fs')
-const readline = require('readline')
-const clauses  = require('./en/clauses')
+const fs        = require('fs')
+const readline  = require('readline')
+const enClauses = require('./en/clauses')
+const esClauses = require('./es/clauses')
 
 function parseLine(line): Sexp|void {
   let stack = [[]]
@@ -53,7 +54,9 @@ readline.createInterface({
 }).on('line', function(line) {
   const parsed = parseLine(line)
   if (parsed !== undefined) {
-    console.log('translated', clauses.translateIndependentClause(parsed,
-      { negative: false, past: true }))
+    for (const clauses of [enClauses, esClauses]) {
+      console.log(clauses.translateIndependentClause(parsed,
+        { negative: false, past: true }).join(' '))
+    }
   }
 })
