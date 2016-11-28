@@ -57,9 +57,9 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
       }
     } else if (features.remove) {
       if (features.past) {
-        auxilary = "does"
-      } else {
         auxilary = "did"
+      } else {
+        auxilary = "does"
       }
     }
 
