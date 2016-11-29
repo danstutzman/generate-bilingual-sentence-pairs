@@ -18,5 +18,15 @@ suite('generate5', function() {
       const translated = enClauses.translateSpeechActShort(parsed, {}).join(' ')
       assert.equal(translated, 'B: what does A want ?')
     })
+    test('B pregunta a A lo que quiere A', function() {
+      const parsed = parse_line.parseLine('ask(B,A,what(want(A,what)))')
+      const translated = esClauses.translateIndependentClause(parsed, {}).join(' ')
+      assert.equal(translated, 'B pregunta a A lo que quiere A')
+    })
+    test('B: que quiere A ?', function() {
+      const parsed = parse_line.parseLine('ask(B,A,what(want(A,what)))')
+      const translated = esClauses.translateSpeechActShort(parsed, {}).join(' ')
+      assert.equal(translated, 'B: qué quiere A ?')
+    })
   })
 })
