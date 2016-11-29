@@ -13,8 +13,8 @@ readline.createInterface({
   if (line !== '' && line.charAt(0) !== '#') {
     const parsed = parse_line.parseLine(line)
     for (const clauses of [enClauses, esClauses]) {
-      console.log(clauses.translateIndependentClause(parsed,
-        { negative: false, past: false, short: true }).join(' '))
+      console.log(clauses.translateSpeechActShort(parsed,
+        { negative: false, past: false }).join(' '))
     }
   }
 })

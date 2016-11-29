@@ -27,19 +27,14 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
     const speaker  = expectString(parsed[1])
     const audience = expectString(parsed[2])
     const statement = expectStatement(parsed[3])
-    if (features.short) {
-      return [speaker + ':']
-        .concat(translateIndependentClause(statement, features))
+    let verb: string
+    if (features.past) {
+      verb = {ask:'asked', tell:'told', command:'commanded'}[head]
     } else {
-      let verb: string
-      if (features.past) {
-        verb = {ask:'asked', tell:'told', command:'commanded'}[head]
-      } else {
-        verb = {ask:'asks', tell:'tells', command:'commands'}[head]
-      }
-      return [speaker, verb, audience].concat(
-        translateRelativeClause(statement, features))
+      verb = {ask:'asks', tell:'tells', command:'commands'}[head]
     }
+    return [speaker, verb, audience].concat(
+      translateRelativeClause(statement, features))
   } else if (head === 'want' || head === 'need' || head == 'have' || head === 'give') {
     const wanter = expectString(parsed[1])
     let givee: string|null = null
@@ -104,4 +99,16 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
   }
 }
 
-module.exports = { translateIndependentClause }
+function translateSpeechActShort(parsed: Sexp, features: Features): Array<string> {
+  const head = expectString(parsed[0])
+  if (head === 'ask' || head === 'tell' || head === 'command') {
+    const speaker   = expectString(parsed[1])
+    const audience  = expectString(parsed[2])
+    const statement = expectStatement(parsed[3])
+    return [speaker + ':'].concat(translateIndependentClause(statement, features))
+  } else {
+    throw new Error("Unexpected speech act verb: " + head)
+  }
+}
+
+module.exports = { translateIndependentClause, translateSpeechActShort }

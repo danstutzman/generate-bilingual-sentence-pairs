@@ -88,4 +88,16 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
   }
 }
 
-module.exports = { translateIndependentClause }
+function translateSpeechActShort(parsed: Sexp, features: Features): Array<string> {
+  const head = expectString(parsed[0])
+  if (head === 'ask' || head === 'tell' || head === 'command') {
+    const speaker   = expectString(parsed[1])
+    const audience  = expectString(parsed[2])
+    const statement = expectStatement(parsed[3])
+    return [speaker + ':'].concat(translateIndependentClause(statement, features))
+  } else {
+    throw new Error("Unknown speech act verb: " + head)
+  }
+}
+
+module.exports = { translateIndependentClause, translateSpeechActShort }

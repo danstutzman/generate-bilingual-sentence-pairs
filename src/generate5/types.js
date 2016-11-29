@@ -19,7 +19,6 @@ export type Features = {|
   negative?: bool,
   past?:     bool,
   remove?:   'what' | 'why',
-  short?:    bool,
 |}
 
 function merge(base: Features, additions: Features): Features {
