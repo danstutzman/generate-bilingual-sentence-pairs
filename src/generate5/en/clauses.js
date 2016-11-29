@@ -23,55 +23,49 @@ function translateRelativeClause(parsed: Sexp, features: Features): Array<string
 
 function translateIndependentClause(parsed: Sexp, features: Features): Array<string> {
   const head = expectString(parsed[0])
-  if (head === 'ask' || head === 'tell' || head === 'command') {
-    const speaker  = expectString(parsed[1])
-    const audience = expectString(parsed[2])
-    const statement = expectStatement(parsed[3])
-    let verb: string
-    if (features.past) {
-      verb = {ask:'asked', tell:'told', command:'commanded'}[head]
-    } else {
-      verb = {ask:'asks', tell:'tells', command:'commands'}[head]
-    }
-    return [speaker, verb, audience].concat(
-      translateRelativeClause(statement, features))
-  } else if (head === 'want' || head === 'need' || head == 'have' || head === 'give') {
-    const wanter = expectString(parsed[1])
-    let givee: string|null = null
-    if (head === 'give') {
-      givee = expectString(parsed[2])
-    }
-    const wanted = expectString(parsed[(head == 'give') ? 3 : 2])
+  if ({ ask:true, tell:true, command:true, want:true, need:true, have:true, give:true
+        }[head]) {
+    const agent       = expectString(parsed[1])
+    const indirectObj = expectString(parsed[2])
+    const directObj   = parsed[3] // string (e.g. ask a question) or statement (ask why...)
 
-    let auxilary: string|null = null
+    let auxilary: Array<string>
     if (features.negative) {
       if (features.past) {
-        auxilary = "doesn't"
+        auxilary = ["doesn't"]
       } else {
-        auxilary = "didn't"
+        auxilary = ["didn't"]
       }
     } else if (features.invert) {
       if (features.past) {
-        auxilary = "did"
+        auxilary = ["did"]
       } else {
-        auxilary = "does"
+        auxilary = ["does"]
       }
+    } else {
+      auxilary = []
     }
 
-    let verb = head
+    let verb: string
     if (!features.negative && !features.invert) {
       if (features.past) {
-        verb = {have:'had', give:'gave'}[head] || (head + 'ed')
+        verb = {tell:'told', have:'had', give:'gave'}[head] || (head + 'ed')
       } else {
         verb = {have:'has', give:'gives'}[head] || (head + 's')
       }
+    } else {
+      verb = head
     }
-    return (features.invert ? [] : [wanter])
-      .concat(auxilary !== null ? [auxilary] : [])
-      .concat(features.invert ? [wanter] : [])
+
+    return (features.invert ? [] : [agent])
+      .concat(auxilary)
+      .concat(features.invert ? [agent] : [])
       .concat([verb])
-      .concat(givee !== null ? [givee] : [])
-      .concat(features.remove === wanted ? [] : [wanted])
+      .concat(indirectObj !== '' ? [indirectObj] : [])
+      .concat(features.remove === directObj ? [] :
+        typeof(directObj) === 'string' ? [directObj] :
+          translateRelativeClause(directObj, features))
+
   } else if (head === 'not') {
     const statement = parsed[1]
     return translateIndependentClause(statement, features)
@@ -87,7 +81,8 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
   } else if (head === 'why') {
     const statement = expectStatement(parsed[1])
     return ['why']
-      .concat(translateIndependentClause(statement, merge(features, {remove: 'why'})))
+      .concat(translateIndependentClause(statement,
+        merge(features, { remove: 'why', invert: true })))
       .concat(['?'])
   } else {
     throw new Error("Don't know how to translate head=" + head)

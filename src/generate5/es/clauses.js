@@ -23,50 +23,29 @@ function translateRelativeClause(parsed: Sexp, features: Features): Array<string
 
 function translateIndependentClause(parsed: Sexp, features: Features): Array<string> {
   const head = expectString(parsed[0])
-  if (head === 'ask' || head === 'tell' || head === 'command') {
-    const speaker  = expectString(parsed[1])
-    const audience = expectString(parsed[2])
-    const statement = expectStatement(parsed[3])
-    if (features.short) {
-      return [speaker + ':'].concat(translateIndependentClause(statement, features))
-    } else {
-      let verb: string
-      if (features.past) {
-        verb = {ask:'preguntó', tell:'dijo', command:'mandó'}[head]
-      } else {
-        verb = {ask:'pregunta', tell:'dice', command:'manda'}[head]
-      }
-      return [speaker, verb, 'a', audience].concat(
-        translateRelativeClause(statement, features))
-    }
-  } else if (head === 'want' || head === 'need' || head == 'have') {
-    const wanter = expectString(parsed[1])
-    const wanted = expectString(parsed[2])
-    let verb: Array<string>
+  if ({ ask:true, tell:true, command:true, want:true, need:true, have:true, give:true
+      }[head]) {
+    const agent       = expectString(parsed[1])
+    const indirectObj = expectString(parsed[2])
+    const directObj   = parsed[3] // could be string or statement
+    let verb: string
     if (features.past) {
-      verb = [ {want:'quiso', need:'necesitó', have:'tuvo'}[head] ]
+      verb = {ask:'preguntó', tell:'dijo', command:'mandó',
+              want:'quiso', need:'necesitó', have:'tuvo', give:'dio'}[head]
     } else {
-      verb = [ {want:'quiere', need:'necesita', have:'tiene'}[head] ]
+      verb = {ask:'pregunta', tell:'dice', command:'manda',
+              want:'quiere', need:'necesita', have:'tiene', give:'da'}[head]
     }
-    return (features.remove ? [] : [wanter])
+
+    return (features.remove ? [] : [agent])
       .concat(features.negative ? ['no'] : [])
-      .concat(verb)
-      .concat(features.remove ? [wanter] : [])
-      .concat(features.remove === wanted ? [] : [wanted])
-  } else if (head === 'give') {
-    const giver  = expectString(parsed[1])
-    const givee  = expectString(parsed[2])
-    const object = expectString(parsed[3])
-    let verb
-    if (features.past) {
-      verb = {give:'dio'}[head]
-    } else {
-      verb = {give:'da'}[head]
-    }
-    return (features.remove ? [] : [giver])
       .concat([verb])
-      .concat(features.remove ? [giver] : [])
-      .concat([object, 'a', givee])
+      .concat(features.remove ? [agent] : [])
+      .concat(indirectObj !== '' ? ['a', indirectObj] : [])
+      .concat(features.remove === directObj ? [] :
+        typeof(directObj) === 'string' ? [directObj] :
+          translateRelativeClause(directObj, features))
+
   } else if (head === 'not') {
     const statement = parsed[1]
     return translateIndependentClause(statement, features)

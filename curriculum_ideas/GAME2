@@ -3,12 +3,12 @@
 # BB: representative's workplace
 # C:  replacement
 
-ask(B,A,what(want(A,what)))       # What do you need?
-tell(A,B,that(want(A,C)))               # I want C
-tell(A,B,that(need(A,C)))               # I need C
+ask(B,A,what(want(A,,what)))       # What do you need?
+tell(A,B,that(want(A,,C)))               # I want C
+tell(A,B,that(need(A,,C)))               # I need C
 command(A,B,that(give(B,A,C)))          # Give me C
-tell(B,A,that(not(need(A,C))))          # You don't need C
-tell(B,A,that(not(have(BB,C))))         # We don't have C
+tell(B,A,that(not(need(A,,C))))          # You don't need C
+tell(B,A,that(not(have(BB,,C))))         # We don't have C
 #ask(B,A,what_is_the_problem)      # What's the problem!
 ask(A,B,why(not(give(B,A,C))))    # Why won't you give me C?
 

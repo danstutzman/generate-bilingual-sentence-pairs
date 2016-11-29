@@ -15,10 +15,8 @@ function parseLine(line: string): Sexp {
       stack.push([word])
       word = ''
     } else if (c === ',') {
-      if (word !== '') {
-        stack[stack.length - 1].push(word)
-        word = ''
-      }
+      stack[stack.length - 1].push(word)
+      word = ''
     } else if (c === ')') {
       if (word !== '') {
         stack[stack.length - 1].push(word)
