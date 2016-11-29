@@ -12,9 +12,9 @@ readline.createInterface({
 }).on('line', function(line) {
   if (line !== '' && line.charAt(0) !== '#') {
     const parsed = parse_line.parseLine(line)
-    for (const clauses of [enClauses, esClauses]) {
-      console.log(clauses.translateSpeechActShort(parsed,
-        { negative: false, past: false }).join(' '))
-    }
+    console.log(enClauses.translateSpeechActShort(parsed, enClauses.newPronouns(),
+      {}).join(' '))
+    console.log(esClauses.translateSpeechActShort(parsed, esClauses.newPronouns(),
+      {}).join(' '))
   }
 })

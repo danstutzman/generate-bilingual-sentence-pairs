@@ -10,22 +10,26 @@ suite('generate5', function() {
   suite('english', function() {
     test('B asks A what A wants', function() {
       const parsed = parse_line.parseLine('ask(B,A,what(want(A,,what)))')
-      const translated = enClauses.translateIndependentClause(parsed, {}).join(' ')
+      const translated = enClauses.translateIndependentClause(parsed,
+        enClauses.newPronouns(), {}).join(' ')
       assert.equal(translated, 'B asks A what A wants')
     })
     test('B: what does A want ?', function() {
       const parsed = parse_line.parseLine('ask(B,A,what(want(A,,what)))')
-      const translated = enClauses.translateSpeechActShort(parsed, {}).join(' ')
+      const translated = enClauses.translateSpeechActShort(parsed,
+        enClauses.newPronouns(), {}).join(' ')
       assert.equal(translated, 'B: what does A want ?')
     })
     test('B pregunta a A lo que quiere A', function() {
       const parsed = parse_line.parseLine('ask(B,A,what(want(A,,what)))')
-      const translated = esClauses.translateIndependentClause(parsed, {}).join(' ')
+      const translated = esClauses.translateIndependentClause(parsed,
+        esClauses.newPronouns(), {}).join(' ')
       assert.equal(translated, 'B pregunta a A lo que quiere A')
     })
     test('B: qué quiere A ?', function() {
       const parsed = parse_line.parseLine('ask(B,A,what(want(A,,what)))')
-      const translated = esClauses.translateSpeechActShort(parsed, {}).join(' ')
+      const translated = esClauses.translateSpeechActShort(parsed,
+        esClauses.newPronouns(), {}).join(' ')
       assert.equal(translated, 'B: qué quiere A ?')
     })
   })

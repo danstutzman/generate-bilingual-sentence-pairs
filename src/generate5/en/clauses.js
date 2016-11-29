@@ -2,26 +2,29 @@
 import type { Features, Sexp } from '../types'
 
 const types = require('../types')
+const { EnPronouns } = require('./pronouns')
 const { expectString, expectStatement, merge } = types
 
-function translateRelativeClause(parsed: Sexp, features: Features): Array<string> {
+function translateRelativeClause(parsed:Sexp, pronouns:EnPronouns,
+    features:Features): Array<string> {
   const head = expectString(parsed[0])
   if (head === 'that') {
     const statement = expectStatement(parsed[1])
-    return ['that'].concat(translateIndependentClause(statement, features))
+    return ['that'].concat(translateIndependentClause(statement, pronouns, features))
   } else if (head === 'what') {
     const statement = expectStatement(parsed[1])
-    return ['what'].concat(translateIndependentClause(statement,
+    return ['what'].concat(translateIndependentClause(statement, pronouns,
       merge(features, { remove: 'what', invert: false })))
   } else if (head === 'why') {
     const statement = expectStatement(parsed[1])
-    return ['why'].concat(translateIndependentClause(statement, features))
+    return ['why'].concat(translateIndependentClause(statement, pronouns, features))
   } else {
     throw new Error("Don't know how to translate head=" + head)
   }
 }
 
-function translateIndependentClause(parsed: Sexp, features: Features): Array<string> {
+function translateIndependentClause(parsed:Sexp, pronouns:EnPronouns,
+    features:Features): Array<string> {
   const head = expectString(parsed[0])
   if ({ ask:true, tell:true, command:true, want:true, need:true, have:true, give:true
         }[head]) {
@@ -64,24 +67,24 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
       .concat(indirectObj !== '' ? [indirectObj] : [])
       .concat(features.remove === directObj ? [] :
         typeof(directObj) === 'string' ? [directObj] :
-          translateRelativeClause(directObj, features))
+          translateRelativeClause(directObj, pronouns, features))
 
   } else if (head === 'not') {
     const statement = parsed[1]
-    return translateIndependentClause(statement, features)
+    return translateIndependentClause(statement, pronouns, features)
   } else if (head === 'what') {
     const statement = parsed[1]
     return ['what']
-      .concat(translateIndependentClause(statement,
+      .concat(translateIndependentClause(statement, pronouns,
         merge(features, { remove: 'what', invert: true })))
       .concat(['?'])
   } else if (head === 'that') {
     const statement = expectStatement(parsed[1])
-    return translateIndependentClause(statement, features)
+    return translateIndependentClause(statement, pronouns, features)
   } else if (head === 'why') {
     const statement = expectStatement(parsed[1])
     return ['why']
-      .concat(translateIndependentClause(statement,
+      .concat(translateIndependentClause(statement, pronouns,
         merge(features, { remove: 'why', invert: true })))
       .concat(['?'])
   } else {
@@ -89,16 +92,21 @@ function translateIndependentClause(parsed: Sexp, features: Features): Array<str
   }
 }
 
-function translateSpeechActShort(parsed: Sexp, features: Features): Array<string> {
+function translateSpeechActShort(parsed:Sexp, pronouns:EnPronouns,
+    features:Features): Array<string> {
   const head = expectString(parsed[0])
   if (head === 'ask' || head === 'tell' || head === 'command') {
     const speaker   = expectString(parsed[1])
     const audience  = expectString(parsed[2])
     const statement = expectStatement(parsed[3])
-    return [speaker + ':'].concat(translateIndependentClause(statement, features))
+    return [speaker + ':'].concat(translateIndependentClause(statement, pronouns, features))
   } else {
     throw new Error("Unexpected speech act verb: " + head)
   }
 }
 
-module.exports = { translateIndependentClause, translateSpeechActShort }
+function newPronouns(): EnPronouns {
+  return new EnPronouns()
+}
+
+module.exports = { newPronouns, translateIndependentClause, translateSpeechActShort }
