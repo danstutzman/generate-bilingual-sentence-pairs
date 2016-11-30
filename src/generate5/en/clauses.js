@@ -105,8 +105,4 @@ function translateSpeechActShort(parsed:Sexp, pronouns:EnPronouns,
   }
 }
 
-function newPronouns(): EnPronouns {
-  return new EnPronouns()
-}
-
-module.exports = { newPronouns, translateIndependentClause, translateSpeechActShort }
+module.exports = { translateIndependentClause, translateSpeechActShort }

@@ -3,7 +3,7 @@ import type { Sexp, Features } from '../types'
 
 const types = require('../types')
 const { EsPronouns } = require('./pronouns')
-const { expectString, expectStatement, merge } = types
+const { expectNoun, expectString, expectStatement, merge } = types
 
 function translateRelativeClause(parsed:Sexp, pronouns:EsPronouns,
     features:Features): Array<string> {
@@ -14,7 +14,7 @@ function translateRelativeClause(parsed:Sexp, pronouns:EsPronouns,
   } else if (head === 'what') {
     const statement = parsed[1]
     return ['lo', 'que'].concat(translateIndependentClause(statement, pronouns,
-      merge(features, merge(features, { remove: 'what' }))))
+      merge(features, merge(features, { remove: 'what', invert: true }))))
   } else if (head === 'why') {
     const statement = parsed[1]
     return ['por', 'qué'].concat(translateIndependentClause(statement, pronouns, features))
@@ -28,22 +28,32 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
   const head = expectString(parsed[0])
   if ({ ask:true, tell:true, command:true, want:true, need:true, have:true, give:true
       }[head]) {
-    const agent       = expectString(parsed[1])
-    const indirectObj = expectString(parsed[2])
+    const agent       = expectNoun(parsed[1], true)
+    const indirectObj = expectNoun(parsed[2], false)
     const directObj   = parsed[3] // could be string or statement
-    let verb: string
-    if (features.past) {
-      verb = {ask:'preguntó', tell:'dijo', command:'mandó',
-              want:'quiso', need:'necesitó', have:'tuvo', give:'dio'}[head]
-    } else {
-      verb = {ask:'pregunta', tell:'dice', command:'manda',
-              want:'quiere', need:'necesita', have:'tiene', give:'da'}[head]
-    }
+    const [per, isAgentSpecific] = pronouns.lookup(agent)
+    const tense = features.past ? 'pret' : 'pres'
+    const verb: string = {
+      ask1pres:'pregunto', ask3pres:'pregunta',
+      ask1pret:'pregunté', ask3pret:'preguntó',
+      tell1pres:'digo', tell3pres:'dice',
+      tell1pret:'dijo', tell3pret:'dije',
+      command1pres:'mando', command3pres:'manda',
+      command1pret:'mandé', command3pret:'mandó',
+      want1pres:'quiero', want3pres:'quiere',
+      want1pret:'quise', want3pret:'quiso',
+      need1pres:'necesito', need3pres:'necesita',
+      need1pret:'necesité', need3pret:'necesitó',
+      have1pres:'tengo', have3pres: 'tiene',
+      have1pret:'tuvo', have3pret: 'tuve',
+      give1pres:'doy', give3pres:'da',
+      give1pret:'di', give3pret:'dio',
+    }[head + per + tense] || ("Can't find conjugation '" + head + per + tense + "'")
 
-    return (features.remove ? [] : [agent])
-      .concat(features.negative ? ['no'] : [])
-      .concat([verb])
-      .concat(features.remove ? [agent] : [])
+    return (features.negative ? ['no'] : [])
+      .concat(features.invert ? [verb] : [])
+      .concat(isAgentSpecific ? [] : [agent])
+      .concat(features.invert ? [] : [verb])
       .concat(indirectObj !== '' ? ['a', indirectObj] : [])
       .concat(features.remove === directObj ? [] :
         typeof(directObj) === 'string' ? [directObj] :
@@ -79,14 +89,11 @@ function translateSpeechActShort(parsed:Sexp, pronouns:EsPronouns,
     const speaker   = expectString(parsed[1])
     const audience  = expectString(parsed[2])
     const statement = expectStatement(parsed[3])
-    return [speaker + ':'].concat(translateIndependentClause(statement, pronouns, features))
+    return [speaker + ':'].concat(translateIndependentClause(statement, pronouns,
+      merge(features, {invert: true})))
   } else {
     throw new Error("Unknown speech act verb: " + head)
   }
 }
 
-function newPronouns(): EsPronouns {
-  return new EsPronouns()
-}
-
-module.exports = { newPronouns, translateIndependentClause, translateSpeechActShort }
+module.exports = { translateIndependentClause, translateSpeechActShort }

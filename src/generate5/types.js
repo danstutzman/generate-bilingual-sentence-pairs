@@ -1,7 +1,22 @@
 // @flow
 export type Sexp = string|Array<Sexp>
+export type Noun = string
 
-function expectString(sexp: Sexp): string {
+function expectNoun(sexp:Sexp, required:bool): Noun {
+  if (typeof sexp !== 'string') {
+    throw new Error("Expected string but got " + JSON.stringify(sexp))
+  }
+  const noun = sexp.toString()
+  if (['', 'A', 'B'].indexOf(noun) === -1) {
+    throw new Error("Unknown noun '" + noun + "'")
+  }
+  if (noun === '' && required) {
+    throw new Error("Blank noun not allowed here")
+  }
+  return noun
+}
+
+function expectString(sexp:Sexp): Noun {
   if (typeof sexp !== 'string') {
     throw new Error("Expected string but got " + JSON.stringify(sexp))
   }
@@ -45,4 +60,4 @@ function merge(base: Features, additions: Features): Features {
   return output
 }
 
-module.exports = { expectString, expectStatement, merge }
+module.exports = { expectNoun, expectString, expectStatement, merge }
