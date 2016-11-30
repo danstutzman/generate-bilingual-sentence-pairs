@@ -7,7 +7,7 @@ function expectNoun(sexp:Sexp, required:bool): Noun {
     throw new Error("Expected string but got " + JSON.stringify(sexp))
   }
   const noun = sexp.toString()
-  if (['', 'A', 'B'].indexOf(noun) === -1) {
+  if (['', 'A', 'B', 'AA'].indexOf(noun) === -1) {
     throw new Error("Unknown noun '" + noun + "'")
   }
   if (noun === '' && required) {

@@ -52,5 +52,17 @@ suite('generate5', function() {
         new EsPronouns({recent:['A']}), {}).join(' ')
       assert.equal(translated, 'tiene B')
     })
+    test('AA tienen B', function() {
+      const parsed = parse_line.parseLine('have(AA,,B)')
+      const translated = esClauses.translateIndependentClause(parsed,
+        new EsPronouns({}), {}).join(' ')
+      assert.equal(translated, 'AA tienen B')
+    })
+    test('(AA) tienen B', function() {
+      const parsed = parse_line.parseLine('have(AA,,B)')
+      const translated = esClauses.translateIndependentClause(parsed,
+        new EsPronouns({recent:['AA']}), {}).join(' ')
+      assert.equal(translated, 'tienen B')
+    })
   })
 })

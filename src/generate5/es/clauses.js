@@ -31,24 +31,39 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
     const agent       = expectNoun(parsed[1], true)
     const indirectObj = expectNoun(parsed[2], false)
     const directObj   = parsed[3] // could be string or statement
-    const [per, isAgentSpecific] = pronouns.lookup(agent)
+    const [per, num, isAgentSpecific] = pronouns.lookup(agent)
     const tense = features.past ? 'pret' : 'pres'
     const verb: string = {
-      ask1pres:'pregunto', ask3pres:'pregunta',
-      ask1pret:'pregunté', ask3pret:'preguntó',
-      tell1pres:'digo', tell3pres:'dice',
-      tell1pret:'dijo', tell3pret:'dije',
-      command1pres:'mando', command3pres:'manda',
-      command1pret:'mandé', command3pret:'mandó',
-      want1pres:'quiero', want3pres:'quiere',
-      want1pret:'quise', want3pret:'quiso',
-      need1pres:'necesito', need3pres:'necesita',
-      need1pret:'necesité', need3pret:'necesitó',
-      have1pres:'tengo', have3pres: 'tiene',
-      have1pret:'tuvo', have3pret: 'tuve',
-      give1pres:'doy', give3pres:'da',
-      give1pret:'di', give3pret:'dio',
-    }[head + per + tense] || ("Can't find conjugation '" + head + per + tense + "'")
+      ask11pres:'pregunto', ask31pres:'pregunta',
+      ask12pres:'preguntamos', ask32pres:'preguntan',
+      ask11pret:'pregunté', ask31pret:'preguntó',
+      ask12pret:'preguntamos', ask32pret:'preguntaron',
+      tell11pres:'digo', tell31pres:'dice',
+      tell12pres:'decimos', tell32pres:'dicen',
+      tell11pret:'dije', tell31pret:'dijo',
+      tell12pret:'dijimos', tell32pret:'dijeron',
+      command11pres:'mando', command31pres:'manda',
+      command12pres:'mandamos', command32pres:'mandan',
+      command11pret:'mandé', command31pret:'mandó',
+      command12pret:'mandamos', command32pret:'mandaron',
+      want11pres:'quiero', want31pres:'quiere',
+      want12pres:'quieremos', want32pres:'quieren',
+      want11pret:'quise', want31pret:'quiso',
+      want12pret:'quisimos', want32pret:'quiseron',
+      need11pres:'necesito', need31pres:'necesita',
+      need12pres:'necesitamos', need32pres:'necesitan',
+      need11pret:'necesité', need31pret:'necesitó',
+      need12pret:'necesitamos', need32pret:'necesitaron',
+      have11pres:'tengo', have31pres: 'tiene',
+      have12pres:'tenemos', have32pres: 'tienen',
+      have11pret:'tuve', have31pret: 'tuvo',
+      have12pret:'tuvimos', have32pret: 'tuvieron',
+      give11pres:'doy', give31pres:'da',
+      give12pres:'damos', give32pres:'dan',
+      give11pret:'di', give31pret:'dio',
+      give12pret:'dimos', give32pret:'dieron',
+    }[head + per + num + tense] || (
+      "Can't find conjugation '" + head + per + num + tense + "'")
 
     return (features.negative ? ['no'] : [])
       .concat(features.invert ? [verb] : [])
