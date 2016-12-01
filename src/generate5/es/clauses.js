@@ -3,7 +3,7 @@ import type { Sexp, Features } from '../types'
 
 const types = require('../types')
 const { EsPronouns } = require('./pronouns')
-const { expectNoun, expectString, expectStatement, merge } = types
+const { expectNoun, expectNounOrStatement, expectString, expectStatement, merge } = types
 
 function translateRelativeClause(parsed:Sexp, pronouns:EsPronouns,
     features:Features): Array<string> {
@@ -30,9 +30,11 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
       }[head]) {
     const agent       = expectNoun(parsed[1], true)
     const indirectObj = expectNoun(parsed[2], false)
-    const directObj   = parsed[3] // could be string or statement
-    const [per, num, isAgentSpecific] = pronouns.lookup(agent)
+    const directObj   = expectNounOrStatement(parsed[3], true)
+
+    const [per, num, isAgentSpecific] = pronouns.lookupAgent(agent)
     const tense = features.past ? 'pret' : 'pres'
+
     const verb: string = {
       ask11pres:'pregunto', ask31pres:'pregunta',
       ask12pres:'preguntamos', ask32pres:'preguntan',
@@ -65,12 +67,20 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
     }[head + per + num + tense] || (
       "Can't find conjugation '" + head + per + num + tense + "'")
 
-    return (features.negative ? ['no'] : [])
-      .concat(features.invert ? [verb] : [])
-      .concat(isAgentSpecific ? [] : [agent])
-      .concat(features.invert ? [] : [verb])
+    let directObjPronoun: Array<string> = []
+    let isDoSpecific = false
+    if (typeof directObj === 'string' && features.remove !== directObj) {
+      directObjPronoun = pronouns.lookupDirectObj(directObj, agent)
+    }
+
+    return []
+      .concat(!isAgentSpecific && !features.invert ? [agent] : [])
+      .concat(features.negative ? ['no'] : [])
+      .concat(features.remove === directObj ? [] : directObjPronoun)
+      .concat([verb])
+      .concat(!isAgentSpecific && features.invert ? [agent] : [])
       .concat(indirectObj !== '' ? ['a', indirectObj] : [])
-      .concat(features.remove === directObj ? [] :
+      .concat(features.remove === directObj || directObjPronoun.length > 0 ? [] :
         typeof(directObj) === 'string' ? [directObj] :
           translateRelativeClause(directObj, pronouns, features))
 
