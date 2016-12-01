@@ -21,6 +21,8 @@ suite('generate5', function() {
         new EnPronouns(), {}).join(' ')
       assert.equal(translated, 'B: what does A want ?')
     })
+  })
+  suite('spanish', function() {
     test('B pregunta a A lo que quiere A', function() {
       const parsed = parse_line.parseLine('ask(B,A,what(want(A,,What)))')
       const translated = esClauses.translateIndependentClause(parsed,
