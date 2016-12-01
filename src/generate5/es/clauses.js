@@ -14,7 +14,7 @@ function translateRelativeClause(parsed:Sexp, pronouns:EsPronouns,
   } else if (head === 'what') {
     const statement = parsed[1]
     return ['lo', 'que'].concat(translateIndependentClause(statement, pronouns,
-      merge(features, merge(features, { remove: 'what', invert: true }))))
+      merge(features, merge(features, { remove: 'What', invert: true }))))
   } else if (head === 'why') {
     const statement = parsed[1]
     return ['por', 'qué'].concat(translateIndependentClause(statement, pronouns, features))
@@ -81,7 +81,7 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
     const statement = parsed[1]
     return ['qué']
       .concat(translateIndependentClause(statement, pronouns,
-        merge(features, {remove: 'what'})))
+        merge(features, {remove: 'What'})))
       .concat(['?'])
   } else if (head === 'that') {
     const statement = expectStatement(parsed[1])
@@ -90,7 +90,7 @@ function translateIndependentClause(parsed:Sexp, pronouns:EsPronouns,
     const statement = expectStatement(parsed[1])
     return ['por', 'qué']
       .concat(translateIndependentClause(statement, pronouns,
-        merge(features, {remove: 'why'})))
+        merge(features, {remove: 'Why'})))
       .concat(['?'])
   } else {
     throw new Error("Don't know how to translate head=" + head)

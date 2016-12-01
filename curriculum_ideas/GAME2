@@ -3,7 +3,7 @@
 # BB: representative's workplace
 # C:  replacement
 
-ask(B,A,what(want(A,,what)))       # What do you need?
+ask(B,A,what(want(A,,What)))       # What do you need?
 tell(A,B,that(want(A,,C)))               # I want C
 tell(A,B,that(need(A,,C)))               # I need C
 command(A,B,that(give(B,A,C)))          # Give me C

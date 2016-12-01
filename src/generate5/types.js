@@ -33,7 +33,7 @@ function expectStatement(sexp: Sexp): Sexp {
 export type Features = {|
   negative?: bool,
   past?:     bool,
-  remove?:   'what' | 'why',
+  remove?:   'What' | 'Why',
   invert?:   bool,
 |}
 
