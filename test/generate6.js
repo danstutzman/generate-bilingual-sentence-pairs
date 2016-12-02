@@ -45,4 +45,15 @@ suite('generate6', function() {
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })
   })
+  suite('integration', function() {
+    for (const pair of [
+      ['need(A,B)', 'A necesita B']
+    ]) {
+      test(pair[1], /* jshint loopfunc:true */ function() {
+        const iclause = interpretSexp(parseLine(pair[0]))
+        const joined = es.join(es.translate(iclause, 'pres').words())
+        assert.equal(joined, pair[1])
+      })
+    }
+  })
 })

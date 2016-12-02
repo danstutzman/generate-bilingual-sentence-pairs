@@ -7,6 +7,7 @@ const { raise } = require('../raise')
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const { RegularConjugationPattern } = regular_conjugation_pattern_table
+const { join } = require('./join')
 
 class NameNoun {
   noun: Noun
@@ -59,9 +60,10 @@ function translate(iclause:IClause, tense:Tense) {
 }
 
 module.exports = {
+  IClauseOrder,
   NameNoun,
   RegularConjugation,
   RegularConjugationPattern,
-  IClauseOrder,
+  join,
   translate,
 }
