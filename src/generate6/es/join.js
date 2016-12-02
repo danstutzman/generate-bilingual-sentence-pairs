@@ -13,10 +13,19 @@ function join(words:Array<string>): string {
   let isStartingSentence: bool = true
   for (const word of words) {
     if (isStartingSentence) {
-      newWords.push(initialCaps(word))
-      isStartingSentence = false
-    } else if (word === '.') {
-      newWords[newWords.length - 1] = newWords[newWords.length - 1] + '.'
+      if (word === '¿') {
+        newWords.push(word)
+        isStartingSentence = true
+      } else {
+        if (newWords.length > 0 && newWords[newWords.length - 1] === '¿') {
+          newWords[newWords.length - 1] += initialCaps(word)
+        } else {
+          newWords.push(initialCaps(word))
+        }
+        isStartingSentence = false
+      }
+    } else if (word === '.' || word === '?') {
+      newWords[newWords.length - 1] += word
       isStartingSentence = true
     } else if (word.startsWith('-')) {
       newWords[newWords.length - 1] = removeEndingHyphen(newWords[newWords.length - 1]) +
