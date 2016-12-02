@@ -49,6 +49,9 @@ suite('generate6', function() {
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A necesita B',   {}],
       ['need(A,B)', '(A) necesito B', {yo:'A'}],
+      ['need(A,Libro)', 'A necesita Libro', {}],
+      ['need(A,Libro)', 'A lo necesita (Libro)', {recent:['Libro']}],
+      ['need(A,Pluma)', 'A la necesita (Pluma)', {recent:['Pluma']}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const iclause = interpretSexp(parseLine(sexp))

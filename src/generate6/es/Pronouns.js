@@ -2,6 +2,9 @@
 import type { Ref } from '../types'
 import type { Gender, Person, Number } from './types'
 
+const { raise } = require('../raise')
+const Pronoun = require('./Pronoun')
+
 function numOfRef(ref:Ref): Number {
   const num = {A:1, B:1, AA:2, Libro:1, Pluma:1, What:1}[ref]
   if (num === undefined) {
@@ -40,9 +43,9 @@ class Pronouns {
     }
   }
 
-  lookupDirectObj(directObj:Ref, agent:Ref): Array<string> {
+  lookupDirectObj(directObj:Ref, agent:Ref): [Pronoun|void, bool] {
     if (directObj === this.yo) {
-      return ['me']
+      return [new Pronoun('me'), true]
     } else {
       const num = numOfRef(directObj)
       const gen = genOfRef(directObj)
@@ -61,15 +64,16 @@ class Pronouns {
         this.recent.push(directObj)
       }
 
-      let pronoun = []
       if (isSpecific) {
-        pronoun = {
-          _M1: ['lo'], _F1: ['la'],
-        }['_' + gen + num] || ["Can't find pronoun for '" + gen + num + "'"]
+        const pronoun:string = {
+          _M1: 'lo', _F1: 'la',
+        }['_' + gen + num] //|| raise("Can't find pronoun for '" + gen + num + "'")
+        return [new Pronoun(pronoun), isSpecific]
+      } else {
+        return [undefined, false]
       }
-      return pronoun
     }
   }
 }
 
-module.exports = { Pronouns }
+module.exports = Pronouns

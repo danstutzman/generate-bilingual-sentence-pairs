@@ -8,7 +8,8 @@ const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const { RegularConjugationPattern } = regular_conjugation_pattern_table
 const { join } = require('./join')
-const { Pronouns } = require('./Pronouns')
+const Pronoun = require('./Pronoun')
+const Pronouns = require('./Pronouns')
 
 class OmittedNoun {
   ref: Ref
@@ -35,23 +36,27 @@ class NameNoun {
 type Noun = OmittedNoun | NameNoun
 
 class IClauseOrder {
-  agent:       Noun
-  conjugation: RegularConjugation
-  direct:      NameNoun
+  agent:         Noun
+  directPronoun: Pronoun|void
+  conjugation:   RegularConjugation
+  direct:        NameNoun
 
   constructor(args:{|
-    agent:       Noun,
-    conjugation: RegularConjugation,
-    direct:      NameNoun,
+    agent:          Noun,
+    directPronoun?: Pronoun|void,
+    conjugation:    RegularConjugation,
+    direct:         NameNoun,
   |}) {
-    this.agent       = args.agent
-    this.conjugation = args.conjugation
-    this.direct      = args.direct
+    this.agent         = args.agent
+    this.directPronoun = args.directPronoun
+    this.conjugation   = args.conjugation
+    this.direct        = args.direct
   }
 
   words(): Array<string> {
     return []
       .concat(this.agent.words())
+      .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
       .concat(this.conjugation.words())
       .concat(this.direct.words())
   }
@@ -68,11 +73,16 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns) {
 
   const pattern = regular_conjugation_pattern_table.find(infinitive, tense, person, number)
 
+  const [directPronoun, isDirectPronounSpecific] =
+    pronouns.lookupDirectObj(iclause.direct, iclause.agent)
+
   return new IClauseOrder({
-    agent:       isAgentSpecific ?
-                   new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
-    conjugation: new RegularConjugation({ infinitive, pattern }),
-    direct:      new NameNoun(iclause.direct),
+    agent:         isAgentSpecific ?
+                     new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
+    directPronoun: directPronoun,
+    conjugation:   new RegularConjugation({ infinitive, pattern }),
+    direct:        isDirectPronounSpecific ?
+                     new OmittedNoun(iclause.direct) : new NameNoun(iclause.direct),
   })
 }
 
