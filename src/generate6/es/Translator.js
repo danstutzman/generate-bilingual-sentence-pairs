@@ -1,7 +1,7 @@
 // @flow
 import type { Person, Tense, Number, PreferredPronouns } from './types'
 import type { UniNP } from '../uni/noun_phrases'
-import type { Conjugation } from './verbs/conjugation'
+import type { Conjugation } from './verbs'
 
 const { UniIClause } = require('../uni/uni_iclause')
 const { raise } = require('../raise')
