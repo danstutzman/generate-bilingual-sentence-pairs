@@ -31,7 +31,7 @@ class Pronouns {
     }
   }
 
-  lookupIndirectObj(indirectObj:Ref|void, agent:Ref,
+  lookupIndirectObj(indirectObj:Ref|void, agent:Ref|void,
       refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
     if (indirectObj === undefined) {
       return [undefined, false]
@@ -71,7 +71,7 @@ class Pronouns {
     }
   }
 
-  lookupDirectObj(directObj:Ref, agent:Ref,
+  lookupDirectObj(directObj:Ref, agent:Ref|void,
       refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
     if (directObj === this.yo) {
       return [new Pronoun('me'), true]

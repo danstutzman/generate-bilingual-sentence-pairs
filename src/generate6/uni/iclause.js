@@ -1,21 +1,28 @@
 // @flow
-const { merge } = require('../merge')
+import type { NounPhrase } from './noun_phrases'
+import type { Sexp } from '../types'
 
 class IClause {
-  agent:    string
+  agent:    NounPhrase
   verb:     string
-  indirect: string | void
-  direct:   string
+  indirect: NounPhrase | void
+  direct:   NounPhrase
   question: void | 'What'
 
-  constructor(args:{| agent:string, verb:string, indirect?:string, direct:string |}) {
+  constructor(args:{|
+    agent:     NounPhrase,
+    verb:      string,
+    indirect?: NounPhrase | void,
+    direct:    NounPhrase,
+  |}) {
     this.agent    = args.agent
     this.verb     = args.verb
     this.indirect = args.indirect
     this.direct   = args.direct
   }
-  setQuestion(question:'What') {
-    return merge(this, { question })
+  setQuestion(question:'What'): IClause {
+    this.question = question
+    return this
   }
 }
 

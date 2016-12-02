@@ -1,6 +1,7 @@
 // @flow
 import type { Tense, PreferredPronouns } from './types'
 import type { Ref } from '../types'
+import type { EsNounPhrase } from './noun_phrases'
 
 const { IClause } = require('../uni/iclause')
 const { raise } = require('../raise')
@@ -10,48 +11,26 @@ const { RegularConjugationPattern } = regular_conjugation_pattern_table
 const { join } = require('./join')
 const Pronoun = require('./Pronoun')
 const Pronouns = require('./Pronouns')
-
-class OmittedNoun {
-  ref: Ref
-
-  constructor(ref:Ref) {
-    this.ref = ref
-  }
-  words(): Array<string> {
-    return []
-  }
-}
-
-class NameNoun {
-  ref: Ref
-
-  constructor(ref:Ref) {
-    this.ref = ref
-  }
-  words(): Array<string> {
-    return [this.ref]
-  }
-}
-
-type Noun = OmittedNoun | NameNoun
+const { NameNoun, EsNounClause, translateNounPhrase } = require('./noun_phrases')
+const { expectString } = require('../types')
 
 class IClauseOrder {
   question:        Pronoun|void
-  agent:           Noun
+  agent:           EsNounPhrase
   indirectPronoun: Pronoun|void
   directPronoun:   Pronoun|void
   conjugation:     RegularConjugation
-  indirect:        NameNoun|void
-  direct:          NameNoun
+  indirect:        EsNounPhrase|void
+  direct:          EsNounPhrase
 
   constructor(args:{|
     question?:        Pronoun|void,
-    agent:            Noun,
+    agent:            EsNounPhrase,
     indirectPronoun?: Pronoun|void,
     directPronoun?:   Pronoun|void,
     conjugation:      RegularConjugation,
-    indirect?:        NameNoun|void,
-    direct:           NameNoun,
+    indirect?:        EsNounPhrase|void,
+    direct:           EsNounPhrase,
   |}) {
     this.question        = args.question
     this.agent           = args.agent
@@ -70,8 +49,10 @@ class IClauseOrder {
       .concat(this.indirectPronoun !== undefined ? this.indirectPronoun.words() : [])
       .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
       .concat(this.conjugation.words())
-      .concat(this.direct.words())
-      .concat(this.indirect !== undefined ? ['a'].concat(this.indirect.words()) : [])
+      .concat(!(this.direct instanceof EsNounClause) ? this.direct.words() : [])
+      .concat(this.indirect !== undefined && !this.indirect.omit ?
+        ['a'].concat(this.indirect.words()) : [])
+      .concat(this.direct instanceof EsNounClause ? this.direct.words() : [])
       .concat(this.question !== undefined ? ['?']: [])
   }
 }
@@ -83,21 +64,38 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
     need: 'necesitar',
     have: 'tener',
     give: 'dar',
+    tell: 'decir',
   }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
-  const [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent,
-    refToPreferredPronouns)
+  let person
+  let number
+  let isAgentSpecific
+  if (typeof iclause.agent === 'string') {
+    [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent,
+      refToPreferredPronouns)
+  } else {
+    [person, number, isAgentSpecific] = [3, 1, false]
+  }
 
   const pattern = regular_conjugation_pattern_table.find(
     infinitive, tense, person, number)
 
-  const [indirectPronoun, isIndirectPronounSpecific] =
-    pronouns.lookupIndirectObj(iclause.indirect, iclause.agent, refToPreferredPronouns)
+  let indirectPronoun
+  let isIndirectPronounSpecific = false
+  if (typeof iclause.indirect === 'string') {
+    [indirectPronoun, isIndirectPronounSpecific] =
+      pronouns.lookupIndirectObj(iclause.indirect,
+        typeof iclause.agent === 'string' ? iclause.agent : undefined,
+        refToPreferredPronouns)
+  }
 
   let [directPronoun, isDirectPronounSpecific] = [undefined, false]
-  if (iclause.question !== iclause.direct) {
+  if (iclause.question !== iclause.direct &&
+      typeof iclause.direct === 'string') {
     [directPronoun, isDirectPronounSpecific] =
-      pronouns.lookupDirectObj(iclause.direct, iclause.agent, refToPreferredPronouns)
+      pronouns.lookupDirectObj(iclause.direct,
+        typeof iclause.agent === 'string' ? iclause.agent : undefined,
+        refToPreferredPronouns)
   }
 
   const question = (iclause.question === undefined) ? undefined :
@@ -105,13 +103,13 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
     raise("Unknown question type " + iclause.question)
 
   return new IClauseOrder({
-    agent:       isAgentSpecific ?
-                   new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
+    agent:       translateNounPhrase(iclause.agent).setOmit(isAgentSpecific),
     conjugation: new RegularConjugation({ infinitive, pattern }),
-    indirect:    !isIndirectPronounSpecific && iclause.indirect !== undefined ?
-                   new NameNoun(iclause.indirect) : undefined,
-    direct:      isDirectPronounSpecific || iclause.question === iclause.direct ?
-                   new OmittedNoun(iclause.direct) : new NameNoun(iclause.direct),
+    indirect:    iclause.indirect === undefined ? undefined :
+                   translateNounPhrase(iclause.indirect)
+                     .setOmit(isIndirectPronounSpecific),
+    direct:      translateNounPhrase(iclause.direct).setOmit(isDirectPronounSpecific ||
+                     iclause.question === iclause.direct),
     question, indirectPronoun, directPronoun,
   })
 }
@@ -119,7 +117,6 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
 module.exports = {
   IClauseOrder,
   NameNoun,
-  OmittedNoun,
   Pronouns,
   RegularConjugation,
   RegularConjugationPattern,
