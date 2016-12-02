@@ -1,8 +1,8 @@
 // @flow
 export type Sexp = string|Array<Sexp>
-export type Noun = string
+export type Ref = string
 
-function expectNoun(sexp:Sexp, required:bool): Noun {
+function expectRef(sexp:Sexp, required:bool): Ref {
   if (typeof sexp !== 'string') {
     throw new Error("Expected string but got " + JSON.stringify(sexp))
   }
@@ -16,7 +16,7 @@ function expectNoun(sexp:Sexp, required:bool): Noun {
   return noun
 }
 
-function expectString(sexp:Sexp): Noun {
+function expectString(sexp:Sexp): string {
   if (typeof sexp !== 'string') {
     throw new Error("Expected string but got " + JSON.stringify(sexp))
   }
@@ -30,8 +30,4 @@ function expectStatement(sexp:Sexp): Sexp {
   return sexp
 }
 
-function expectNounOrStatement(sexp:Sexp, required:bool): Noun|Sexp {
-  return (typeof sexp === 'string') ? expectNoun(sexp, required) : expectStatement(sexp)
-}
-
-module.exports = { expectNoun, expectNounOrStatement, expectString, expectStatement }
+module.exports = { expectRef, expectString, expectStatement }

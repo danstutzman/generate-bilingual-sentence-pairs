@@ -22,7 +22,7 @@ suite('generate6', function() {
   suite('translate_to_es', function() {
     test('A need B', function() {
       const from = new IClause({agent:'A', verb:'need', direct:'B'})
-      assert.deepEqual(es.translate(from, 'pres'), new es.IClauseOrder({
+      assert.deepEqual(es.translate(from, 'pres', new es.Pronouns({})), new es.IClauseOrder({
         agent: new es.NameNoun('A'),
         conjugation: new es.RegularConjugation({
           infinitive: 'necesitar',
@@ -46,13 +46,15 @@ suite('generate6', function() {
     })
   })
   suite('integration', function() {
-    for (const pair of [
-      ['need(A,B)', 'A necesita B']
+    for (const [sexp, expected, pronounsInit] of [
+      ['need(A,B)', 'A necesita B',   {}],
+      ['need(A,B)', '(A) necesito B', {yo:'A'}],
     ]) {
-      test(pair[1], /* jshint loopfunc:true */ function() {
-        const iclause = interpretSexp(parseLine(pair[0]))
-        const joined = es.join(es.translate(iclause, 'pres').words())
-        assert.equal(joined, pair[1])
+      test(expected, /* jshint loopfunc:true */ function() {
+        const iclause = interpretSexp(parseLine(sexp))
+        const pronouns = new es.Pronouns(pronounsInit)
+        const joined = es.join(es.translate(iclause, 'pres', pronouns).words())
+        assert.equal(joined, expected)
       })
     }
   })

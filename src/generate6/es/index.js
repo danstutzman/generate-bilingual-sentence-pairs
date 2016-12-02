@@ -1,6 +1,6 @@
 // @flow
 import type { Tense } from './types'
-import type { Noun } from '../types'
+import type { Ref } from '../types'
 
 const { IClause } = require('../uni/iclause')
 const { raise } = require('../raise')
@@ -8,25 +8,39 @@ const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const { RegularConjugationPattern } = regular_conjugation_pattern_table
 const { join } = require('./join')
+const { Pronouns } = require('./Pronouns')
 
-class NameNoun {
-  noun: Noun
+class OmittedNoun {
+  ref: Ref
 
-  constructor(noun: Noun) {
-    this.noun = noun
+  constructor(ref:Ref) {
+    this.ref = ref
   }
   words(): Array<string> {
-    return [this.noun]
+    return ['(' + this.ref + ')']
   }
 }
 
+class NameNoun {
+  ref: Ref
+
+  constructor(ref:Ref) {
+    this.ref = ref
+  }
+  words(): Array<string> {
+    return [this.ref]
+  }
+}
+
+type Noun = OmittedNoun | NameNoun
+
 class IClauseOrder {
-  agent:       NameNoun
+  agent:       Noun
   conjugation: RegularConjugation
   direct:      NameNoun
 
   constructor(args:{|
-    agent:       NameNoun,
+    agent:       Noun,
     conjugation: RegularConjugation,
     direct:      NameNoun,
   |}) {
@@ -43,17 +57,20 @@ class IClauseOrder {
   }
 }
 
-function translate(iclause:IClause, tense:Tense) {
+function translate(iclause:IClause, tense:Tense, pronouns:Pronouns) {
   const infinitive = {
     want: 'querer',
     need: 'necesitar',
     have: 'tener',
   }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
-  const pattern = regular_conjugation_pattern_table.find(infinitive, tense, 3, 1)
+  const [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent)
+
+  const pattern = regular_conjugation_pattern_table.find(infinitive, tense, person, number)
 
   return new IClauseOrder({
-    agent:       new NameNoun(iclause.agent),
+    agent:       isAgentSpecific ?
+                   new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
     conjugation: new RegularConjugation({ infinitive, pattern }),
     direct:      new NameNoun(iclause.direct),
   })
@@ -62,6 +79,8 @@ function translate(iclause:IClause, tense:Tense) {
 module.exports = {
   IClauseOrder,
   NameNoun,
+  OmittedNoun,
+  Pronouns,
   RegularConjugation,
   RegularConjugationPattern,
   join,

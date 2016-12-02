@@ -13,7 +13,7 @@ export type Person = 1 | 2 | 3
 
 export type Number = 1 | 2
 
-export type Gender = "M" | "F"
+export type Gender = "M" | "F" | "?"
 
 function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb): bool {
   switch (kindOfVerb) {
