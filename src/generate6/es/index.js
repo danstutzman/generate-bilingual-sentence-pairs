@@ -1,5 +1,5 @@
 // @flow
-import type { Tense } from './types'
+import type { Tense, PreferredPronouns } from './types'
 import type { Ref } from '../types'
 
 const { IClause } = require('../uni/iclause')
@@ -62,19 +62,21 @@ class IClauseOrder {
   }
 }
 
-function translate(iclause:IClause, tense:Tense, pronouns:Pronouns) {
+function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
+    refToPreferredPronouns:{[ref: string]: PreferredPronouns}) {
   const infinitive = {
     want: 'querer',
     need: 'necesitar',
     have: 'tener',
   }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
-  const [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent)
+  const [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent,
+    refToPreferredPronouns)
 
   const pattern = regular_conjugation_pattern_table.find(infinitive, tense, person, number)
 
   const [directPronoun, isDirectPronounSpecific] =
-    pronouns.lookupDirectObj(iclause.direct, iclause.agent)
+    pronouns.lookupDirectObj(iclause.direct, iclause.agent, refToPreferredPronouns)
 
   return new IClauseOrder({
     agent:         isAgentSpecific ?

@@ -1,4 +1,5 @@
 // @flow
+const { raise } = require('../raise')
 
 export type KindOfVerb =
   "-ar verbs" |
@@ -13,7 +14,7 @@ export type Person = 1 | 2 | 3
 
 export type Number = 1 | 2
 
-export type Gender = "M" | "F" | "?"
+export type Gender = "M" | "F"
 
 function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb): bool {
   switch (kindOfVerb) {
@@ -26,4 +27,14 @@ function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb): bool 
   }
 }
 
-module.exports = { isInfinitiveKindOfVerb }
+export type PreferredPronouns = "yo/él" | "yo/ella" | "nosotros/ellos" | "nosotras/ellas"
+function preferenceToGenderNumber(pronouns:PreferredPronouns): [Gender, Number] {
+  return {
+    "yo/él":          ['M', 1],
+    "yo/ella":        ['F', 1],
+    "nosotros/ellos": ['M', 2],
+    "nosotras/ellas": ['F', 2],
+  }[pronouns] || raise("Unknown preferred pronouns " + pronouns)
+}
+
+module.exports = { isInfinitiveKindOfVerb, preferenceToGenderNumber }
