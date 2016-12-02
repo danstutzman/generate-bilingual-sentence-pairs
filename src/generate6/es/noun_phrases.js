@@ -3,7 +3,7 @@ import type { Ref } from '../types'
 import type { NounPhrase } from '../uni/noun_phrases'
 
 const { NounClause } = require('../uni/noun_phrases')
-const IClauseOrder = require('./IClauseOrder')
+const EsIClause = require('./EsIClause')
 
 class NameNoun {
   ref:  Ref
@@ -22,10 +22,10 @@ class NameNoun {
 }
 
 class EsNounClause {
-  iclause: IClauseOrder
+  iclause: EsIClause
   omit:    bool
 
-  constructor(iclause:IClauseOrder) {
+  constructor(iclause:EsIClause) {
     this.iclause = iclause
   }
   setOmit(omit:bool): EsNounClause {

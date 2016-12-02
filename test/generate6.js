@@ -7,7 +7,7 @@ const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
 const Pronouns               = require('../src/generate6/es/Pronouns')
 const Translator             = require('../src/generate6/es/Translator')
 const { join }               = require('../src/generate6/es/join')
-const IClauseOrder           = require('../src/generate6/es/IClauseOrder')
+const EsIClause              = require('../src/generate6/es/EsIClause')
 const { NameNoun }           = require('../src/generate6/es/noun_phrases')
 const RegularConjugation     = require('../src/generate6//es/RegularConjugation.js')
 const { RegularConjugationPattern } =
@@ -31,7 +31,7 @@ suite('generate6', function() {
       const from = new IClause({agent:'A', verb:'need', direct:'B'})
       const translated = new Translator('pres', new Pronouns({}),
         {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
-      assert.deepEqual(translated, new IClauseOrder({
+      assert.deepEqual(translated, new EsIClause({
         agent: new NameNoun('A').setOmit(false),
         conjugation: new RegularConjugation({
           infinitive: 'necesitar',
@@ -43,7 +43,7 @@ suite('generate6', function() {
   })
   suite('words', function() {
     test('A need B', function() {
-      const iclause = new IClauseOrder({
+      const iclause = new EsIClause({
         agent: new NameNoun('A'),
         conjugation: new RegularConjugation({
           infinitive: 'necesitar',

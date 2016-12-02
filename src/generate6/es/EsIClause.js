@@ -5,7 +5,7 @@ import type { Conjugation } from './conjugation'
 const EsPronoun        = require('./EsPronoun')
 const { EsNounClause } = require('./noun_phrases')
 
-class IClauseOrder {
+class EsIClause {
   question:        EsPronoun|void
   agent:           EsNounPhrase
   indirectPronoun: EsPronoun|void
@@ -48,4 +48,4 @@ class IClauseOrder {
   }
 }
 
-module.exports = IClauseOrder
+module.exports = EsIClause

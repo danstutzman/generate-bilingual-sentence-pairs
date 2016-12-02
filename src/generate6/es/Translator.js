@@ -9,7 +9,7 @@ const regular_conjugation_pattern_table = require('./regular_conjugation_pattern
 const unique_conjugation_table = require('./unique_conjugation_table')
 const EsPronoun = require('./EsPronoun')
 const Pronouns = require('./Pronouns')
-const IClauseOrder = require('./IClauseOrder')
+const EsIClause = require('./EsIClause')
 const { NounClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNounClause } = require('./noun_phrases')
 
@@ -81,7 +81,7 @@ class Translator {
       (iclause.question === 'What') ? new EsPronoun('qué') :
       raise("Unknown question type " + iclause.question)
 
-    return new IClauseOrder({
+    return new EsIClause({
       agent:       this.translateNounPhrase(iclause.agent).setOmit(isAgentSpecific),
       indirect:    iclause.indirect === undefined ? undefined :
                      this.translateNounPhrase(iclause.indirect)
