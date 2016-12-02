@@ -2,7 +2,9 @@
 const { parseLine }          = require('./uni/parse_line')
 const { IClause }            = require('./uni/iclause')
 const { interpretIClause }   = require('./uni/interpret_sexp')
-const es                     = require('./es')
+const Pronouns               = require('./es/Pronouns')
+const Translator             = require('./es/Translator')
+const { join }               = require('./es/join')
 
 const refToPreferredPronouns = {
   'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
@@ -12,7 +14,8 @@ const refToPreferredPronouns = {
 const sexp = 'need(A,B)'
 const pronounsInit = {}
 const iclause = interpretIClause(parseLine(sexp))
-const pronouns = new es.Pronouns(pronounsInit)
-const translated = es.translate(iclause, 'pres', pronouns, refToPreferredPronouns)
-const joined = es.join(translated.words())
+const pronouns = new Pronouns(pronounsInit)
+const translated = new Translator('pres', pronouns, refToPreferredPronouns)
+  .translateIClause(iclause)
+const joined = join(translated.words())
 console.log(joined)

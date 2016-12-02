@@ -3,6 +3,7 @@ import type { Ref } from '../types'
 import type { NounPhrase } from '../uni/noun_phrases'
 
 const { NounClause } = require('../uni/noun_phrases')
+const IClauseOrder = require('./IClauseOrder')
 
 class NameNoun {
   ref:  Ref
@@ -21,27 +22,21 @@ class NameNoun {
 }
 
 class EsNounClause {
-  omit: bool
+  iclause: IClauseOrder
+  omit:    bool
 
+  constructor(iclause:IClauseOrder) {
+    this.iclause = iclause
+  }
   setOmit(omit:bool): EsNounClause {
     this.omit = omit
     return this
   }
   words(): Array<string> {
-    return ['que...']
+    return ['que'].concat(this.iclause.words())
   }
 }
 
 export type EsNounPhrase = NameNoun | EsNounClause
 
-function translateNounPhrase(np:NounPhrase) {
-  if (typeof np == 'string') {
-    return new NameNoun(np)
-  } else if (np instanceof NounClause) {
-    return new EsNounClause()
-  } else {
-    throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
-  }
-}
-
-module.exports = { NameNoun, EsNounClause, translateNounPhrase }
+module.exports = { NameNoun, EsNounClause }

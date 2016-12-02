@@ -4,7 +4,14 @@ const { setup, suite, test } = require('mocha')
 const { parseLine }          = require('../src/generate6/uni/parse_line')
 const { IClause }            = require('../src/generate6/uni/iclause')
 const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
-const es                     = require('../src/generate6/es')
+const Pronouns               = require('../src/generate6/es/Pronouns')
+const Translator             = require('../src/generate6/es/Translator')
+const { join }               = require('../src/generate6/es/join')
+const IClauseOrder           = require('../src/generate6/es/IClauseOrder')
+const { NameNoun }           = require('../src/generate6/es/noun_phrases')
+const RegularConjugation     = require('../src/generate6//es/RegularConjugation.js')
+const { RegularConjugationPattern } =
+  require('../src/generate6/es/regular_conjugation_pattern_table')
 
 suite('generate6', function() {
   suite('parse_line', function() {
@@ -22,27 +29,27 @@ suite('generate6', function() {
   suite('translate_to_es', function() {
     test('A need B', function() {
       const from = new IClause({agent:'A', verb:'need', direct:'B'})
-      const translated = es.translate(from, 'pres', new es.Pronouns({}),
-        {'A':'yo/él', 'B':'yo/él'})
-      assert.deepEqual(translated, new es.IClauseOrder({
-        agent: new es.NameNoun('A').setOmit(false),
-        conjugation: new es.RegularConjugation({
+      const translated = new Translator('pres', new Pronouns({}),
+        {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
+      assert.deepEqual(translated, new IClauseOrder({
+        agent: new NameNoun('A').setOmit(false),
+        conjugation: new RegularConjugation({
           infinitive: 'necesitar',
-          pattern: new es.RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
+          pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
-        direct: new es.NameNoun('B').setOmit(false),
+        direct: new NameNoun('B').setOmit(false),
       }))
     })
   })
   suite('words', function() {
     test('A need B', function() {
-      const iclause = new es.IClauseOrder({
-        agent: new es.NameNoun('A'),
-        conjugation: new es.RegularConjugation({
+      const iclause = new IClauseOrder({
+        agent: new NameNoun('A'),
+        conjugation: new RegularConjugation({
           infinitive: 'necesitar',
-          pattern: new es.RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
+          pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
-        direct: new es.NameNoun('B'),
+        direct: new NameNoun('B'),
       })
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })
@@ -65,13 +72,14 @@ suite('generate6', function() {
       ['give(A,B,Libros)', 'A da Libros a B', {}],
       ['give(A,B,Libros)', 'A me da Libros', {yo:'B'}],
       ['give(A,B,Libros)', 'A le da Libros', {recent:['B']}],
-      ['tell(A,B,that(need(A,B)))', 'A dice a B que A necesita B', {}],
+      ['tell(A,B,that(need(A,B)))', 'A dice a B que A lo necesita', {}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const iclause = interpretIClause(parseLine(sexp))
-        const pronouns = new es.Pronouns(pronounsInit)
-        const translated = es.translate(iclause, 'pres', pronouns, refToPreferredPronouns)
-        const joined = es.join(translated.words())
+        const pronouns = new Pronouns(pronounsInit)
+        const translated = new Translator('pres', pronouns, refToPreferredPronouns)
+          .translateIClause(iclause)
+        const joined = join(translated.words())
         assert.equal(joined, expected)
       })
     }
