@@ -1,17 +1,50 @@
 // @flow
-import type { Tense, PreferredPronouns } from './types'
+import type { Person, Tense, Number, PreferredPronouns } from './types'
 import type { UniNP } from '../uni/noun_phrases'
+import type { Conjugation } from './conjugation'
 
 const { UniIClause } = require('../uni/uni_iclause')
 const { raise } = require('../raise')
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const unique_conjugation_table = require('./unique_conjugation_table')
+const stem_change_table = require('./stem_change_table')
 const EsPronoun = require('./EsPronoun')
 const EsPronouns = require('./EsPronouns')
 const EsIClause = require('./EsIClause')
 const { UniNClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNounClause } = require('./noun_phrases')
+
+function conjugate(infinitive:string, tense:Tense, person:Person, number:Number):
+    Conjugation {
+  const uniqueConjugations = unique_conjugation_table.find01(
+    infinitive, tense, person, number)
+  if (uniqueConjugations.length === 1) {
+    return uniqueConjugations[0]
+  }
+
+  const stemChanges = stem_change_table.find01(infinitive, tense)
+  if (stemChanges.length === 1) {
+    const patterns = regular_conjugation_pattern_table.find01(
+      infinitive, tense, person, number, true)
+    if (patterns.length === 1) {
+      return new stem_change_table.StemChangeConjugation(infinitive, stemChanges[0],
+        patterns[0])
+    } else {
+      throw new Error(`Can't find RegularConjugationPattern for stem-changing
+        ${infinitive}.${tense}.${person}.${number}`)
+    }
+  }
+
+  const regularPatterns = regular_conjugation_pattern_table.find01(
+    infinitive, tense, person, number, false)
+  if (regularPatterns.length === 1) {
+    return new RegularConjugation({ infinitive, pattern:regularPatterns[0] })
+  } else {
+    throw new Error(`Can't find UniqueConjugation or RegularConjugation for
+      ${infinitive}.${tense}.${person}.${number}`)
+  }
+}
 
 class Translator {
   tense:                  Tense
@@ -43,21 +76,7 @@ class Translator {
       [person, number, isAgentSpecific] = [3, 1, false]
     }
 
-    let conjugation
-    const uniqueConjugations = unique_conjugation_table.find01(
-      infinitive, this.tense, person, number)
-    if (uniqueConjugations.length === 1) {
-      conjugation = uniqueConjugations[0]
-    } else {
-      const regularPatterns = regular_conjugation_pattern_table.find01(
-        infinitive, this.tense, person, number)
-      if (regularPatterns.length === 1) {
-        conjugation = new RegularConjugation({ infinitive, pattern:regularPatterns[0] })
-      } else {
-        throw new Error(`Can't find UniqueConjugation or RegularConjugation for
-          ${infinitive}.${this.tense}.${person}.${number}`)
-      }
-    }
+    const conjugation = conjugate(infinitive, this.tense, person, number)
 
     let indirectPronoun
     let isIndirectPronounSpecific = false

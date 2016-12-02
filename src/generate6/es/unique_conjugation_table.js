@@ -77,9 +77,6 @@ const table = [
   new UniqueConjugation("enviar",  "pres", 2, 1, "envías"),
   new UniqueConjugation("enviar",  "pres", 3, 1, "envía"),
   new UniqueConjugation("enviar",  "pres", 1, 2, "envían"),
-
-  // TODO: remove when implement stem-changers
-  new UniqueConjugation("decir", "pres", 3, 1, "dice"),
 ]
 
 function find01(infinitive:string, tense:Tense, person:Person,

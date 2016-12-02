@@ -50,10 +50,10 @@ const table : Array<RegularConjugationPattern> = [
 ]
 
 function find01(infinitive:string, tense:Tense, person:Person,
-    number:Number): Array<RegularConjugationPattern> {
+    number:Number, isStemChange:bool): Array<RegularConjugationPattern> {
   const patterns = []
   for (const pattern of table) {
-    if (isInfinitiveKindOfVerb(infinitive, pattern.kindOfVerb) &&
+    if (isInfinitiveKindOfVerb(infinitive, pattern.kindOfVerb, isStemChange) &&
         pattern.tense === tense &&
         pattern.person === person &&
         pattern.number === number) {
