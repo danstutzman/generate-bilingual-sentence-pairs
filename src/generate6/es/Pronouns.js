@@ -31,41 +31,81 @@ class Pronouns {
     }
   }
 
+  lookupIndirectObj(indirectObj:Ref|void, agent:Ref,
+      refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
+    if (indirectObj === undefined) {
+      return [undefined, false]
+    } else if (indirectObj === this.yo) {
+      return [new Pronoun('me'), true]
+    }
+
+    const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[indirectObj] ||
+      raise("Can't find preferred pronoun for " + indirectObj))
+
+    const possible: Array<Ref> = []
+    for (const possibleRef of this.recent) {
+      if (possibleRef === agent) {
+        // not confusable because we'd use reflexive for that
+      } else {
+        const [possibleGen, possibleNum] = preferenceToGenderNumber(
+          refToPreferredPronouns[possibleRef] ||
+          raise("Can't find preferred pronoun for " + possibleRef))
+        if (possibleGen === gen && possibleNum === num) {
+          possible.push(possibleRef)
+        }
+      }
+    }
+
+    const isSpecific = (possible.length === 1 && possible[0] === indirectObj)
+    if (this.recent.indexOf(indirectObj) === -1) {
+      this.recent.push(indirectObj)
+    }
+
+    if (isSpecific) {
+      const pronoun:string = {
+        _1:'le', _2:'les',
+      }['_' + num] || raise("Can't find pronoun for '" + num + "'")
+      return [new Pronoun(pronoun), isSpecific]
+    } else {
+      return [undefined, false]
+    }
+  }
+
   lookupDirectObj(directObj:Ref, agent:Ref,
       refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
     if (directObj === this.yo) {
       return [new Pronoun('me'), true]
-    } else {
-      const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[directObj] ||
-        raise("Can't find preferred pronoun for " + directObj))
+    }
 
-      const possible: Array<Ref> = []
-      for (const possibleRef of this.recent) {
-        if (possibleRef === agent) {
-          // not confusable because we'd use reflexive for that
-        } else {
-          const [possibleGen, possibleNum] = preferenceToGenderNumber(
-            refToPreferredPronouns[possibleRef] ||
-            raise("Can't find preferred pronoun for " + possibleRef))
-          if (possibleGen === gen && possibleNum === num) {
-            possible.push(possibleRef)
-          }
+    const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[directObj] ||
+      raise("Can't find preferred pronoun for " + directObj))
+
+    const possible: Array<Ref> = []
+    for (const possibleRef of this.recent) {
+      if (possibleRef === agent) {
+        // not confusable because we'd use reflexive for that
+      } else {
+        const [possibleGen, possibleNum] = preferenceToGenderNumber(
+          refToPreferredPronouns[possibleRef] ||
+          raise("Can't find preferred pronoun for " + possibleRef))
+        if (possibleGen === gen && possibleNum === num) {
+          possible.push(possibleRef)
         }
       }
+    }
 
-      const isSpecific = (possible.length === 1 && possible[0] === directObj)
-      if (this.recent.indexOf(directObj) === -1) {
-        this.recent.push(directObj)
-      }
+    const isSpecific = (possible.length === 1 && possible[0] === directObj)
+    if (this.recent.indexOf(directObj) === -1) {
+      this.recent.push(directObj)
+    }
 
-      if (isSpecific) {
-        const pronoun:string = {
-          _M1:'lo', _F1:'la', _M2:'los', _F2:'las',
-        }['_' + gen + num] || raise("Can't find pronoun for '" + gen + num + "'")
-        return [new Pronoun(pronoun), isSpecific]
-      } else {
-        return [undefined, false]
-      }
+    if (isSpecific) {
+      const pronoun:string = {
+        _M1:'lo', _F1:'la', _M2:'los', _F2:'las',
+      }['_' + gen + num] || raise("Can't find pronoun for '" + gen + num + "'")
+      return [new Pronoun(pronoun), isSpecific]
+    } else {
+      return [undefined, false]
     }
   }
 }

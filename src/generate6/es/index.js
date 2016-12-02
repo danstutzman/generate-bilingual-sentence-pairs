@@ -36,24 +36,30 @@ class NameNoun {
 type Noun = OmittedNoun | NameNoun
 
 class IClauseOrder {
-  question:      Pronoun|void
-  agent:         Noun
-  directPronoun: Pronoun|void
-  conjugation:   RegularConjugation
-  direct:        NameNoun
+  question:        Pronoun|void
+  agent:           Noun
+  indirectPronoun: Pronoun|void
+  directPronoun:   Pronoun|void
+  conjugation:     RegularConjugation
+  indirect:        NameNoun|void
+  direct:          NameNoun
 
   constructor(args:{|
-    question?:      Pronoun|void,
-    agent:          Noun,
-    directPronoun?: Pronoun|void,
-    conjugation:    RegularConjugation,
-    direct:         NameNoun,
+    question?:        Pronoun|void,
+    agent:            Noun,
+    indirectPronoun?: Pronoun|void,
+    directPronoun?:   Pronoun|void,
+    conjugation:      RegularConjugation,
+    indirect?:        NameNoun|void,
+    direct:           NameNoun,
   |}) {
-    this.question      = args.question
-    this.agent         = args.agent
-    this.directPronoun = args.directPronoun
-    this.conjugation   = args.conjugation
-    this.direct        = args.direct
+    this.question        = args.question
+    this.agent           = args.agent
+    this.indirectPronoun = args.indirectPronoun
+    this.directPronoun   = args.directPronoun
+    this.conjugation     = args.conjugation
+    this.indirect        = args.indirect
+    this.direct          = args.direct
   }
 
   words(): Array<string> {
@@ -61,9 +67,11 @@ class IClauseOrder {
       .concat(this.question !== undefined ? ['¿']: [])
       .concat(this.question !== undefined ? this.question.words() : [])
       .concat(this.agent.words())
+      .concat(this.indirectPronoun !== undefined ? this.indirectPronoun.words() : [])
       .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
       .concat(this.conjugation.words())
       .concat(this.direct.words())
+      .concat(this.indirect !== undefined ? ['a'].concat(this.indirect.words()) : [])
       .concat(this.question !== undefined ? ['?']: [])
   }
 }
@@ -74,6 +82,7 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
     want: 'querer',
     need: 'necesitar',
     have: 'tener',
+    give: 'dar',
   }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
   const [person, number, isAgentSpecific] = pronouns.lookupAgent(iclause.agent,
@@ -81,6 +90,9 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
 
   const pattern = regular_conjugation_pattern_table.find(
     infinitive, tense, person, number)
+
+  const [indirectPronoun, isIndirectPronounSpecific] =
+    pronouns.lookupIndirectObj(iclause.indirect, iclause.agent, refToPreferredPronouns)
 
   let [directPronoun, isDirectPronounSpecific] = [undefined, false]
   if (iclause.question !== iclause.direct) {
@@ -93,13 +105,14 @@ function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
     raise("Unknown question type " + iclause.question)
 
   return new IClauseOrder({
-    question:      question,
-    agent:         isAgentSpecific ?
-                     new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
-    directPronoun: directPronoun,
-    conjugation:   new RegularConjugation({ infinitive, pattern }),
-    direct:        isDirectPronounSpecific || iclause.question === iclause.direct ?
-                     new OmittedNoun(iclause.direct) : new NameNoun(iclause.direct),
+    agent:       isAgentSpecific ?
+                   new OmittedNoun(iclause.agent) : new NameNoun(iclause.agent),
+    conjugation: new RegularConjugation({ infinitive, pattern }),
+    indirect:    !isIndirectPronounSpecific && iclause.indirect !== undefined ?
+                   new NameNoun(iclause.indirect) : undefined,
+    direct:      isDirectPronounSpecific || iclause.question === iclause.direct ?
+                   new OmittedNoun(iclause.direct) : new NameNoun(iclause.direct),
+    question, indirectPronoun, directPronoun,
   })
 }
 
