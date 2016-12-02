@@ -1,19 +1,19 @@
 // @flow
-import type { NounPhrase } from './noun_phrases'
+import type { UniNP } from './noun_phrases'
 import type { Sexp } from '../types'
 
 class UniIClause {
-  agent:    NounPhrase
+  agent:    UniNP
   verb:     string
-  indirect: NounPhrase | void
-  direct:   NounPhrase
+  indirect: UniNP | void
+  direct:   UniNP
   question: void | 'What'
 
   constructor(args:{|
-    agent:     NounPhrase,
+    agent:     UniNP,
     verb:      string,
-    indirect?: NounPhrase | void,
-    direct:    NounPhrase,
+    indirect?: UniNP | void,
+    direct:    UniNP,
   |}) {
     this.agent    = args.agent
     this.verb     = args.verb

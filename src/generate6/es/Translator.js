@@ -1,6 +1,6 @@
 // @flow
 import type { Tense, PreferredPronouns } from './types'
-import type { NounPhrase } from '../uni/noun_phrases'
+import type { UniNP } from '../uni/noun_phrases'
 
 const { UniIClause } = require('../uni/uni_iclause')
 const { raise } = require('../raise')
@@ -10,7 +10,7 @@ const unique_conjugation_table = require('./unique_conjugation_table')
 const EsPronoun = require('./EsPronoun')
 const EsPronouns = require('./EsPronouns')
 const EsIClause = require('./EsIClause')
-const { NounClause } = require('../uni/noun_phrases')
+const { UniNClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNounClause } = require('./noun_phrases')
 
 class Translator {
@@ -91,10 +91,10 @@ class Translator {
       conjugation, question, indirectPronoun, directPronoun,
     })
   }
-  translateNounPhrase(np:NounPhrase) {
+  translateNounPhrase(np:UniNP) {
     if (typeof np == 'string') {
       return new NameNoun(np)
-    } else if (np instanceof NounClause) {
+    } else if (np instanceof UniNClause) {
       return new EsNounClause(this.translateIClause(np.iclause))
     } else {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))

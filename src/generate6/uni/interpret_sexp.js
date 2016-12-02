@@ -1,10 +1,10 @@
 // @flow
 import type { Sexp } from '../types'
-import type { NounPhrase } from './noun_phrases'
+import type { UniNP } from './noun_phrases'
 
 const { expectString } = require('../types')
 const { UniIClause } = require('./uni_iclause')
-const { NounClause } = require('./noun_phrases')
+const { UniNClause } = require('./noun_phrases')
 
 const ICLAUSE_VERBS = {
   'ask':true,
@@ -21,8 +21,8 @@ function interpretIClause(sexp:Sexp): UniIClause {
   if (ICLAUSE_VERBS[head]) {
     const verb = head
     const agent = interpretNP(sexp[1])
-    let indirect:NounPhrase|void
-    let direct:NounPhrase
+    let indirect:UniNP|void
+    let direct:UniNP
     if (sexp.length === 3) {
       direct = interpretNP(sexp[2])
     } else if (sexp.length === 4) {
@@ -41,7 +41,7 @@ function interpretIClause(sexp:Sexp): UniIClause {
   }
 }
 
-function interpretNP(sexp:Sexp): NounPhrase {
+function interpretNP(sexp:Sexp): UniNP {
   if (typeof sexp === 'string') {
     const ref = sexp.toString()
     if (ref === '') {
@@ -54,7 +54,7 @@ function interpretNP(sexp:Sexp): NounPhrase {
     const head = expectString(sexp[0])
     if (head === 'that') {
       const iclause = interpretIClause(sexp[1])
-      return new NounClause('that', iclause)
+      return new UniNClause('that', iclause)
     } else {
       throw new Error("Unknown head " + head)
     }
@@ -62,6 +62,5 @@ function interpretNP(sexp:Sexp): NounPhrase {
     throw new Error("Expected string or array but got " + JSON.stringify(sexp))
   }
 }
-
 
 module.exports = { interpretIClause }

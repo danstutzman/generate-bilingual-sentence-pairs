@@ -1,8 +1,6 @@
 // @flow
 import type { Ref } from '../types'
-import type { NounPhrase } from '../uni/noun_phrases'
 
-const { NounClause } = require('../uni/noun_phrases')
 const EsIClause = require('./EsIClause')
 
 class NameNoun {

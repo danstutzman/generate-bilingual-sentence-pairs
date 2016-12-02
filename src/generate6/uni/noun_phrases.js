@@ -3,7 +3,7 @@ import type { Sexp } from '../types'
 
 const { UniIClause } = require('./uni_iclause')
 
-class NounClause {
+class UniNClause {
   type: 'that'
   iclause: UniIClause
   constructor(type:'that', iclause:UniIClause) {
@@ -12,6 +12,6 @@ class NounClause {
   }
 }
 
-export type NounPhrase = string | NounClause
+export type UniNP = string | UniNClause
 
-module.exports = { NounClause }
+module.exports = { UniNClause }
