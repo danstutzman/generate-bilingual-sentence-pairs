@@ -2,23 +2,23 @@
 import type { EsNounPhrase } from './noun_phrases'
 import type { Conjugation } from './conjugation'
 
-const Pronoun = require('./Pronoun')
+const EsPronoun        = require('./EsPronoun')
 const { EsNounClause } = require('./noun_phrases')
 
 class IClauseOrder {
-  question:        Pronoun|void
+  question:        EsPronoun|void
   agent:           EsNounPhrase
-  indirectPronoun: Pronoun|void
-  directPronoun:   Pronoun|void
+  indirectPronoun: EsPronoun|void
+  directPronoun:   EsPronoun|void
   conjugation:     Conjugation
   indirect:        EsNounPhrase|void
   direct:          EsNounPhrase
 
   constructor(args:{|
-    question?:        Pronoun|void,
+    question?:        EsPronoun|void,
     agent:            EsNounPhrase,
-    indirectPronoun?: Pronoun|void,
-    directPronoun?:   Pronoun|void,
+    indirectPronoun?: EsPronoun|void,
+    directPronoun?:   EsPronoun|void,
     conjugation:      Conjugation,
     indirect?:        EsNounPhrase|void,
     direct:           EsNounPhrase,

@@ -7,7 +7,7 @@ const { raise } = require('../raise')
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const unique_conjugation_table = require('./unique_conjugation_table')
-const Pronoun = require('./Pronoun')
+const EsPronoun = require('./EsPronoun')
 const Pronouns = require('./Pronouns')
 const IClauseOrder = require('./IClauseOrder')
 const { NounClause } = require('../uni/noun_phrases')
@@ -78,7 +78,7 @@ class Translator {
     }
 
     const question = (iclause.question === undefined) ? undefined :
-      (iclause.question === 'What') ? new Pronoun('qué') :
+      (iclause.question === 'What') ? new EsPronoun('qué') :
       raise("Unknown question type " + iclause.question)
 
     return new IClauseOrder({

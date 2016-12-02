@@ -3,7 +3,7 @@ import type { Ref } from '../types'
 import type { Gender, Person, Number, PreferredPronouns } from './types'
 
 const { raise } = require('../raise')
-const Pronoun = require('./Pronoun')
+const EsPronoun = require('./EsPronoun')
 const { preferenceToGenderNumber } = require('./types')
 
 class Pronouns {
@@ -32,11 +32,11 @@ class Pronouns {
   }
 
   lookupIndirectObj(indirectObj:Ref|void, agent:Ref|void,
-      refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
+      refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [EsPronoun|void, bool] {
     if (indirectObj === undefined) {
       return [undefined, false]
     } else if (indirectObj === this.yo) {
-      return [new Pronoun('me'), true]
+      return [new EsPronoun('me'), true]
     }
 
     const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[indirectObj] ||
@@ -65,16 +65,16 @@ class Pronouns {
       const pronoun:string = {
         '_1':'le', '_2':'les',
       }['_' + num] || raise("Can't find pronoun for '" + num + "'")
-      return [new Pronoun(pronoun), isSpecific]
+      return [new EsPronoun(pronoun), isSpecific]
     } else {
       return [undefined, false]
     }
   }
 
   lookupDirectObj(directObj:Ref, agent:Ref|void,
-      refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [Pronoun|void, bool] {
+      refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [EsPronoun|void, bool] {
     if (directObj === this.yo) {
-      return [new Pronoun('me'), true]
+      return [new EsPronoun('me'), true]
     }
 
     const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[directObj] ||
@@ -103,7 +103,7 @@ class Pronouns {
       const pronoun:string = {
         '_M1':'lo', '_F1':'la', '_M2':'los', '_F2':'las',
       }['_' + gen + num] || raise("Can't find pronoun for '" + gen + num + "'")
-      return [new Pronoun(pronoun), isSpecific]
+      return [new EsPronoun(pronoun), isSpecific]
     } else {
       return [undefined, false]
     }

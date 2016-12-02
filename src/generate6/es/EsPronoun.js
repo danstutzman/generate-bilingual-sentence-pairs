@@ -1,6 +1,6 @@
 // @flow
 
-class Pronoun {
+class EsPronoun {
   word: string
 
   constructor(word:string) {
@@ -14,4 +14,4 @@ class Pronoun {
   }
 }
 
-module.exports = Pronoun
+module.exports = EsPronoun
