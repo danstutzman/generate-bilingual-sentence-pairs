@@ -7,13 +7,13 @@ const { IClause } = require('./iclause')
 const { NounClause } = require('./noun_phrases')
 
 const ICLAUSE_VERBS = {
-  ask:true,
-  tell:true,
-  command:true,
-  want:true,
-  need:true,
-  have:true,
-  give:true,
+  'ask':true,
+  'tell':true,
+  'command':true,
+  'want':true,
+  'need':true,
+  'have':true,
+  'give':true,
 }
 
 function interpretIClause(sexp:Sexp): IClause {

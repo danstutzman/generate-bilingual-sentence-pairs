@@ -60,11 +60,11 @@ class IClauseOrder {
 function translate(iclause:IClause, tense:Tense, pronouns:Pronouns,
     refToPreferredPronouns:{[ref: string]: PreferredPronouns}) {
   const infinitive = {
-    want: 'querer',
-    need: 'necesitar',
-    have: 'tener',
-    give: 'dar',
-    tell: 'decir',
+    'want': 'querer',
+    'need': 'necesitar',
+    'have': 'tener',
+    'give': 'dar',
+    'tell': 'decir',
   }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
   let person

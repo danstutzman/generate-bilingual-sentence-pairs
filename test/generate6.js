@@ -49,8 +49,8 @@ suite('generate6', function() {
   })
   suite('integration', function() {
     const refToPreferredPronouns = {
-      A:'yo/él', AA:'nosotros/ellos', B:'yo/él', Libro:'yo/él', Libros:'nosotros/ellos',
-      Pluma:'yo/ella',
+      'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
+      'Libros':'nosotros/ellos', 'Pluma':'yo/ella',
     }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A necesita B', {}],
