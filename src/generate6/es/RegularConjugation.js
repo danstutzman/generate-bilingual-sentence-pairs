@@ -12,8 +12,7 @@ class RegularConjugation {
   }
 
   words(): Array<string> {
-    const stem = this.infinitive.substring(0,
-      this.infinitive.length - this.pattern.suffix.length) + '-'
+    const stem = this.infinitive.substring(0, this.infinitive.length - 2) + '-'
     return [stem, this.pattern.suffix]
   }
 }

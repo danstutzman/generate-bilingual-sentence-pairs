@@ -48,10 +48,13 @@ suite('generate6', function() {
     })
   })
   suite('integration', function() {
-    const refToPreferredPronouns = { A:'yo/él', B:'yo/él', Libro: 'yo/él', Pluma: 'yo/ella' }
+    const refToPreferredPronouns = {
+      A:'yo/él', AA:'nosotros/ellos', B:'yo/él', Libro: 'yo/él', Pluma: 'yo/ella',
+    }
     for (const [sexp, expected, pronounsInit] of [
-      ['need(A,B)', 'A necesita B',   {}],
+      ['need(A,B)', 'A necesita B', {}],
       ['need(A,B)', '(A) necesito B', {yo:'A'}],
+      ['need(AA,B)', 'AA necesitan B', {}],
       ['need(A,Libro)', 'A necesita Libro', {}],
       ['need(A,Libro)', 'A lo necesita (Libro)', {recent:['Libro']}],
       ['need(A,Pluma)', 'A la necesita (Pluma)', {recent:['Pluma']}],
