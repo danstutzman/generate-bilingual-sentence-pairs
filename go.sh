@@ -21,3 +21,10 @@ node_modules/.bin/jshint `find build -name '*.js'`
 #node build/src/generate3.js
 #node build/src/generate5/parse_game2.js
 node_modules/.bin/mocha build/test --grep generate6
+
+#echo "Browserify..."
+#node_modules/.bin/browserify build/src/generate6/test.js -o build/browserified.js
+#echo "Google Closure Compiler..."
+#java -jar node_modules/google-closure-compiler//compiler.jar \
+#  --compilation_level ADVANCED_OPTIMIZATIONS --js build/browserified.js \
+#  > build/browserified.min.js
