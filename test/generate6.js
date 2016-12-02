@@ -53,6 +53,7 @@ suite('generate6', function() {
     }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A necesita B', {}],
+      ['need(A,B)', '(A) necesita B', {recent:['A']}],
       ['need(A,B)', '(A) necesito B', {yo:'A'}],
       ['need(AA,B)', 'AA necesitan B', {}],
       ['need(A,Libro)', 'A necesita Libro', {}],
