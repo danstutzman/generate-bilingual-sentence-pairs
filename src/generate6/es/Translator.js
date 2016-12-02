@@ -8,17 +8,17 @@ const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
 const unique_conjugation_table = require('./unique_conjugation_table')
 const EsPronoun = require('./EsPronoun')
-const Pronouns = require('./Pronouns')
+const EsPronouns = require('./EsPronouns')
 const EsIClause = require('./EsIClause')
 const { NounClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNounClause } = require('./noun_phrases')
 
 class Translator {
   tense:                  Tense
-  pronouns:               Pronouns
+  pronouns:               EsPronouns
   refToPreferredPronouns: {[ref:string]:PreferredPronouns}
 
-  constructor(tense:Tense, pronouns:Pronouns,
+  constructor(tense:Tense, pronouns:EsPronouns,
       refToPreferredPronouns:{[ref:string]:PreferredPronouns}) {
     this.tense                  = tense
     this.pronouns               = pronouns

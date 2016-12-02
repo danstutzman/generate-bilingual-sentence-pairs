@@ -4,7 +4,7 @@ const { setup, suite, test } = require('mocha')
 const { parseLine }          = require('../src/generate6/uni/parse_line')
 const { IClause }            = require('../src/generate6/uni/iclause')
 const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
-const Pronouns               = require('../src/generate6/es/Pronouns')
+const EsPronouns             = require('../src/generate6/es/EsPronouns')
 const Translator             = require('../src/generate6/es/Translator')
 const { join }               = require('../src/generate6/es/join')
 const EsIClause              = require('../src/generate6/es/EsIClause')
@@ -29,7 +29,7 @@ suite('generate6', function() {
   suite('translate_to_es', function() {
     test('A need B', function() {
       const from = new IClause({agent:'A', verb:'need', direct:'B'})
-      const translated = new Translator('pres', new Pronouns({}),
+      const translated = new Translator('pres', new EsPronouns({}),
         {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
       assert.deepEqual(translated, new EsIClause({
         agent: new NameNoun('A').setOmit(false),
@@ -76,7 +76,7 @@ suite('generate6', function() {
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const iclause = interpretIClause(parseLine(sexp))
-        const pronouns = new Pronouns(pronounsInit)
+        const pronouns = new EsPronouns(pronounsInit)
         const translated = new Translator('pres', pronouns, refToPreferredPronouns)
           .translateIClause(iclause)
         const joined = join(translated.words())

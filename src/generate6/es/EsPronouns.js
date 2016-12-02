@@ -6,7 +6,7 @@ const { raise } = require('../raise')
 const EsPronoun = require('./EsPronoun')
 const { preferenceToGenderNumber } = require('./types')
 
-class Pronouns {
+class EsPronouns {
   yo:     string|void
   recent: Array<string>
 
@@ -110,4 +110,4 @@ class Pronouns {
   }
 }
 
-module.exports = Pronouns
+module.exports = EsPronouns
