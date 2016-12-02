@@ -60,8 +60,8 @@ class Pronouns {
 
       if (isSpecific) {
         const pronoun:string = {
-          _M1: 'lo', _F1: 'la',
-        }['_' + gen + num] //|| raise("Can't find pronoun for '" + gen + num + "'")
+          _M1:'lo', _F1:'la', _M2:'los', _F2:'las',
+        }['_' + gen + num] || raise("Can't find pronoun for '" + gen + num + "'")
         return [new Pronoun(pronoun), isSpecific]
       } else {
         return [undefined, false]

@@ -49,7 +49,8 @@ suite('generate6', function() {
   })
   suite('integration', function() {
     const refToPreferredPronouns = {
-      A:'yo/él', AA:'nosotros/ellos', B:'yo/él', Libro: 'yo/él', Pluma: 'yo/ella',
+      A:'yo/él', AA:'nosotros/ellos', B:'yo/él', Libro:'yo/él', Libros:'nosotros/ellos',
+      Pluma:'yo/ella',
     }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A necesita B', {}],
@@ -59,6 +60,7 @@ suite('generate6', function() {
       ['need(A,Libro)', 'A necesita Libro', {}],
       ['need(A,Libro)', 'A lo necesita (Libro)', {recent:['Libro']}],
       ['need(A,Pluma)', 'A la necesita (Pluma)', {recent:['Pluma']}],
+      ['need(A,Libros)', 'A los necesita (Libros)', {recent:['Libros']}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
         const iclause = interpretSexp(parseLine(sexp))
