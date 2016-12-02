@@ -3,7 +3,7 @@ const { parseLine }          = require('./uni/parse_line')
 const { interpretIClause }   = require('./uni/interpret_sexp')
 const EsPronouns             = require('./es/EsPronouns')
 const Translator             = require('./es/Translator')
-const { join }               = require('./es/join')
+const { join }               = require('./join')
 
 const refToPreferredPronouns = {
   'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
