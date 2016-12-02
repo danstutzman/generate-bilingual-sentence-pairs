@@ -2,7 +2,7 @@
 const assert                 = require('assert')
 const { setup, suite, test } = require('mocha')
 const { parseLine }          = require('../src/generate6/uni/parse_line')
-const { IClause }            = require('../src/generate6/uni/iclause')
+const { UniIClause }         = require('../src/generate6/uni/uni_iclause')
 const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
 const EsPronouns             = require('../src/generate6/es/EsPronouns')
 const Translator             = require('../src/generate6/es/Translator')
@@ -23,12 +23,12 @@ suite('generate6', function() {
     test('A want B', function() {
       const sexp = ['want', 'A', 'B']
       assert.deepEqual(interpretIClause(sexp),
-        new IClause({agent:'A', verb:'want', direct:'B'}))
+        new UniIClause({agent:'A', verb:'want', direct:'B'}))
     })
   })
   suite('translate_to_es', function() {
     test('A need B', function() {
-      const from = new IClause({agent:'A', verb:'need', direct:'B'})
+      const from = new UniIClause({agent:'A', verb:'need', direct:'B'})
       const translated = new Translator('pres', new EsPronouns({}),
         {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
       assert.deepEqual(translated, new EsIClause({

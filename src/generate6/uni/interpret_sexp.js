@@ -3,7 +3,7 @@ import type { Sexp } from '../types'
 import type { NounPhrase } from './noun_phrases'
 
 const { expectString } = require('../types')
-const { IClause } = require('./iclause')
+const { UniIClause } = require('./uni_iclause')
 const { NounClause } = require('./noun_phrases')
 
 const ICLAUSE_VERBS = {
@@ -16,7 +16,7 @@ const ICLAUSE_VERBS = {
   'give':true,
 }
 
-function interpretIClause(sexp:Sexp): IClause {
+function interpretIClause(sexp:Sexp): UniIClause {
   const head = expectString(sexp[0])
   if (ICLAUSE_VERBS[head]) {
     const verb = head
@@ -32,7 +32,7 @@ function interpretIClause(sexp:Sexp): IClause {
       throw new Error("Unexpected size of sexp " + JSON.stringify(sexp))
     }
 
-    return new IClause({ agent, verb, indirect, direct })
+    return new UniIClause({ agent, verb, indirect, direct })
   } else if (head === 'what') {
     const statement = sexp[1]
     return interpretIClause(statement).setQuestion('What')

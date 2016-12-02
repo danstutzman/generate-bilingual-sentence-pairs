@@ -2,7 +2,7 @@
 import type { Tense, PreferredPronouns } from './types'
 import type { NounPhrase } from '../uni/noun_phrases'
 
-const { IClause } = require('../uni/iclause')
+const { UniIClause } = require('../uni/uni_iclause')
 const { raise } = require('../raise')
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
@@ -24,7 +24,7 @@ class Translator {
     this.pronouns               = pronouns
     this.refToPreferredPronouns = refToPreferredPronouns
   }
-  translateIClause(iclause:IClause) {
+  translateIClause(iclause:UniIClause) {
     const infinitive = {
       'want': 'querer',
       'need': 'necesitar',

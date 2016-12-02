@@ -1,6 +1,5 @@
 // @flow
 const { parseLine }          = require('./uni/parse_line')
-const { IClause }            = require('./uni/iclause')
 const { interpretIClause }   = require('./uni/interpret_sexp')
 const EsPronouns             = require('./es/EsPronouns')
 const Translator             = require('./es/Translator')

@@ -1,12 +1,12 @@
 // @flow
 import type { Sexp } from '../types'
 
-const { IClause } = require('./iclause')
+const { UniIClause } = require('./uni_iclause')
 
 class NounClause {
   type: 'that'
-  iclause: IClause
-  constructor(type:'that', iclause:IClause) {
+  iclause: UniIClause
+  constructor(type:'that', iclause:UniIClause) {
     this.type    = type
     this.iclause = iclause
   }

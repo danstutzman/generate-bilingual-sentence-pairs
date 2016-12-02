@@ -2,7 +2,7 @@
 import type { NounPhrase } from './noun_phrases'
 import type { Sexp } from '../types'
 
-class IClause {
+class UniIClause {
   agent:    NounPhrase
   verb:     string
   indirect: NounPhrase | void
@@ -20,10 +20,10 @@ class IClause {
     this.indirect = args.indirect
     this.direct   = args.direct
   }
-  setQuestion(question:'What'): IClause {
+  setQuestion(question:'What'): UniIClause {
     this.question = question
     return this
   }
 }
 
-module.exports = { IClause }
+module.exports = { UniIClause }
