@@ -49,8 +49,8 @@ const table : Array<RegularConjugationPattern> = [
   new RegularConjugationPattern("stem change pret",  "pret", 3, 2, "-ieron"),
 ]
 
-function find(infinitive:string, tense:Tense, person:Person,
-    number:Number): RegularConjugationPattern {
+function find01(infinitive:string, tense:Tense, person:Person,
+    number:Number): Array<RegularConjugationPattern> {
   const patterns = []
   for (const pattern of table) {
     if (isInfinitiveKindOfVerb(infinitive, pattern.kindOfVerb) &&
@@ -60,13 +60,11 @@ function find(infinitive:string, tense:Tense, person:Person,
       patterns.push(pattern)
     }
   }
-  if (patterns.length === 0) {
-    throw new Error("Can't find RegularConjugationPattern for " + tense + person + number)
-  }
   if (patterns.length > 1) {
-    throw new Error("Found >1 RegularConjugationPattern for " + tense + person + number)
+    throw new Error(
+      `Found >1 RegularConjugationPattern for ${tense}${person}${number}`)
   }
-  return patterns[0]
+  return patterns
 }
 
-module.exports = { RegularConjugationPattern, find }
+module.exports = { RegularConjugationPattern, find01 }

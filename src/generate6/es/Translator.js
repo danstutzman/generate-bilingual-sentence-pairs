@@ -6,6 +6,7 @@ const { IClause } = require('../uni/iclause')
 const { raise } = require('../raise')
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
+const unique_conjugation_table = require('./unique_conjugation_table')
 const Pronoun = require('./Pronoun')
 const Pronouns = require('./Pronouns')
 const IClauseOrder = require('./IClauseOrder')
@@ -42,8 +43,21 @@ class Translator {
       [person, number, isAgentSpecific] = [3, 1, false]
     }
 
-    const pattern = regular_conjugation_pattern_table.find(
+    let conjugation
+    const uniqueConjugations = unique_conjugation_table.find01(
       infinitive, this.tense, person, number)
+    if (uniqueConjugations.length === 1) {
+      conjugation = uniqueConjugations[0]
+    } else {
+      const regularPatterns = regular_conjugation_pattern_table.find01(
+        infinitive, this.tense, person, number)
+      if (regularPatterns.length === 1) {
+        conjugation = new RegularConjugation({ infinitive, pattern:regularPatterns[0] })
+      } else {
+        throw new Error(`Can't find UniqueConjugation or RegularConjugation for
+          ${infinitive}.${this.tense}.${person}.${number}`)
+      }
+    }
 
     let indirectPronoun
     let isIndirectPronounSpecific = false
@@ -69,13 +83,12 @@ class Translator {
 
     return new IClauseOrder({
       agent:       this.translateNounPhrase(iclause.agent).setOmit(isAgentSpecific),
-      conjugation: new RegularConjugation({ infinitive, pattern }),
       indirect:    iclause.indirect === undefined ? undefined :
                      this.translateNounPhrase(iclause.indirect)
                        .setOmit(isIndirectPronounSpecific),
       direct:      this.translateNounPhrase(iclause.direct).setOmit(
                      isDirectPronounSpecific || iclause.question === iclause.direct),
-      question, indirectPronoun, directPronoun,
+      conjugation, question, indirectPronoun, directPronoun,
     })
   }
   translateNounPhrase(np:NounPhrase) {

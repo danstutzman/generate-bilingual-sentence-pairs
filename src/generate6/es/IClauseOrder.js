@@ -1,7 +1,7 @@
 // @flow
 import type { EsNounPhrase } from './noun_phrases'
+import type { Conjugation } from './conjugation'
 
-const RegularConjugation = require('./RegularConjugation')
 const Pronoun = require('./Pronoun')
 const { EsNounClause } = require('./noun_phrases')
 
@@ -10,7 +10,7 @@ class IClauseOrder {
   agent:           EsNounPhrase
   indirectPronoun: Pronoun|void
   directPronoun:   Pronoun|void
-  conjugation:     RegularConjugation
+  conjugation:     Conjugation
   indirect:        EsNounPhrase|void
   direct:          EsNounPhrase
 
@@ -19,7 +19,7 @@ class IClauseOrder {
     agent:            EsNounPhrase,
     indirectPronoun?: Pronoun|void,
     directPronoun?:   Pronoun|void,
-    conjugation:      RegularConjugation,
+    conjugation:      Conjugation,
     indirect?:        EsNounPhrase|void,
     direct:           EsNounPhrase,
   |}) {
