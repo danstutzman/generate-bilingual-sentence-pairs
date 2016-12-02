@@ -1,6 +1,6 @@
 // @flow
 import type { EsNounPhrase } from './noun_phrases'
-import type { Conjugation } from './conjugation'
+import type { Conjugation } from './verbs/conjugation'
 
 const EsPronoun        = require('./EsPronoun')
 const { EsNounClause } = require('./noun_phrases')

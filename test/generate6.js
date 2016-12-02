@@ -9,9 +9,9 @@ const Translator             = require('../src/generate6/es/Translator')
 const { join }               = require('../src/generate6/es/join')
 const EsIClause              = require('../src/generate6/es/EsIClause')
 const { NameNoun }           = require('../src/generate6/es/noun_phrases')
-const RegularConjugation     = require('../src/generate6//es/RegularConjugation.js')
+const RegularConjugation     = require('../src/generate6/es/verbs/RegularConjugation.js')
 const { RegularConjugationPattern } =
-  require('../src/generate6/es/regular_conjugation_pattern_table')
+  require('../src/generate6/es/verbs/regular_conjugation_pattern_table')
 
 suite('generate6', function() {
   suite('parse_line', function() {

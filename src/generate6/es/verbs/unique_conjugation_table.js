@@ -1,5 +1,5 @@
 // @flow
-import type { Number, Person, Tense } from './types'
+import type { Number, Person, Tense } from '../types'
 
 class UniqueConjugation {
   infinitive: string

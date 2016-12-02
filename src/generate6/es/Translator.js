@@ -1,14 +1,15 @@
 // @flow
 import type { Person, Tense, Number, PreferredPronouns } from './types'
 import type { UniNP } from '../uni/noun_phrases'
-import type { Conjugation } from './conjugation'
+import type { Conjugation } from './verbs/conjugation'
 
 const { UniIClause } = require('../uni/uni_iclause')
 const { raise } = require('../raise')
-const RegularConjugation = require('./RegularConjugation')
-const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')
-const unique_conjugation_table = require('./unique_conjugation_table')
-const stem_change_table = require('./stem_change_table')
+const RegularConjugation = require('./verbs/RegularConjugation')
+const regular_conjugation_pattern_table =
+  require('./verbs/regular_conjugation_pattern_table')
+const unique_conjugation_table = require('./verbs/unique_conjugation_table')
+const stem_change_table = require('./verbs/stem_change_table')
 const EsPronoun = require('./EsPronoun')
 const EsPronouns = require('./EsPronouns')
 const EsIClause = require('./EsIClause')

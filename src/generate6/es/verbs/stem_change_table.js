@@ -1,5 +1,5 @@
 // @flow
-import type { Tense } from './types'
+import type { Tense } from '../types'
 const { RegularConjugationPattern } = require('./regular_conjugation_pattern_table')
 
 class StemChange {

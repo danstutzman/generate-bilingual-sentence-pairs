@@ -1,7 +1,7 @@
 // @flow
-import type { KindOfVerb, Tense, Person, Number } from "./types"
+import type { KindOfVerb, Tense, Person, Number } from "../types"
 
-const { isInfinitiveKindOfVerb } = require('./types')
+const { isInfinitiveKindOfVerb } = require('../types')
 
 class RegularConjugationPattern {
   kindOfVerb: KindOfVerb
