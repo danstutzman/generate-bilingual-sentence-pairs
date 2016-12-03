@@ -54,7 +54,7 @@ class Translator {
     }
 
     let direct
-    if (iclause.question !== iclause.direct) {
+    if (iclause.remove !== iclause.direct) {
       if (typeof iclause.direct === 'string') {
         direct = this.pronouns.lookup(iclause.direct,
           typeof iclause.agent === 'string' ? iclause.agent : undefined, false,
@@ -65,11 +65,7 @@ class Translator {
       }
     }
 
-    const question = (iclause.question === undefined) ? undefined :
-      (iclause.question === 'What') ? new EnPronoun('what') :
-      raise("Unknown question type " + iclause.question)
-
-    return new EnIClause({ agent, helpingVerb, mainVerb, question, direct, indirect })
+    return new EnIClause({ agent, helpingVerb, mainVerb, direct, indirect })
   }
   translateNounPhrase(np:UniNP) {
     if (typeof np == 'string') {

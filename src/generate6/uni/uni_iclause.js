@@ -7,7 +7,8 @@ class UniIClause {
   verb:     string
   indirect: UniNP | void
   direct:   UniNP
-  question: void | 'What'
+  remove:   void | string
+  negative: bool
 
   constructor(args:{|
     agent:     UniNP,
@@ -20,8 +21,12 @@ class UniIClause {
     this.indirect = args.indirect
     this.direct   = args.direct
   }
-  setQuestion(question:'What'): UniIClause {
-    this.question = question
+  setRemove(remove:void|string): UniIClause {
+    this.remove = remove
+    return this
+  }
+  setNegative(negative:bool): UniIClause {
+    this.negative = negative
     return this
   }
 }

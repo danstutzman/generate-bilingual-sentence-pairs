@@ -38,4 +38,4 @@ function join(words:Array<string>): string {
   return newWords.join(' ')
 }
 
-module.exports = { join }
+module.exports = { join, initialCaps }

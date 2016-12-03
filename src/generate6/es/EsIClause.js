@@ -6,36 +6,35 @@ const EsPronoun        = require('./EsPronoun')
 const { EsNounClause } = require('./noun_phrases')
 
 class EsIClause {
-  question:        EsPronoun|void
   agent:           EsNounPhrase
   indirectPronoun: EsPronoun|void
   directPronoun:   EsPronoun|void
   conjugation:     Conjugation
   indirect:        EsNounPhrase|void
   direct:          EsNounPhrase
+  negative:        bool
 
   constructor(args:{|
-    question?:        EsPronoun|void,
     agent:            EsNounPhrase,
     indirectPronoun?: EsPronoun|void,
     directPronoun?:   EsPronoun|void,
     conjugation:      Conjugation,
     indirect?:        EsNounPhrase|void,
     direct:           EsNounPhrase,
+    negative:         bool,
   |}) {
-    this.question        = args.question
     this.agent           = args.agent
     this.indirectPronoun = args.indirectPronoun
     this.directPronoun   = args.directPronoun
     this.conjugation     = args.conjugation
     this.indirect        = args.indirect
     this.direct          = args.direct
+    this.negative        = args.negative
   }
 
   words(): Array<string> {
     return []
-      .concat(this.question !== undefined ? ['¿']: [])
-      .concat(this.question !== undefined ? this.question.words() : [])
+      .concat(this.negative ? ['no'] : [])
       .concat(this.agent.words())
       .concat(this.indirectPronoun !== undefined ? this.indirectPronoun.words() : [])
       .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
@@ -44,7 +43,6 @@ class EsIClause {
       .concat(this.indirect !== undefined && !this.indirect.omit ?
         ['a'].concat(this.indirect.words()) : [])
       .concat(this.direct instanceof EsNounClause ? this.direct.words() : [])
-      .concat(this.question !== undefined ? ['?']: [])
   }
 }
 

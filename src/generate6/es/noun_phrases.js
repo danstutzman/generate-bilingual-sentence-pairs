@@ -20,18 +20,20 @@ class NameNoun {
 }
 
 class EsNounClause {
-  iclause: EsIClause
-  omit:    bool
+  headWords: Array<string>
+  iclause:   EsIClause
+  omit:      bool
 
-  constructor(iclause:EsIClause) {
-    this.iclause = iclause
+  constructor(headWords:Array<string>, iclause:EsIClause) {
+    this.headWords = headWords
+    this.iclause   = iclause
   }
   setOmit(omit:bool): EsNounClause {
     this.omit = omit
     return this
   }
   words(): Array<string> {
-    return ['que'].concat(this.iclause.words())
+    return this.headWords.concat(this.iclause.words())
   }
 }
 

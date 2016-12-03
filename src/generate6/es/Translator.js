@@ -12,6 +12,12 @@ const { UniNClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNounClause } = require('./noun_phrases')
 const { conjugate } = require('./verbs')
 
+const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS = {
+  'that':['que'],
+  'what':['lo', 'que'],
+  'why':['por', 'qué'],
+}
+
 class Translator {
   tense:                  Tense
   pronouns:               EsPronouns
@@ -30,6 +36,8 @@ class Translator {
       'have': 'tener',
       'give': 'dar',
       'tell': 'decir',
+      'ask': 'preguntar',
+      'command': 'ordenar',
     }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
 
     let person
@@ -54,7 +62,7 @@ class Translator {
     }
 
     let [directPronoun, isDirectPronounSpecific] = [undefined, false]
-    if (iclause.question !== iclause.direct &&
+    if (iclause.remove !== iclause.direct &&
         typeof iclause.direct === 'string') {
       [directPronoun, isDirectPronounSpecific] =
         this.pronouns.lookupDirectObj(iclause.direct,
@@ -62,25 +70,24 @@ class Translator {
           this.refToPreferredPronouns)
     }
 
-    const question = (iclause.question === undefined) ? undefined :
-      (iclause.question === 'What') ? new EsPronoun('qué') :
-      raise("Unknown question type " + iclause.question)
-
     return new EsIClause({
       agent:       this.translateNounPhrase(iclause.agent).setOmit(isAgentSpecific),
       indirect:    iclause.indirect === undefined ? undefined :
                      this.translateNounPhrase(iclause.indirect)
                        .setOmit(isIndirectPronounSpecific),
       direct:      this.translateNounPhrase(iclause.direct).setOmit(
-                     isDirectPronounSpecific || iclause.question === iclause.direct),
-      conjugation, question, indirectPronoun, directPronoun,
+                     isDirectPronounSpecific || iclause.remove === iclause.direct),
+      negative:    iclause.negative,
+      conjugation, indirectPronoun, directPronoun,
     })
   }
   translateNounPhrase(np:UniNP) {
     if (typeof np == 'string') {
       return new NameNoun(np)
     } else if (np instanceof UniNClause) {
-      return new EsNounClause(this.translateIClause(np.iclause))
+      const headWords = UNI_NCLAUSE_TYPE_TO_HEAD_WORDS[np.type] ||
+        raise(`Unknown UniNClause type '${np.type}'`)
+      return new EsNounClause(headWords, this.translateIClause(np.iclause))
     } else {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }

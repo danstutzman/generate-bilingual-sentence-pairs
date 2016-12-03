@@ -40,6 +40,7 @@ suite('generate6', function() {
           pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B').setOmit(false),
+        negative: false,
       }))
     })
   })
@@ -52,6 +53,7 @@ suite('generate6', function() {
           pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B'),
+        negative: false,
       })
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })

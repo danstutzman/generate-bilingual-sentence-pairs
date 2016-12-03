@@ -4,7 +4,8 @@ import type { UniNP } from './noun_phrases'
 
 const { expectString } = require('../types')
 const { UniIClause } = require('./uni_iclause')
-const { UniNClause } = require('./noun_phrases')
+const { UniNClause, VALID_UNI_NCLAUSE_HEADS } = require('./noun_phrases')
+const { initialCaps } = require('../join')
 
 const ICLAUSE_VERBS = {
   'ask':true,
@@ -33,11 +34,11 @@ function interpretIClause(sexp:Sexp): UniIClause {
     }
 
     return new UniIClause({ agent, verb, indirect, direct })
-  } else if (head === 'what') {
+  } else if (head === 'not') {
     const statement = sexp[1]
-    return interpretIClause(statement).setQuestion('What')
+    return interpretIClause(statement).setNegative(true)
   } else {
-    throw new Error("Unknown sexp head " + head)
+    throw new Error(`Unknown iclause head '${head}'`)
   }
 }
 
@@ -52,12 +53,8 @@ function interpretNP(sexp:Sexp): UniNP {
     return ref
   } else if (Array.isArray(sexp)) {
     const head = expectString(sexp[0])
-    if (head === 'that') {
-      const iclause = interpretIClause(sexp[1])
-      return new UniNClause('that', iclause)
-    } else {
-      throw new Error("Unknown head " + head)
-    }
+    const iclause = interpretIClause(sexp[1]).setRemove(initialCaps(head))
+    return new UniNClause(head, iclause)
   } else {
     throw new Error("Expected string or array but got " + JSON.stringify(sexp))
   }
