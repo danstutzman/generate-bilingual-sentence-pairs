@@ -1,5 +1,6 @@
 [ignore]
 .*/*.json
+.*/node_modules/chalk/.*
 .*/node_modules/flow-bin/.*
 .*/node_modules/unflowify/.*
 .*/node_modules/flow-remove-types/.*
