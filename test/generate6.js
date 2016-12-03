@@ -13,7 +13,7 @@ const { NameNoun }           = require('../src/generate6/es/noun_phrases')
 const RegularConjugation     = require('../src/generate6/es/verbs/RegularConjugation.js')
 const { RegularConjugationPattern } =
   require('../src/generate6/es/verbs/regular_conjugation_pattern_table')
-const { interpretIClause, interpretSpeechAct } =
+const { interpretAny, interpretIClause, interpretSpeechAct } =
   require('../src/generate6/uni/interpret_sexp')
 
 suite('generate6', function() {
@@ -41,7 +41,6 @@ suite('generate6', function() {
           pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B').setOmit(false),
-        negative: false,
       }))
     })
   })
@@ -54,7 +53,6 @@ suite('generate6', function() {
           pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B'),
-        negative: false,
       })
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })
@@ -73,17 +71,17 @@ suite('generate6', function() {
       ['need(A,Libro)', 'A lo necesita', {recent:['Libro']}],
       ['need(A,Pluma)', 'A la necesita', {recent:['Pluma']}],
       ['need(A,Libros)', 'A los necesita', {recent:['Libros']}],
-      ['what(need(A,What))', '¿Qué necesito?', {yo:'A'}],
+      ['what(need(A,What))', 'Qué necesito', {yo:'A'}],
       ['give(A,B,Libros)', 'A da Libros a B', {}],
       ['give(A,B,Libros)', 'A me da Libros', {yo:'B'}],
       ['give(A,B,Libros)', 'A le da Libros', {recent:['B']}],
       ['tell(A,B,that(need(A,B)))', 'A dice a B que A lo necesita', {}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
-        const iclause = interpretIClause(parseLine(sexp))
+        const clause = interpretAny(parseLine(sexp))
         const pronouns = new EsPronouns(pronounsInit)
         const translated = new EsTranslator('pres', pronouns, refToPreferredPronouns)
-          .translateIClause(iclause)
+          .translateAny(clause)
         const joined = join(translated.words())
         assert.equal(joined, expected)
       })
@@ -93,14 +91,14 @@ suite('generate6', function() {
     const refToPreferredPronouns = { 'A':'I/he', 'B':'I/he', 'C':'I/he' }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A needs B', {}],
-      ['what(need(A,What))', 'What does A need?', {}],
+      ['what(need(A,What))', 'What does A need', {}],
       ['give(A,B,C)', 'A gives B C', {}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
-        const iclause = interpretIClause(parseLine(sexp))
+        const clause = interpretAny(parseLine(sexp))
         const pronouns = new EnPronouns(pronounsInit)
         const translated = new EnTranslator('pres', pronouns, refToPreferredPronouns)
-          .translateIClause(iclause, false)
+          .translateAny(clause)
         const joined = join(translated.words())
         assert.equal(joined, expected)
       })

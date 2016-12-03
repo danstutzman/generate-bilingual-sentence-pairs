@@ -12,7 +12,7 @@ class EsIClause {
   conjugation:     Conjugation
   indirect:        EsNP|void
   direct:          EsNP
-  negative:        bool
+  negative:        bool|void
   verbFirst:       bool
 
   constructor(args:{|
@@ -22,7 +22,7 @@ class EsIClause {
     conjugation:      Conjugation,
     indirect?:        EsNP|void,
     direct:           EsNP,
-    negative:         bool,
+    negative?:        bool,
   |}) {
     this.agent           = args.agent
     this.indirectPronoun = args.indirectPronoun

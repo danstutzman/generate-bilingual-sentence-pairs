@@ -121,6 +121,21 @@ class Translator {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }
   }
+
+  translateAny(clause:Object|void) {
+    if (clause instanceof UniIClause) {
+      return this.translateIClause(clause)
+    } else if (clause instanceof UniNClause) {
+      const np:UniNClause = clause
+      const headWords = UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_TOP[np.type] ||
+        raise(`Unknown UniNClause type '${np.type}'`)
+      // e.g. "Who are you" instead of "Who you are"
+      return new EsNClause(headWords,
+        this.translateIClause(np.iclause).setVerbFirst(np.type !== 'that'))
+    } else {
+      throw new Error(`Can't translateAny #{JSON.stringify(clause)}`)
+    }
+  }
 }
 
 module.exports = Translator

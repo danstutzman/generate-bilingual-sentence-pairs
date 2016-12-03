@@ -19,8 +19,8 @@ node_modules/.bin/jshint `find build -name '*.js'`
 #node build/src/generate.js
 #node build/src/generate2.js
 #node build/src/generate3.js
-node build/src/generate6/main.js
-#node_modules/.bin/mocha build/test --grep generate6
+#node build/src/generate6/main.js
+node_modules/.bin/mocha build/test --grep generate6
 
 #echo "Browserify..."
 #node_modules/.bin/browserify build/src/generate6/test.js -o build/browserified.js
