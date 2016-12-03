@@ -19,7 +19,7 @@ class NameNoun {
   }
 }
 
-class EsNounClause {
+class EsNClause {
   headWords: Array<string>
   iclause:   EsIClause
   omit:      bool
@@ -28,7 +28,7 @@ class EsNounClause {
     this.headWords = headWords
     this.iclause   = iclause
   }
-  setOmit(omit:bool): EsNounClause {
+  setOmit(omit:bool): EsNClause {
     this.omit = omit
     return this
   }
@@ -37,6 +37,6 @@ class EsNounClause {
   }
 }
 
-export type EsNounPhrase = NameNoun | EsNounClause
+export type EsNP = NameNoun | EsNClause
 
-module.exports = { NameNoun, EsNounClause }
+module.exports = { NameNoun, EsNClause }

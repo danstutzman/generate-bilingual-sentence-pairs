@@ -1,21 +1,31 @@
 // @flow
 import type { Person, Tense, Number, PreferredPronouns } from './types'
 import type { UniNP } from '../uni/noun_phrases'
+import type { EsNP } from '../es/noun_phrases'
 import type { Conjugation } from './verbs'
 
 const { UniIClause } = require('../uni/uni_iclause')
+const { UniSpeechAct } = require('../uni/uni_speech_act')
 const { raise } = require('../raise')
 const EsPronoun = require('./EsPronoun')
 const EsPronouns = require('./EsPronouns')
 const EsIClause = require('./EsIClause')
+const EsSpeechAct = require('./EsSpeechAct')
 const { UniNClause } = require('../uni/noun_phrases')
-const { NameNoun, EsNounClause } = require('./noun_phrases')
+const { NameNoun, EsNClause } = require('./noun_phrases')
 const { conjugate } = require('./verbs')
 
-const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS = {
-  'that':['que'],
-  'what':['lo', 'que'],
-  'why':['por', 'qué'],
+const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_NOT_TOP = {
+  'that': ['que'],
+  'what': ['lo', 'que'],
+  'why':  ['por', 'qué'],
+  'where':['donde'],
+}
+const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_TOP = {
+  'that': [],
+  'what': ['qué'],
+  'why':  ['por', 'qué'],
+  'where':['dónde'],
 }
 
 class Translator {
@@ -29,7 +39,25 @@ class Translator {
     this.pronouns               = pronouns
     this.refToPreferredPronouns = refToPreferredPronouns
   }
-  translateIClause(iclause:UniIClause) {
+
+  translateSpeechAct(speechAct:UniSpeechAct): EsSpeechAct {
+    if (speechAct.speech instanceof UniNClause) {
+      const np = speechAct.speech
+      const intonation = (speechAct.verb === 'ask') ? 'question' :
+                         (speechAct.verb === 'command') ? 'exclamation' :
+                         'comment'
+      const headWords = UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_TOP[np.type] ||
+        raise(`Unknown UniNClause type '${np.type}'`)
+      // e.g. "Who are you" instead of "Who you are"
+      return new EsSpeechAct(intonation, speechAct.speaker, new EsNClause(headWords,
+        this.translateIClause(np.iclause).setVerbFirst(np.type !== 'that')))
+    } else {
+      throw new Error(
+        `Don't know how to translate speech '${JSON.stringify(speechAct.speech)}'`)
+    }
+  }
+
+  translateIClause(iclause:UniIClause): EsIClause {
     const infinitive = {
       'want': 'querer',
       'need': 'necesitar',
@@ -81,13 +109,14 @@ class Translator {
       conjugation, indirectPronoun, directPronoun,
     })
   }
-  translateNounPhrase(np:UniNP) {
+
+  translateNounPhrase(np:UniNP): EsNP {
     if (typeof np == 'string') {
       return new NameNoun(np)
     } else if (np instanceof UniNClause) {
-      const headWords = UNI_NCLAUSE_TYPE_TO_HEAD_WORDS[np.type] ||
+      const headWords = UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_NOT_TOP[np.type] ||
         raise(`Unknown UniNClause type '${np.type}'`)
-      return new EsNounClause(headWords, this.translateIClause(np.iclause))
+      return new EsNClause(headWords, this.translateIClause(np.iclause))
     } else {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }

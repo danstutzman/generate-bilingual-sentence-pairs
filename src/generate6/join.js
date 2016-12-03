@@ -13,18 +13,22 @@ function join(words:Array<string>): string {
   let isStartingSentence: bool = true
   for (const word of words) {
     if (isStartingSentence) {
-      if (word === '¿') {
+      if (word === '¿' || word === '¡') {
+        newWords.push(word)
+        isStartingSentence = true
+      } else if (word.endsWith(':')) { // e.g. Bob: Hello.
         newWords.push(word)
         isStartingSentence = true
       } else {
-        if (newWords.length > 0 && newWords[newWords.length - 1] === '¿') {
+        if (newWords.length > 0 && newWords[newWords.length - 1] === '¿' ||
+                                   newWords[newWords.length - 1] === '¡') {
           newWords[newWords.length - 1] += initialCaps(word)
         } else {
           newWords.push(initialCaps(word))
         }
         isStartingSentence = false
       }
-    } else if (word === '.' || word === '?') {
+    } else if (word === '.' || word === '?' || word === '!') {
       newWords[newWords.length - 1] += word
       isStartingSentence = true
     } else if (word.startsWith('-')) {

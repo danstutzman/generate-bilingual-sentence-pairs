@@ -1,26 +1,27 @@
 // @flow
-import type { EsNounPhrase } from './noun_phrases'
+import type { EsNP } from './noun_phrases'
 import type { Conjugation } from './verbs'
 
 const EsPronoun        = require('./EsPronoun')
-const { EsNounClause } = require('./noun_phrases')
+const { EsNClause } = require('./noun_phrases')
 
 class EsIClause {
-  agent:           EsNounPhrase
+  agent:           EsNP
   indirectPronoun: EsPronoun|void
   directPronoun:   EsPronoun|void
   conjugation:     Conjugation
-  indirect:        EsNounPhrase|void
-  direct:          EsNounPhrase
+  indirect:        EsNP|void
+  direct:          EsNP
   negative:        bool
+  verbFirst:       bool
 
   constructor(args:{|
-    agent:            EsNounPhrase,
+    agent:            EsNP,
     indirectPronoun?: EsPronoun|void,
     directPronoun?:   EsPronoun|void,
     conjugation:      Conjugation,
-    indirect?:        EsNounPhrase|void,
-    direct:           EsNounPhrase,
+    indirect?:        EsNP|void,
+    direct:           EsNP,
     negative:         bool,
   |}) {
     this.agent           = args.agent
@@ -32,17 +33,23 @@ class EsIClause {
     this.negative        = args.negative
   }
 
+  setVerbFirst(verbFirst:bool): EsIClause {
+    this.verbFirst = verbFirst
+    return this
+  }
+
   words(): Array<string> {
     return []
+      .concat(!this.verbFirst ? this.agent.words() : [])
       .concat(this.negative ? ['no'] : [])
-      .concat(this.agent.words())
       .concat(this.indirectPronoun !== undefined ? this.indirectPronoun.words() : [])
       .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
       .concat(this.conjugation.words())
-      .concat(!(this.direct instanceof EsNounClause) ? this.direct.words() : [])
+      .concat(this.verbFirst ? this.agent.words() : [])
+      .concat(!(this.direct instanceof EsNClause) ? this.direct.words() : [])
       .concat(this.indirect !== undefined && !this.indirect.omit ?
         ['a'].concat(this.indirect.words()) : [])
-      .concat(this.direct instanceof EsNounClause ? this.direct.words() : [])
+      .concat(this.direct instanceof EsNClause ? this.direct.words() : [])
   }
 }
 

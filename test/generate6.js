@@ -3,7 +3,6 @@ const assert                 = require('assert')
 const { setup, suite, test } = require('mocha')
 const { parseLine }          = require('../src/generate6/uni/parse_line')
 const { UniIClause }         = require('../src/generate6/uni/uni_iclause')
-const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
 const EsPronouns             = require('../src/generate6/es/EsPronouns')
 const EnPronouns             = require('../src/generate6/en/EnPronouns')
 const EsTranslator           = require('../src/generate6/es/Translator')
@@ -14,6 +13,8 @@ const { NameNoun }           = require('../src/generate6/es/noun_phrases')
 const RegularConjugation     = require('../src/generate6/es/verbs/RegularConjugation.js')
 const { RegularConjugationPattern } =
   require('../src/generate6/es/verbs/regular_conjugation_pattern_table')
+const { interpretIClause, interpretSpeechAct } =
+  require('../src/generate6/uni/interpret_sexp')
 
 suite('generate6', function() {
   suite('parse_line', function() {

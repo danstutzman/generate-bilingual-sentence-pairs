@@ -8,12 +8,15 @@ const VALID_UNI_NCLAUSE_HEADS = { 'that':true, 'what':true, 'why':true }
 class UniNClause {
   type:    string
   iclause: UniIClause
-  constructor(type:string, iclause:UniIClause) {
+  isTop:   bool
+
+  constructor(type:string, iclause:UniIClause, isTop:bool) {
     if (VALID_UNI_NCLAUSE_HEADS[type] === undefined) {
       throw new Error(`Invalid UniNClause type '${type}'`)
     }
     this.type    = type
     this.iclause = iclause
+    this.isTop   = isTop
   }
 }
 

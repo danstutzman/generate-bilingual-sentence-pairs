@@ -2,10 +2,11 @@
 const fs                     = require('fs')
 const readline               = require('readline')
 const { parseLine }          = require('./uni/parse_line')
-const { interpretIClause }   = require('./uni/interpret_sexp')
 const EsPronouns             = require('./es/EsPronouns')
 const Translator             = require('./es/Translator')
 const { join }               = require('./join')
+const { interpretIClause, interpretSpeechAct } =
+  require('./uni/interpret_sexp')
 
 const refToPreferredPronouns = {
   'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
@@ -18,10 +19,10 @@ readline.createInterface({
 }).on('line', function(line) {
   if (line !== '' && line.charAt(0) !== '#') {
     const pronounsInit = {}
-    const iclause = interpretIClause(parseLine(line))
+    const speechAct = interpretSpeechAct(parseLine(line))
     const pronouns = new EsPronouns(pronounsInit)
     const translated = new Translator('pres', pronouns, refToPreferredPronouns)
-      .translateIClause(iclause)
+      .translateSpeechAct(speechAct)
     const joined = join(translated.words())
     console.log(joined)
   }
