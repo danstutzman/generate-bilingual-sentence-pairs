@@ -100,7 +100,7 @@ suite('generate6', function() {
         const iclause = interpretIClause(parseLine(sexp))
         const pronouns = new EnPronouns(pronounsInit)
         const translated = new EnTranslator('pres', pronouns, refToPreferredPronouns)
-          .translateIClause(iclause)
+          .translateIClause(iclause, false)
         const joined = join(translated.words())
         assert.equal(joined, expected)
       })

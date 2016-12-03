@@ -35,14 +35,14 @@ class Translator {
       const headWords = (np.type === 'that') ? [] : [np.type]
       // e.g. "Who are you" instead of "Who you are"
       return new EnSpeechAct(intonation, speechAct.speaker, new EnNClause(headWords,
-        this.translateIClause(np.iclause).setVerbFirst(np.type !== 'that')))
+        this.translateIClause(np.iclause, np.type !== 'that')))
     } else {
       throw new Error(
         `Don't know how to translate speech '${JSON.stringify(speechAct.speech)}'`)
     }
   }
 
-  translateIClause(iclause:UniIClause): EnIClause {
+  translateIClause(iclause:UniIClause, isVerbFirst:bool): EnIClause {
     let person = 3
     let number = 1
     let agent
@@ -54,10 +54,11 @@ class Translator {
       [person, number, agent] = [3, 1, this.translateNounPhrase(iclause.agent)]
     }
 
-    const helpingVerb = (iclause.question !== undefined) ?
-      conjugate('do', this.tense, person, number) : undefined
-    const mainVerb = (iclause.question !== undefined) ?
-      new EnVerb([iclause.verb]) : conjugate(iclause.verb, this.tense, person, number)
+    const helpingVerb = isVerbFirst || iclause.negative ?
+      conjugate('do', this.tense, person, number, iclause.negative) : undefined
+    const mainVerb = isVerbFirst || iclause.negative ?
+      new EnVerb([iclause.verb]) :
+      conjugate(iclause.verb, this.tense, person, number, false)
 
     let indirect: EnNP | void
     if (iclause.indirect !== undefined) {
@@ -84,14 +85,14 @@ class Translator {
       }
     }
 
-    return new EnIClause({ agent, helpingVerb, mainVerb, direct, indirect })
+    return new EnIClause({ agent, helpingVerb, mainVerb, direct, indirect, isVerbFirst })
   }
 
   translateNounPhrase(np:UniNP): EnNClause {
     if (typeof np == 'string') {
       return new NameNoun(np)
     } else if (np instanceof UniNClause) {
-      return new EnNClause([np.type], this.translateIClause(np.iclause))
+      return new EnNClause([np.type], this.translateIClause(np.iclause, false))
     } else {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }

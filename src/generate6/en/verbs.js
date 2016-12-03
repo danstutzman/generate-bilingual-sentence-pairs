@@ -17,8 +17,15 @@ const VERB_REQUIRES_ES = {
 }
 
 function conjugate(base:string, tense:Tense, person:Person,
-    number:Number): EnVerb {
-  if (person === 3 && number === 1) { // e.g. "he goes"
+    number:Number, negative:bool): EnVerb {
+  if (negative) {
+    if (base === 'do') {
+      return (person === 3 && number === 1) ?
+        new EnVerb(['does', "-n't"]) : new EnVerb(['do', "-n't"])
+    } else {
+      throw new Error(`Can't negate verb '${base}'`)
+    }
+  } else if (person === 3 && number === 1) { // e.g. "he goes"
     if (VERB_REQUIRES_ES[base]) {
       return new EnVerb([base, '-es'])
     } else {

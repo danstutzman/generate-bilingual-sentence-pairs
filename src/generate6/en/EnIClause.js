@@ -9,7 +9,7 @@ class EnIClause {
   mainVerb:        EnVerb
   indirect:        EnNP|void
   direct:          EnNP|void
-  verbFirst:       bool
+  isVerbFirst:     bool
 
   constructor(args:{|
     agent:            EnNP,
@@ -17,25 +17,22 @@ class EnIClause {
     mainVerb:         EnVerb,
     indirect?:        EnNP|void,
     direct?:          EnNP|void,
+    isVerbFirst:      bool,
   |}) {
     this.agent           = args.agent
     this.helpingVerb     = args.helpingVerb
     this.mainVerb        = args.mainVerb
     this.indirect        = args.indirect
     this.direct          = args.direct
-  }
-
-  setVerbFirst(verbFirst:bool): EnIClause {
-    this.verbFirst = verbFirst
-    return this
+    this.isVerbFirst     = args.isVerbFirst
   }
 
   words(): Array<string> {
     return []
-      .concat(this.verbFirst && this.helpingVerb !== undefined ?
+      .concat(this.isVerbFirst && this.helpingVerb !== undefined ?
         this.helpingVerb.words() : [])
       .concat(this.agent.words())
-      .concat(!this.verbFirst && this.helpingVerb !== undefined ?
+      .concat(!this.isVerbFirst && this.helpingVerb !== undefined ?
         this.helpingVerb.words() : [])
       .concat(this.mainVerb.words())
       .concat(this.indirect !== undefined ? this.indirect.words() : [])
