@@ -5,7 +5,9 @@ const { parseLine }          = require('../src/generate6/uni/parse_line')
 const { UniIClause }         = require('../src/generate6/uni/uni_iclause')
 const { interpretIClause }   = require('../src/generate6/uni/interpret_sexp')
 const EsPronouns             = require('../src/generate6/es/EsPronouns')
-const Translator             = require('../src/generate6/es/Translator')
+const EnPronouns             = require('../src/generate6/en/EnPronouns')
+const EsTranslator           = require('../src/generate6/es/Translator')
+const EnTranslator           = require('../src/generate6/en/Translator')
 const { join }               = require('../src/generate6/join')
 const EsIClause              = require('../src/generate6/es/EsIClause')
 const { NameNoun }           = require('../src/generate6/es/noun_phrases')
@@ -29,7 +31,7 @@ suite('generate6', function() {
   suite('translate_to_es', function() {
     test('A need B', function() {
       const from = new UniIClause({agent:'A', verb:'need', direct:'B'})
-      const translated = new Translator('pres', new EsPronouns({}),
+      const translated = new EsTranslator('pres', new EsPronouns({}),
         {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
       assert.deepEqual(translated, new EsIClause({
         agent: new NameNoun('A').setOmit(false),
@@ -54,7 +56,7 @@ suite('generate6', function() {
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })
   })
-  suite('integration', function() {
+  suite('integration-spanish', function() {
     const refToPreferredPronouns = {
       'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
       'Libros':'nosotros/ellos', 'Pluma':'yo/ella',
@@ -77,7 +79,24 @@ suite('generate6', function() {
       test(expected, /* jshint loopfunc:true */ function() {
         const iclause = interpretIClause(parseLine(sexp))
         const pronouns = new EsPronouns(pronounsInit)
-        const translated = new Translator('pres', pronouns, refToPreferredPronouns)
+        const translated = new EsTranslator('pres', pronouns, refToPreferredPronouns)
+          .translateIClause(iclause)
+        const joined = join(translated.words())
+        assert.equal(joined, expected)
+      })
+    }
+  })
+  suite('integration-english', function() {
+    const refToPreferredPronouns = { 'A':'I/he', 'B':'I/he', 'C':'I/he' }
+    for (const [sexp, expected, pronounsInit] of [
+      ['need(A,B)', 'A needs B', {}],
+      ['what(need(A,What))', 'What does A need?', {}],
+      ['give(A,B,C)', 'A gives B C', {}],
+    ]) {
+      test(expected, /* jshint loopfunc:true */ function() {
+        const iclause = interpretIClause(parseLine(sexp))
+        const pronouns = new EnPronouns(pronounsInit)
+        const translated = new EnTranslator('pres', pronouns, refToPreferredPronouns)
           .translateIClause(iclause)
         const joined = join(translated.words())
         assert.equal(joined, expected)
