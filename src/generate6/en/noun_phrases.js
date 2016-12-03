@@ -16,16 +16,18 @@ class NameNoun {
 }
 
 class EnNClause {
-  iclause: EnIClause
+  headWords: Array<string>
+  iclause:   EnIClause
 
-  constructor(iclause:EnIClause) {
-    this.iclause = iclause
+  constructor(headWords:Array<string>, iclause:EnIClause) {
+    this.headWords = headWords
+    this.iclause   = iclause
   }
   words(): Array<string> {
-    return ['that'].concat(this.iclause.words())
+    return this.headWords.concat(this.iclause.words())
   }
 }
 
-export type EnNPhrase = NameNoun | EnNClause | EnPronoun
+export type EnNP = NameNoun | EnNClause | EnPronoun
 
 module.exports = { NameNoun, EnNClause }

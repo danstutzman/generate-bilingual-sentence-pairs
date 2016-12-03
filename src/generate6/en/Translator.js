@@ -1,7 +1,7 @@
 // @flow
 import type { Person, Tense, Number, PreferredPronouns } from './types'
 import type { UniNP } from '../uni/noun_phrases'
-import type { EnNPhrase } from './noun_phrases'
+import type { EnNP } from './noun_phrases'
 
 const EnPronoun = require('./EnPronoun')
 const { raise } = require('../raise')
@@ -11,6 +11,8 @@ const EnIClause = require('./EnIClause')
 const { UniIClause } = require('../uni/uni_iclause')
 const EnPronouns = require('./EnPronouns')
 const { conjugate, EnVerb } = require('./verbs')
+const EnSpeechAct = require('./EnSpeechAct')
+const { UniSpeechAct } = require('../uni/uni_speech_act')
 
 class Translator {
   tense:                  Tense
@@ -23,7 +25,24 @@ class Translator {
     this.pronouns               = pronouns
     this.refToPreferredPronouns = refToPreferredPronouns
   }
-  translateIClause(iclause:UniIClause) {
+
+  translateSpeechAct(speechAct:UniSpeechAct): EnSpeechAct {
+    if (speechAct.speech instanceof UniNClause) {
+      const np = speechAct.speech
+      const intonation = (speechAct.verb === 'ask') ? 'question' :
+                         (speechAct.verb === 'command') ? 'exclamation' :
+                         'comment'
+      const headWords = (np.type === 'that') ? [] : [np.type]
+      // e.g. "Who are you" instead of "Who you are"
+      return new EnSpeechAct(intonation, speechAct.speaker, new EnNClause(headWords,
+        this.translateIClause(np.iclause).setVerbFirst(np.type !== 'that')))
+    } else {
+      throw new Error(
+        `Don't know how to translate speech '${JSON.stringify(speechAct.speech)}'`)
+    }
+  }
+
+  translateIClause(iclause:UniIClause): EnIClause {
     let person = 3
     let number = 1
     let agent
@@ -40,7 +59,7 @@ class Translator {
     const mainVerb = (iclause.question !== undefined) ?
       new EnVerb([iclause.verb]) : conjugate(iclause.verb, this.tense, person, number)
 
-    let indirect: EnNPhrase | void
+    let indirect: EnNP | void
     if (iclause.indirect !== undefined) {
       if (typeof iclause.indirect === 'string') {
         indirect = this.pronouns.lookup(iclause.indirect,
@@ -67,11 +86,12 @@ class Translator {
 
     return new EnIClause({ agent, helpingVerb, mainVerb, direct, indirect })
   }
-  translateNounPhrase(np:UniNP) {
+
+  translateNounPhrase(np:UniNP): EnNClause {
     if (typeof np == 'string') {
       return new NameNoun(np)
     } else if (np instanceof UniNClause) {
-      return new EnNClause(this.translateIClause(np.iclause))
+      return new EnNClause([np.type], this.translateIClause(np.iclause))
     } else {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }
