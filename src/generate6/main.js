@@ -25,6 +25,11 @@ const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
 }
 
 function askQuestion(questioner, speechActs, numSpeechAct) {
+  if (numSpeechAct >= speechActs.length) {
+    questioner.pause() // so program can exit
+    return
+  }
+
   const speechAct = speechActs[numSpeechAct]
 
   const enPronouns = new EnPronouns({ me:speechAct.speaker, you:speechAct.audience })
