@@ -19,7 +19,7 @@ function conjugate(infinitive:string, tense:Tense, person:Person, number:Number)
   }
 
   const stemChanges = stem_change_table.find01(infinitive, tense)
-  if (stemChanges.length === 1) {
+  if (stemChanges.length === 1 && !(person === 1 && number === 2)) {
     const patterns = regular_conjugation_pattern_table.find01(
       infinitive, tense, person, number, true)
     if (patterns.length === 1) {
