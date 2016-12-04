@@ -18,9 +18,9 @@ if (process.argv.length > 3) {
   throw new Error("Too many command-line arguments")
 } else if (process.argv.length === 3) {
   if (process.argv[2] === 'main') {
-    kexec('node', ['./build/src/generate6/main.js'])
+    kexec('node', ['./build/src/main.js'])
   } else if (process.argv[2] === 'test') {
-    kexec('node_modules/.bin/mocha', ['build/test', '--grep', 'generate6'])
+    kexec('node_modules/.bin/mocha', ['build/test'])
   } else {
     throw new Error("Unknown argv[2]")
   }
@@ -84,7 +84,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
 })
 
 //echo "Browserify..."
-//node_modules/.bin/browserify build/src/generate6/test.js -o build/browserified.js
+//node_modules/.bin/browserify build/src/test.js -o build/browserified.js
 //echo "Google Closure Compiler..."
 //java -jar node_modules/google-closure-compiler//compiler.jar \
 //  --compilation_level ADVANCED_OPTIMIZATIONS --js build/browserified.js \

@@ -1,22 +1,22 @@
 // @flow
 const assert                 = require('assert')
 const { setup, suite, test } = require('mocha')
-const { parseLine }          = require('../src/generate6/uni/parse_line')
-const { UniIClause }         = require('../src/generate6/uni/uni_iclause')
-const { UniNClause }         = require('../src/generate6/uni/noun_phrases')
-const { UniSpeechAct }       = require('../src/generate6/uni/uni_speech_act')
-const EsPronouns             = require('../src/generate6/es/EsPronouns')
-const EnPronouns             = require('../src/generate6/en/EnPronouns')
-const EsTranslator           = require('../src/generate6/es/Translator')
-const EnTranslator           = require('../src/generate6/en/Translator')
-const { join }               = require('../src/generate6/join')
-const EsIClause              = require('../src/generate6/es/EsIClause')
-const { NameNoun }           = require('../src/generate6/es/noun_phrases')
-const RegularConjugation     = require('../src/generate6/es/verbs/RegularConjugation.js')
+const { parseLine }          = require('../src/uni/parse_line')
+const { UniIClause }         = require('../src/uni/uni_iclause')
+const { UniNClause }         = require('../src/uni/noun_phrases')
+const { UniSpeechAct }       = require('../src/uni/uni_speech_act')
+const EsPronouns             = require('../src/es/EsPronouns')
+const EnPronouns             = require('../src/en/EnPronouns')
+const EsTranslator           = require('../src/es/Translator')
+const EnTranslator           = require('../src/en/Translator')
+const { join }               = require('../src/join')
+const EsIClause              = require('../src/es/EsIClause')
+const { NameNoun }           = require('../src/es/noun_phrases')
+const RegularConjugation     = require('../src/es/verbs/RegularConjugation.js')
 const { RegularConjugationPattern } =
-  require('../src/generate6/es/verbs/regular_conjugation_pattern_table')
+  require('../src/es/verbs/regular_conjugation_pattern_table')
 const { interpretIClause, interpretSpeechAct, interpretNP } =
-  require('../src/generate6/uni/interpret_sexp')
+  require('../src/uni/interpret_sexp')
 
 function lineToUniSpeechAct(line:string): UniSpeechAct {
   if (line.startsWith('what(')) {
