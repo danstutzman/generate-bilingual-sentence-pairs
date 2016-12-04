@@ -39,13 +39,15 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
       }
     }
 
-    const flowRemovedSource = flowRemoveTypes(flowSource)
+    let flowRemovedSource
     try {
-      fs.writeFileSync(`build/${path}`, flowRemovedSource)
+      flowRemovedSource = flowRemoveTypes(flowSource)
     } catch (e) {
+      console.error(e)
       exec("/usr/bin/say 'flow type error'")
       return
     }
+    fs.writeFileSync(`build/${path}`, flowRemovedSource)
 
     JSHINT(flowRemovedSource, JSHINT_OPTIONS, {})
     if (JSHINT.errors.length > 0) {
