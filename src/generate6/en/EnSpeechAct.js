@@ -12,17 +12,18 @@ const INTONATION_TO_PUNCTUATION = {
 
 class EnSpeechAct {
   intonation: EnSpeechActIntonation
-  speaker:    Ref
+  speaker:    Ref | void
   speech:     EnNP
 
-  constructor(intonation:EnSpeechActIntonation, speaker:Ref, speech:EnNP) {
+  constructor(intonation:EnSpeechActIntonation, speaker:Ref|void, speech:EnNP) {
     this.intonation = intonation
     this.speaker    = speaker
     this.speech     = speech
   }
 
   words(): Array<string> {
-    return [this.speaker + ':']
+    return []
+      .concat(this.speaker ? [`${this.speaker}:`] : [])
       .concat(this.speech.words())
       .concat(INTONATION_TO_PUNCTUATION[this.intonation])
   }

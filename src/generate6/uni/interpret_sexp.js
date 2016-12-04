@@ -88,24 +88,4 @@ function interpretNP(sexp:Sexp, isTop:bool): UniNP {
   }
 }
 
-function interpretAny(sexp:Sexp) {
-  if (typeof sexp === 'string') {
-    throw new Error("Can't handle string sexps here")
-  } else if (Array.isArray(sexp)) {
-    const head = expectString(sexp[0])
-    if (ICLAUSE_VERBS[head] || head === 'not') {
-      return interpretIClause(sexp)
-    } else if (VALID_UNI_NCLAUSE_HEADS[head]) {
-      const result = interpretNP(sexp, true)
-      if (result instanceof UniNClause) {
-        return result
-      } else {
-        throw new Error("Can't handle string sexps here")
-      }
-    } else {
-      throw new Error(`Can't interpret clause: ${JSON.stringify(sexp)}`)
-    }
-  }
-}
-
-module.exports = { interpretIClause, interpretSpeechAct, interpretAny }
+module.exports = { interpretIClause, interpretSpeechAct, interpretNP }

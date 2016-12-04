@@ -3,6 +3,8 @@ const assert                 = require('assert')
 const { setup, suite, test } = require('mocha')
 const { parseLine }          = require('../src/generate6/uni/parse_line')
 const { UniIClause }         = require('../src/generate6/uni/uni_iclause')
+const { UniNClause }         = require('../src/generate6/uni/noun_phrases')
+const { UniSpeechAct }       = require('../src/generate6/uni/uni_speech_act')
 const EsPronouns             = require('../src/generate6/es/EsPronouns')
 const EnPronouns             = require('../src/generate6/en/EnPronouns')
 const EsTranslator           = require('../src/generate6/es/Translator')
@@ -13,8 +15,18 @@ const { NameNoun }           = require('../src/generate6/es/noun_phrases')
 const RegularConjugation     = require('../src/generate6/es/verbs/RegularConjugation.js')
 const { RegularConjugationPattern } =
   require('../src/generate6/es/verbs/regular_conjugation_pattern_table')
-const { interpretAny, interpretIClause, interpretSpeechAct } =
+const { interpretIClause, interpretSpeechAct, interpretNP } =
   require('../src/generate6/uni/interpret_sexp')
+
+function lineToUniSpeechAct(line:string): UniSpeechAct {
+  if (line.startsWith('what(')) {
+    return new UniSpeechAct('ask', undefined, undefined,
+      interpretNP(parseLine(line), true))
+  } else {
+    return new UniSpeechAct('tell', undefined, undefined,
+      new UniNClause('that', interpretIClause(parseLine(line)), true))
+  }
+}
 
 suite('generate6', function() {
   suite('parse_line', function() {
@@ -63,42 +75,38 @@ suite('generate6', function() {
       'Libros':'nosotros/ellos', 'Pluma':'yo/ella',
     }
     for (const [sexp, expected, pronounsInit] of [
-      ['need(A,B)', 'A necesita B', {}],
-      ['need(A,B)', 'Necesita B', {recent:['A']}],
-      ['need(A,B)', 'Necesito B', {yo:'A'}],
-      ['need(AA,B)', 'AA necesitan B', {}],
-      ['need(A,Libro)', 'A necesita Libro', {}],
-      ['need(A,Libro)', 'A lo necesita', {recent:['Libro']}],
-      ['need(A,Pluma)', 'A la necesita', {recent:['Pluma']}],
-      ['need(A,Libros)', 'A los necesita', {recent:['Libros']}],
-      ['what(need(A,What))', 'Qué necesito', {yo:'A'}],
-      ['give(A,B,Libros)', 'A da Libros a B', {}],
-      ['give(A,B,Libros)', 'A me da Libros', {yo:'B'}],
-      ['give(A,B,Libros)', 'A le da Libros', {recent:['B']}],
-      ['tell(A,B,that(need(A,B)))', 'A dice a B que A lo necesita', {}],
+      ['need(A,B)', 'A necesita B.', {}],
+      ['need(A,B)', 'Necesita B.', {recent:['A']}],
+      ['need(A,B)', 'Necesito B.', {yo:'A'}],
+      ['need(AA,B)', 'AA necesitan B.', {}],
+      ['need(A,Libro)', 'A necesita Libro.', {}],
+      ['need(A,Libro)', 'A lo necesita.', {recent:['Libro']}],
+      ['need(A,Pluma)', 'A la necesita.', {recent:['Pluma']}],
+      ['need(A,Libros)', 'A los necesita.', {recent:['Libros']}],
+      ['what(need(A,What))', '¿Qué necesito?', {yo:'A'}],
+      ['give(A,B,Libros)', 'A da Libros a B.', {}],
+      ['give(A,B,Libros)', 'A me da Libros.', {yo:'B'}],
+      ['give(A,B,Libros)', 'A le da Libros.', {recent:['B']}],
+      ['tell(A,B,that(need(A,B)))', 'A dice a B que A lo necesita.', {}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
-        const clause = interpretAny(parseLine(sexp))
-        const pronouns = new EsPronouns(pronounsInit)
-        const translated = new EsTranslator('pres', pronouns, refToPreferredPronouns)
-          .translateAny(clause)
+        const translated = new EsTranslator('pres', new EsPronouns(pronounsInit),
+          refToPreferredPronouns).translateSpeechAct(lineToUniSpeechAct(sexp))
         const joined = join(translated.words())
         assert.equal(joined, expected)
       })
     }
   })
   suite('integration-english', function() {
-    const refToPreferredPronouns = { 'A':'I/he', 'B':'I/he', 'C':'I/he' }
+    const refToPreferredPronouns = { '':'I/he', 'A':'I/he', 'B':'I/he', 'C':'I/he' }
     for (const [sexp, expected, pronounsInit] of [
-      ['need(A,B)', 'A needs B', {}],
-      ['what(need(A,What))', 'What does A need', {}],
-      ['give(A,B,C)', 'A gives B C', {}],
+      ['need(A,B)', 'A needs B.', {}],
+      ['what(need(A,What))', 'What does A need?', {}],
+      ['give(A,B,C)', 'A gives B C.', {}],
     ]) {
       test(expected, /* jshint loopfunc:true */ function() {
-        const clause = interpretAny(parseLine(sexp))
-        const pronouns = new EnPronouns(pronounsInit)
-        const translated = new EnTranslator('pres', pronouns, refToPreferredPronouns)
-          .translateAny(clause)
+        const translated = new EnTranslator('pres', new EnPronouns(pronounsInit),
+          refToPreferredPronouns).translateSpeechAct(lineToUniSpeechAct(sexp))
         const joined = join(translated.words())
         assert.equal(joined, expected)
       })

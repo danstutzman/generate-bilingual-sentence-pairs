@@ -97,20 +97,6 @@ class Translator {
       throw new Error("Can't translateNounPhrase " + JSON.stringify(np))
     }
   }
-
-  translateAny(clause:Object|void) {
-    if (clause instanceof UniIClause) {
-      return this.translateIClause(clause, false)
-    } else if (clause instanceof UniNClause) {
-      const np:UniNClause = clause
-      const headWords = (clause.type === 'that') ? [] : [np.type]
-      // e.g. "Who are you" instead of "Who you are"
-      return new EnNClause(headWords,
-        this.translateIClause(np.iclause, np.type !== 'that'))
-    } else {
-      throw new Error(`Can't translateAny #{JSON.stringify(clause)}`)
-    }
-  }
 }
 
 module.exports = Translator
