@@ -1,5 +1,5 @@
 // @flow
-import type { Person, Tense, Number, PreferredPronouns } from '../types'
+import type { Person, Tense, Number } from '../types'
 
 const RegularConjugation = require('./RegularConjugation')
 const regular_conjugation_pattern_table = require('./regular_conjugation_pattern_table')

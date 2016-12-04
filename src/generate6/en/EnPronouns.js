@@ -1,46 +1,42 @@
 // @flow
 import type { Ref } from '../types'
-import type { Gender, Person, Number, PreferredPronouns } from './types'
+import type { Gender, Person, Number, EnIdentity } from './types'
 
 const { raise } = require('../raise')
 const EnPronoun = require('./EnPronoun')
-const { preferenceToGenderNumber } = require('./types')
 
 class EnPronouns {
   me:     Ref | void
   you:    Ref | void
-  we:     Ref | void
   recent: Array<string>
 
-  constructor(args:{| me?:Ref, you?:Ref, we?:Ref, recent?:Array<Ref> |}) {
+  constructor(args:{| me?:Ref, you?:Ref, recent?:Array<Ref> |}) {
     this.me     = args.me
     this.you    = args.you
-    this.we     = args.we
     this.recent = (args.recent === undefined) ? [] : args.recent
   }
 
   lookup(ref:Ref, agentRef:Ref|void, nominative:bool,
-      refToPreferredPronouns:{[ref: string]: PreferredPronouns}):
-      [Person, Number, EnPronoun|void] {
+      refToIdentity:{[ref:Ref]:EnIdentity}): [Person, Number, EnPronoun|void] {
     if (ref === this.me) {
       return [1, 1, nominative ? new EnPronoun('I') : new EnPronoun('me')]
     } else if (ref === this.you) {
       return [2, 1, new EnPronoun('you')]
-    } else if (ref === this.we) {
-      return [1, 2, new EnPronoun('we')]
     }
 
-    const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[ref] ||
-      raise("Can't find preferred pronoun for " + ref))
+    const [gen, num, members] = refToIdentity[ref] ||
+      raise(`Can't find EnIdentity for ${ref}`)
+    if (this.me && members.indexOf(this.me) !== -1) {
+      return [1, 2, new EnPronoun('we')]
+    }
 
     const possible: Array<Ref> = []
     for (const possibleRef of this.recent) {
       if (possibleRef === agentRef && !nominative) {
         // not confusable because we'd use reflexive for that
       } else {
-        const [possibleGen, possibleNum] = preferenceToGenderNumber(
-          refToPreferredPronouns[possibleRef] ||
-          raise("Can't find preferred pronoun for " + possibleRef))
+        const [possibleGen, possibleNum] = refToIdentity[possibleRef] ||
+          raise(`Can't find EnIdentity for ${possibleRef}`)
         if (possibleGen === gen && possibleNum === num) {
           possible.push(possibleRef)
         }

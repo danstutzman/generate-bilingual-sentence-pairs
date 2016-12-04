@@ -1,4 +1,8 @@
 // @flow
+import type { Ref } from './types'
+import type { EnIdentity } from './en/types'
+import type { EsIdentity } from './es/types'
+
 const fs                     = require('fs')
 const readline               = require('readline')
 const chalk                  = require('chalk')
@@ -11,27 +15,26 @@ const { join }               = require('./join')
 const { UniSpeechAct }       = require('./uni/uni_speech_act')
 const { interpretIClause, interpretSpeechAct } = require('./uni/interpret_sexp')
 
-const esRefToPreferredPronouns = {
-  'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
-  'Libros':'nosotros/ellos', 'Pluma':'yo/ella', 'What':'yo/él', 'C':'yo/él',
-  'BB':'nosotros/ellos',
+const esRefToPreferredPronouns: {[ref:Ref]:EsIdentity} = {
+  'A':['M',1,[]], 'AA':['M',2,['A']], 'B':['M',1,[]], 'BB':['M',2,['B']],
+  'C':['M',1,[]], 'Libro':['M',1,[]], 'Libros':['M',2,[]], 'Pluma':['F',1,[]],
+  'What':['M',1,[]],
 }
-const enRefToPreferredPronouns = {
-  'A':'I/he', 'B':'I/he', 'C':'I/it', 'BB':'we/they',
+const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
+  'A':['M',1,[]], 'B':['M',1,[]], 'C':['N',1,[]], 'BB':['N',2,['B']],
 }
 
 function askQuestion(questioner, speechActs, numSpeechAct) {
   const speechAct = speechActs[numSpeechAct]
 
   const enPronouns = new EnPronouns({ me:speechAct.speaker, you:speechAct.audience })
-  const enTranslated = new EnTranslator('pres', enPronouns, enRefToPreferredPronouns)
+  const enTranslated = new EnTranslator('pres', enPronouns, enRefToIdentity)
     .translateSpeechAct(speechAct)
   const enJoined = join(enTranslated.words())
 
   const question = "Please translate the following:\n  " + enJoined + "\n> "
   questioner.question(question, function(answer:string) {
     const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
-    console.log('pronouns', esPronouns)
     const esTranslated = new EsTranslator('pres', esPronouns, esRefToPreferredPronouns)
       .translateSpeechAct(speechAct)
     const esJoined = join(esTranslated.words())

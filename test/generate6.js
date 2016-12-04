@@ -45,7 +45,7 @@ suite('generate6', function() {
     test('A need B', function() {
       const from = new UniIClause({agent:'A', verb:'need', direct:'B'})
       const translated = new EsTranslator('pres', new EsPronouns({}),
-        {'A':'yo/él', 'B':'yo/él'}).translateIClause(from)
+        {'A':['M',1,[]], 'B':['M',1,[]]}).translateIClause(from)
       assert.deepEqual(translated, new EsIClause({
         agent: new NameNoun('A').setOmit(false),
         conjugation: new RegularConjugation({
@@ -71,8 +71,8 @@ suite('generate6', function() {
   })
   suite('integration-spanish', function() {
     const refToPreferredPronouns = {
-      'A':'yo/él', 'AA':'nosotros/ellos', 'B':'yo/él', 'Libro':'yo/él',
-      'Libros':'nosotros/ellos', 'Pluma':'yo/ella',
+      'A':['M',1,[]], 'AA':['M',2,['A']], 'B':['M',1,[]], 'BB':['M',2,['B']],
+      'Libro':['M',1,[]], 'Libros':['M',2,[]], 'Pluma':['F',1,[]],
     }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A necesita B.', {}],
@@ -98,7 +98,7 @@ suite('generate6', function() {
     }
   })
   suite('integration-english', function() {
-    const refToPreferredPronouns = { '':'I/he', 'A':'I/he', 'B':'I/he', 'C':'I/he' }
+    const refToPreferredPronouns = { 'A':['M',1,[]], 'B':['M',1,[]], 'C':['N',1,[]] }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A needs B.', {}],
       ['what(need(A,What))', 'What does A need?', {}],

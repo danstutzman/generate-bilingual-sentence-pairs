@@ -1,5 +1,6 @@
 // @flow
-import type { Person, Tense, Number, PreferredPronouns } from './types'
+import type { Ref } from '../types'
+import type { Person, Tense, Number, EsIdentity } from './types'
 import type { UniNP } from '../uni/noun_phrases'
 import type { EsNP } from '../es/noun_phrases'
 import type { Conjugation } from './verbs'
@@ -29,15 +30,14 @@ const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_TOP = {
 }
 
 class Translator {
-  tense:                  Tense
-  pronouns:               EsPronouns
-  refToPreferredPronouns: {[ref:string]:PreferredPronouns}
+  tense:         Tense
+  pronouns:      EsPronouns
+  refToIdentity: {[ref:Ref]:EsIdentity}
 
-  constructor(tense:Tense, pronouns:EsPronouns,
-      refToPreferredPronouns:{[ref:string]:PreferredPronouns}) {
-    this.tense                  = tense
-    this.pronouns               = pronouns
-    this.refToPreferredPronouns = refToPreferredPronouns
+  constructor(tense:Tense, pronouns:EsPronouns, refToIdentity:{[ref:Ref]:EsIdentity}) {
+    this.tense         = tense
+    this.pronouns      = pronouns
+    this.refToIdentity = refToIdentity
   }
 
   translateSpeechAct(speechAct:UniSpeechAct): EsSpeechAct {
@@ -73,7 +73,7 @@ class Translator {
     let isAgentSpecific
     if (typeof iclause.agent === 'string') {
       [person, number, isAgentSpecific] = this.pronouns.lookupAgent(iclause.agent,
-        this.refToPreferredPronouns)
+        this.refToIdentity)
     } else {
       [person, number, isAgentSpecific] = [3, 1, false]
     }
@@ -86,7 +86,7 @@ class Translator {
       [indirectPronoun, isIndirectPronounSpecific] =
         this.pronouns.lookupIndirectObj(iclause.indirect,
           typeof iclause.agent === 'string' ? iclause.agent : undefined,
-          this.refToPreferredPronouns)
+          this.refToIdentity)
     }
 
     let [directPronoun, isDirectPronounSpecific] = [undefined, false]
@@ -95,7 +95,7 @@ class Translator {
       [directPronoun, isDirectPronounSpecific] =
         this.pronouns.lookupDirectObj(iclause.direct,
           typeof iclause.agent === 'string' ? iclause.agent : undefined,
-          this.refToPreferredPronouns)
+          this.refToIdentity)
     }
 
     return new EsIClause({

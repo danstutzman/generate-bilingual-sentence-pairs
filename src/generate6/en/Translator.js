@@ -1,5 +1,6 @@
 // @flow
-import type { Person, Tense, Number, PreferredPronouns } from './types'
+import type { Ref } from '../types'
+import type { Person, Tense, Number, EnIdentity } from './types'
 import type { UniNP } from '../uni/noun_phrases'
 import type { EnNP } from './noun_phrases'
 
@@ -15,15 +16,14 @@ const EnSpeechAct = require('./EnSpeechAct')
 const { UniSpeechAct } = require('../uni/uni_speech_act')
 
 class Translator {
-  tense:                  Tense
-  pronouns:               EnPronouns
-  refToPreferredPronouns: {[ref:string]:PreferredPronouns}
+  tense:         Tense
+  pronouns:      EnPronouns
+  refToIdentity: {[ref:Ref]:EnIdentity}
 
-  constructor(tense:Tense, pronouns:EnPronouns,
-      refToPreferredPronouns:{[ref:string]:PreferredPronouns}) {
-    this.tense                  = tense
-    this.pronouns               = pronouns
-    this.refToPreferredPronouns = refToPreferredPronouns
+  constructor(tense:Tense, pronouns:EnPronouns, refToIdentity:{[ref:Ref]:EnIdentity}) {
+    this.tense         = tense
+    this.pronouns      = pronouns
+    this.refToIdentity = refToIdentity
   }
 
   translateSpeechAct(speechAct:UniSpeechAct): EnSpeechAct {
@@ -48,7 +48,7 @@ class Translator {
     let agent
     if (typeof iclause.agent === 'string') {
       [person, number, agent] = this.pronouns.lookup(iclause.agent, undefined, true,
-        this.refToPreferredPronouns)
+        this.refToIdentity)
     }
     if (agent === undefined) {
       [person, number, agent] = [3, 1, this.translateNounPhrase(iclause.agent)]
@@ -65,7 +65,7 @@ class Translator {
       if (typeof iclause.indirect === 'string') {
         indirect = this.pronouns.lookup(iclause.indirect,
           typeof iclause.agent === 'string' ? iclause.agent : undefined, false,
-          this.refToPreferredPronouns)[2]
+          this.refToIdentity)[2]
         if (indirect === undefined &&
             /* flowtype workaround */ iclause.indirect !== undefined) {
           indirect = this.translateNounPhrase(iclause.indirect)
@@ -78,7 +78,7 @@ class Translator {
       if (typeof iclause.direct === 'string') {
         direct = this.pronouns.lookup(iclause.direct,
           typeof iclause.agent === 'string' ? iclause.agent : undefined, false,
-          this.refToPreferredPronouns)[2]
+          this.refToIdentity)[2]
       }
       if (direct === undefined) {
         direct = this.translateNounPhrase(iclause.direct)
