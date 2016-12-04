@@ -4,7 +4,7 @@ import type { EnIdentity } from './en/types'
 import type { EsIdentity } from './es/types'
 
 const fs                     = require('fs')
-const readline               = require('readline')
+const readlineSync           = require('readline-sync')
 const chalk                  = require('chalk')
 const { parseLine }          = require('./uni/parse_line')
 const EnPronouns             = require('./en/EnPronouns')
@@ -24,46 +24,24 @@ const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
   'A':['M',1,[]], 'B':['M',1,[]], 'C':['N',1,[]], 'BB':['N',2,['B']],
 }
 
-function askQuestion(questioner, speechActs, numSpeechAct) {
-  if (numSpeechAct >= speechActs.length) {
-    questioner.pause() // so program can exit
-    return
+const speechActs = []
+for (const line of fs.readFileSync('curriculum_ideas/GAME2').toString().split("\n")) {
+  if (line !== '' && line.charAt(0) !== '#') {
+    speechActs.push(interpretSpeechAct(parseLine(line)))
   }
+}
 
-  const speechAct = speechActs[numSpeechAct]
-
+for (const speechAct of speechActs) {
   const enPronouns = new EnPronouns({ me:speechAct.speaker, you:speechAct.audience })
   const enTranslated = new EnTranslator('past', enPronouns, enRefToIdentity)
     .translateSpeechAct(speechAct)
   const enJoined = join(enTranslated.words())
 
-  const question = "Please translate the following:\n  " + enJoined + "\n> "
-  questioner.question(question, function(answer:string) {
-    const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
-    const esTranslated = new EsTranslator('pret', esPronouns, esRefToPreferredPronouns)
-      .translateSpeechAct(speechAct)
-    const esJoined = join(esTranslated.words())
-    console.log(chalk.green(esJoined))
-
-    askQuestion(questioner, speechActs, numSpeechAct + 1)
-  })
+  const answer:string = readlineSync.question(
+    "Please translate the following:\n  " + enJoined + "\n> ")
+  const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
+  const esTranslated = new EsTranslator('pret', esPronouns, esRefToPreferredPronouns)
+    .translateSpeechAct(speechAct)
+  const esJoined = join(esTranslated.words())
+  console.log(chalk.green(esJoined))
 }
-
-function quiz(speechActs: Array<UniSpeechAct>) {
-  const questioner = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-  askQuestion(questioner, speechActs, 0)
-}
-
-const speechActs = []
-readline.createInterface({
-  input: fs.createReadStream('curriculum_ideas/GAME2'),
-}).on('line', (line) => {
-  if (line !== '' && line.charAt(0) !== '#') {
-    speechActs.push(interpretSpeechAct(parseLine(line)))
-  }
-}).on('close', () => {
-  quiz(speechActs)
-})
