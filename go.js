@@ -47,32 +47,39 @@ spawned.on('close', (code) => {
 chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
   console.log(chalk.gray(`Detected ${event} of ${path}`))
   if ((event === 'change' || event === 'add') && path.endsWith('.js')) {
-    const flowSource = fs.readFileSync(path, 'utf8')
-    for (const line of flowSource.split('\n')) {
-      if (line.endsWith(';')) {
-        exec("/usr/bin/say 'semicolon'")
+    const spawned = spawn('node_modules/.bin/flow')
+    spawned.stdout.on('data', (data) => { console.log(data.toString().trim()) })
+    spawned.stderr.on('data', (data) => { console.log(data.toString().trim()) })
+    spawned.on('close', (code) => {
+      if (code !== 0) { exec("/usr/bin/say 'flow type error'") }
+
+      const flowSource = fs.readFileSync(path, 'utf8')
+      for (const line of flowSource.split('\n')) {
+        if (line.endsWith(';')) {
+          exec("/usr/bin/say 'semicolon'")
+          return
+        }
+      }
+
+      let flowRemovedSource
+      try {
+        flowRemovedSource = flowRemoveTypes(flowSource)
+      } catch (e) {
+        console.error(e)
+        exec("/usr/bin/say 'flow remove type error'")
         return
       }
-    }
+      fs.writeFileSync(`build/${path}`, flowRemovedSource)
 
-    let flowRemovedSource
-    try {
-      flowRemovedSource = flowRemoveTypes(flowSource)
-    } catch (e) {
-      console.error(e)
-      exec("/usr/bin/say 'flow type error'")
-      return
-    }
-    fs.writeFileSync(`build/${path}`, flowRemovedSource)
+      JSHINT(flowRemovedSource, JSHINT_OPTIONS, {})
+      if (JSHINT.errors.length > 0) {
+        console.error(JSHINT.errors)
+        exec("/usr/bin/say 'j s hint error'")
+        return
+      }
 
-    JSHINT(flowRemovedSource, JSHINT_OPTIONS, {})
-    if (JSHINT.errors.length > 0) {
-      console.error(JSHINT.errors)
-      exec("/usr/bin/say 'j s hint error'")
-      return
-    }
-
-    exec('afplay /System/Library/Sounds/Pop.aiff') // success sound
+      exec('afplay /System/Library/Sounds/Pop.aiff') // success sound
+    })
   }
 })
 
