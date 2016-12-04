@@ -23,14 +23,17 @@ const enRefToPreferredPronouns = {
 function askQuestion(questioner, speechActs, numSpeechAct) {
   const speechAct = speechActs[numSpeechAct]
 
-  const enTranslated = new EnTranslator('pres', new EnPronouns({}),
-    enRefToPreferredPronouns).translateSpeechAct(speechAct)
+  const enPronouns = new EnPronouns({ me:speechAct.speaker, you:speechAct.audience })
+  const enTranslated = new EnTranslator('pres', enPronouns, enRefToPreferredPronouns)
+    .translateSpeechAct(speechAct)
   const enJoined = join(enTranslated.words())
 
   const question = "Please translate the following:\n  " + enJoined + "\n> "
   questioner.question(question, function(answer:string) {
-    const esTranslated = new EsTranslator('pres', new EsPronouns({}),
-      esRefToPreferredPronouns).translateSpeechAct(speechAct)
+    const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
+    console.log('pronouns', esPronouns)
+    const esTranslated = new EsTranslator('pres', esPronouns, esRefToPreferredPronouns)
+      .translateSpeechAct(speechAct)
     const esJoined = join(esTranslated.words())
     console.log(chalk.green(esJoined))
 

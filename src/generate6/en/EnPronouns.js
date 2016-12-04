@@ -7,11 +7,15 @@ const EnPronoun = require('./EnPronoun')
 const { preferenceToGenderNumber } = require('./types')
 
 class EnPronouns {
-  me:     Ref|void
+  me:     Ref | void
+  you:    Ref | void
+  we:     Ref | void
   recent: Array<string>
 
-  constructor(args:{| me?:Ref, recent?:Array<Ref> |}) {
+  constructor(args:{| me?:Ref, you?:Ref, we?:Ref, recent?:Array<Ref> |}) {
     this.me     = args.me
+    this.you    = args.you
+    this.we     = args.we
     this.recent = (args.recent === undefined) ? [] : args.recent
   }
 
@@ -20,6 +24,10 @@ class EnPronouns {
       [Person, Number, EnPronoun|void] {
     if (ref === this.me) {
       return [1, 1, nominative ? new EnPronoun('I') : new EnPronoun('me')]
+    } else if (ref === this.you) {
+      return [2, 1, new EnPronoun('you')]
+    } else if (ref === this.we) {
+      return [1, 2, new EnPronoun('we')]
     }
 
     const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[ref] ||

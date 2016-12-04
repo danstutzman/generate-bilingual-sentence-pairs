@@ -7,12 +7,21 @@ const EsPronoun = require('./EsPronoun')
 const { preferenceToGenderNumber } = require('./types')
 
 class EsPronouns {
-  yo:     string|void
-  recent: Array<string>
+  yo:       string | void
+  tu:       string | void
+  nosotros: string | void
+  recent:   Array<string>
 
-  constructor(args:{| yo?:string, recent?:Array<string> |}) {
-    this.yo     = args.yo
-    this.recent = (args.recent === undefined) ? [] : args.recent
+  constructor(args:{|
+    yo?       : string,
+    tu?       : string,
+    nosotros? : string,
+    recent?   : Array<string>,
+  |}) {
+    this.yo       = args.yo
+    this.tu       = args.tu
+    this.nosotros = args.nosotros
+    this.recent   = (args.recent === undefined) ? [] : args.recent
   }
 
   // 3rd return (bool) means isSpecific (no further words needed)
@@ -20,6 +29,10 @@ class EsPronouns {
       ): [Person, Number, bool] {
     if (ref === this.yo) {
       return [1, 1, true]
+    } else if (ref === this.tu) {
+      return [2, 1, true]
+    } else if (ref === this.nosotros) {
+      return [1, 2, true]
     } else {
       const isSpecific = (this.recent.length === 1 && this.recent[0] === ref)
       if (this.recent.indexOf(ref) === -1) {
@@ -37,6 +50,10 @@ class EsPronouns {
       return [undefined, false]
     } else if (indirectObj === this.yo) {
       return [new EsPronoun('me'), true]
+    } else if (indirectObj === this.tu) {
+      return [new EsPronoun('te'), true]
+    } else if (indirectObj === this.nosotros) {
+      return [new EsPronoun('nos'), true]
     }
 
     const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[indirectObj] ||
@@ -75,6 +92,10 @@ class EsPronouns {
       refToPreferredPronouns:{[ref: string]: PreferredPronouns}): [EsPronoun|void, bool] {
     if (directObj === this.yo) {
       return [new EsPronoun('me'), true]
+    } else if (directObj === this.tu) {
+      return [new EsPronoun('te'), true]
+    } else if (directObj === this.nosotros) {
+      return [new EsPronoun('nos'), true]
     }
 
     const [gen, num] = preferenceToGenderNumber(refToPreferredPronouns[directObj] ||
