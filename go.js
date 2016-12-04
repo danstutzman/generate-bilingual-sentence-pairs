@@ -5,12 +5,28 @@ const fs              = require('fs')
 const { spawn, exec } = require('child_process')
 const { JSHINT }      = require('jshint')
 const chalk           = require('chalk')
+const process         = require('process')
+const kexec           = require('kexec')
 
 const JSHINT_OPTIONS = { "asi": true, "esversion": 6 }
 const CHOKIDAR_OPTIONS = {'ignored':/[\/\\]\./, 'ignoreInitial':true}
 
-// Build all files when watch.js is first run
-const process = spawn('/bin/bash', ['-c', `echo Running flow &&
+// argv[0] is node
+// argv[1] is path to script
+// argv[2] is optional 'main' or 'test'
+if (process.argv.length > 3) {
+  throw new Error("Too many command-line arguments")
+} else if (process.argv.length === 3) {
+  if (process.argv[2] === 'main') {
+    kexec('node', ['./build/src/generate6/main.js'])
+  } else if (process.argv[2] === 'test') {
+    kexec('node_modules/.bin/mocha', ['build/test', '--grep', 'generate6'])
+  } else {
+    throw new Error("Unknown argv[2]")
+  }
+}
+
+const spawned = spawn('/bin/bash', ['-c', `echo Running flow &&
   node_modules/.bin/flow &&
   JS_FILES="$(find src -name '*.js') $(find test -name '*.js')" &&
   grep ';$' $JS_FILES
@@ -19,9 +35,9 @@ const process = spawn('/bin/bash', ['-c', `echo Running flow &&
   node_modules/.bin/flow-remove-types --out-dir build $JS_FILES &&
   echo Running jshint &&
   node_modules/.bin/jshint $(find build -name '*.js')`])
-process.stdout.on('data', (data) => { console.log(data.toString().trim()) })
-process.stderr.on('data', (data) => { console.log(data.toString().trim()) })
-process.on('close', (code) => {
+spawned.stdout.on('data', (data) => { console.log(data.toString().trim()) })
+spawned.stderr.on('data', (data) => { console.log(data.toString().trim()) })
+spawned.on('close', (code) => {
   if (code !== 0) { process.exit(1) }
   console.log('Build done')
   exec('afplay /System/Library/Sounds/Pop.aiff') // success sound
