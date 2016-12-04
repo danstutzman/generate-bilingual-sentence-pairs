@@ -12,7 +12,7 @@ const CHOKIDAR_OPTIONS = {'ignored':/[\/\\]\./, 'ignoreInitial':true}
 // Build all files when watch.js is first run
 const process = spawn('/bin/bash', ['-c', `echo Running flow &&
   node_modules/.bin/flow &&
-  JS_FILES=$(find src -name '*.js') &&
+  JS_FILES="$(find src -name '*.js') $(find test -name '*.js')" &&
   grep ';$' $JS_FILES
   if [ "$?" == "0" ]; then exit 1; fi &&
   rm -rf build &&
@@ -28,7 +28,7 @@ process.on('close', (code) => {
 })
 
 // Every time a file is edited, build that file
-chokidar.watch('src', CHOKIDAR_OPTIONS).on('all', (event, path) => {
+chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
   console.log(chalk.gray(`Detected ${event} of ${path}`))
   if ((event === 'change' || event === 'add') && path.endsWith('.js')) {
     const flowSource = fs.readFileSync(path, 'utf8')
