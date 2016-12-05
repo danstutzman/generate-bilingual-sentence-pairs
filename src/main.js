@@ -44,4 +44,5 @@ for (const speechAct of speechActs) {
     .translateSpeechAct(speechAct)
   const esJoined = join(esTranslated.words())
   console.log(chalk.green(esJoined))
+  console.log(esTranslated.skills())
 }

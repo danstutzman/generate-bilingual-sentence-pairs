@@ -18,35 +18,40 @@ class RegularConjugationPattern {
     this.number     = number
     this.suffix     = suffix
   }
+  skills(): Array<[string,string]> {
+    return [
+      [`prod-v-suffix-${this.kindOfVerb}-${this.tense}${this.person}${this.number}`,
+       this.suffix]]
+  }
 }
 
 const table : Array<RegularConjugationPattern> = [
-  new RegularConjugationPattern("-ar verbs",         "pres", 1, 1, "-o"),
-  new RegularConjugationPattern("-ar verbs",         "pres", 2, 1, "-as"),
-  new RegularConjugationPattern("-ar verbs",         "pres", 3, 1, "-a"),
-  new RegularConjugationPattern("-ar verbs",         "pres", 1, 2, "-amos"),
-  new RegularConjugationPattern("-ar verbs",         "pres", 3, 2, "-an"),
-  new RegularConjugationPattern("-ar verbs",         "pret", 1, 1, "-é"),
-  new RegularConjugationPattern("-ar verbs",         "pret", 2, 1, "-aste"),
-  new RegularConjugationPattern("-ar verbs",         "pret", 3, 1, "-ó"),
-  new RegularConjugationPattern("-ar verbs",         "pret", 1, 2, "-amos"),
-  new RegularConjugationPattern("-ar verbs",         "pret", 3, 2, "-aron"),
-  new RegularConjugationPattern("-er and -ir verbs", "pres", 1, 1, "-o"),
-  new RegularConjugationPattern("-er and -ir verbs", "pres", 2, 1, "-es"),
-  new RegularConjugationPattern("-er and -ir verbs", "pres", 3, 1, "-e"),
-  new RegularConjugationPattern("-er and -ir verbs", "pres", 3, 2, "-en"),
-  new RegularConjugationPattern("-er and -ir verbs", "pret", 1, 1, "-í"),
-  new RegularConjugationPattern("-er and -ir verbs", "pret", 2, 1, "-iste"),
-  new RegularConjugationPattern("-er and -ir verbs", "pret", 3, 1, "-ió"),
-  new RegularConjugationPattern("-er and -ir verbs", "pret", 1, 2, "-imos"),
-  new RegularConjugationPattern("-er and -ir verbs", "pret", 3, 2, "-ieron"),
-  new RegularConjugationPattern("-er verbs",         "pres", 1, 2, "-emos"),
-  new RegularConjugationPattern("-ir verbs",         "pres", 1, 2, "-imos"),
-  new RegularConjugationPattern("stem change pret",  "pret", 1, 1, "-e"),
-  new RegularConjugationPattern("stem change pret",  "pret", 2, 1, "-iste"),
-  new RegularConjugationPattern("stem change pret",  "pret", 3, 1, "-o"),
-  new RegularConjugationPattern("stem change pret",  "pret", 1, 2, "-imos"),
-  new RegularConjugationPattern("stem change pret",  "pret", 3, 2, "-ieron"),
+  new RegularConjugationPattern("ar",       "pres", 1, 1, "-o"),
+  new RegularConjugationPattern("ar",       "pres", 2, 1, "-as"),
+  new RegularConjugationPattern("ar",       "pres", 3, 1, "-a"),
+  new RegularConjugationPattern("ar",       "pres", 1, 2, "-amos"),
+  new RegularConjugationPattern("ar",       "pres", 3, 2, "-an"),
+  new RegularConjugationPattern("ar",       "pret", 1, 1, "-é"),
+  new RegularConjugationPattern("ar",       "pret", 2, 1, "-aste"),
+  new RegularConjugationPattern("ar",       "pret", 3, 1, "-ó"),
+  new RegularConjugationPattern("ar",       "pret", 1, 2, "-amos"),
+  new RegularConjugationPattern("ar",       "pret", 3, 2, "-aron"),
+  new RegularConjugationPattern("erir",     "pres", 1, 1, "-o"),
+  new RegularConjugationPattern("erir",     "pres", 2, 1, "-es"),
+  new RegularConjugationPattern("erir",     "pres", 3, 1, "-e"),
+  new RegularConjugationPattern("erir",     "pres", 3, 2, "-en"),
+  new RegularConjugationPattern("erir",     "pret", 1, 1, "-í"),
+  new RegularConjugationPattern("erir",     "pret", 2, 1, "-iste"),
+  new RegularConjugationPattern("erir",     "pret", 3, 1, "-ió"),
+  new RegularConjugationPattern("erir",     "pret", 1, 2, "-imos"),
+  new RegularConjugationPattern("erir",     "pret", 3, 2, "-ieron"),
+  new RegularConjugationPattern("er",       "pres", 1, 2, "-emos"),
+  new RegularConjugationPattern("ir",       "pres", 1, 2, "-imos"),
+  new RegularConjugationPattern("stempret", "pret", 1, 1, "-e"),
+  new RegularConjugationPattern("stempret", "pret", 2, 1, "-iste"),
+  new RegularConjugationPattern("stempret", "pret", 3, 1, "-o"),
+  new RegularConjugationPattern("stempret", "pret", 1, 2, "-imos"),
+  new RegularConjugationPattern("stempret", "pret", 3, 2, "-ieron"),
 ]
 
 function find01(infinitive:string, tense:Tense, person:Person,

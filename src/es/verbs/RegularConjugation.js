@@ -15,6 +15,12 @@ class RegularConjugation {
     const stem = this.infinitive.substring(0, this.infinitive.length - 2) + '-'
     return [stem, this.pattern.suffix]
   }
+  skills(): Array<[string,string]> {
+    const stem = this.infinitive.substring(0, this.infinitive.length - 2)
+    return []
+      .concat([['prod-v-inf-' + this.infinitive, stem + '-']])
+      .concat(this.pattern.skills())
+  }
 }
 
 module.exports = RegularConjugation

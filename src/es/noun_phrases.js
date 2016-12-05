@@ -17,6 +17,9 @@ class NameNoun {
   words(): Array<string> {
     return this.omit ? [] : [this.ref]
   }
+  skills(): Array<[string,string]> {
+    return [this.omit ? ['prod-ref-omit', ''] : ['', this.ref]]
+  }
 }
 
 class EsNClause {
@@ -34,6 +37,12 @@ class EsNClause {
   }
   words(): Array<string> {
     return this.headWords.concat(this.iclause.words())
+  }
+  skills(): Array<[string,string]> {
+    return []
+      .concat(this.headWords.length > 0 ?
+        [['prod-nc-' + this.headWords[0], this.headWords[0]]] : [])
+      .concat(this.iclause.skills())
   }
 }
 

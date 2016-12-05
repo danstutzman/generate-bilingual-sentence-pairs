@@ -3,12 +3,7 @@ import type { Ref } from '../types'
 
 const { raise } = require('../raise')
 
-export type KindOfVerb =
-  "-ar verbs" |
-  "-er verbs" |
-  "-ir verbs" |
-  "-er and -ir verbs" |
-  "stem change pret"
+export type KindOfVerb = "ar" | "er" | "ir" | "erir" | "stempret"
 
 export type Tense = "pres" | "pret"
 
@@ -21,15 +16,14 @@ export type Gender = "M" | "F"
 function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb,
     isStemChangePret:bool): bool {
   if (isStemChangePret) {
-    return kindOfVerb === 'stem change pret'
+    return kindOfVerb === 'stempret'
   } else {
     switch (kindOfVerb) {
-      case "-ar verbs": return infinitive.endsWith('ar')
-      case "-er verbs": return infinitive.endsWith('er')
-      case "-ir verbs": return infinitive.endsWith('ir')
-      case "-er and -ir verbs":
-        return infinitive.endsWith('er') || infinitive.endsWith('ir')
-      case "stem change pret": return false
+      case 'ar': return infinitive.endsWith('ar')
+      case 'er': return infinitive.endsWith('er')
+      case 'ir': return infinitive.endsWith('ir')
+      case 'erir': return infinitive.endsWith('er') || infinitive.endsWith('ir')
+      case 'stempret': return false
       default: throw new Error("Unknown kindOfVerb " + kindOfVerb)
     }
   }

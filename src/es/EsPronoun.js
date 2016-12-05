@@ -12,6 +12,9 @@ class EsPronoun {
   words(): Array<string> {
     return [this.word]
   }
+  skills(): Array<[string,string]> {
+    return [['prod-pro-' + this.word, this.word]]
+  }
 }
 
 module.exports = EsPronoun

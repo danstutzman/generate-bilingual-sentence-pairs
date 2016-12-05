@@ -25,6 +25,13 @@ class UniqueConjugation {
   words(): Array<string> {
     return [this.word]
   }
+  skills(): Array<[string,string]> {
+    return [
+      [`prod-v-inf-${this.infinitive}`, ''],
+      [`prod-v-uniq-${this.infinitive}-${this.tense}${this.person}${this.number}`,
+        this.word]
+    ]
+  }
 }
 
 const table = [

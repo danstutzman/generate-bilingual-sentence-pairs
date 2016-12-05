@@ -50,7 +50,7 @@ suite('generate6', function() {
         agent: new NameNoun('A').setOmit(false),
         conjugation: new RegularConjugation({
           infinitive: 'necesitar',
-          pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
+          pattern: new RegularConjugationPattern('ar', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B').setOmit(false),
       }))
@@ -62,7 +62,7 @@ suite('generate6', function() {
         agent: new NameNoun('A'),
         conjugation: new RegularConjugation({
           infinitive: 'necesitar',
-          pattern: new RegularConjugationPattern('-ar verbs', 'pres', 3, 1, '-a'),
+          pattern: new RegularConjugationPattern('ar', 'pres', 3, 1, '-a'),
         }),
         direct: new NameNoun('B'),
       })
