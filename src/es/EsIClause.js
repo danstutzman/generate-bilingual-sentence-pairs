@@ -55,16 +55,16 @@ class EsIClause {
   skills(): Array<[Skill,string]> {
     return []
       .concat(!this.verbFirst ? this.agent.skills() : [])
-      .concat(this.negative ? [['iclause-no', 'no']] : [])
+      .concat(this.negative ? [['iclause-orderof-no', 'no']] : [])
       .concat(this.indirectPronoun !== undefined ?
-        [['iclause-io-pro', '']].concat(this.indirectPronoun.skills()) : [])
+        [['iclause-orderof-io-pro', '']].concat(this.indirectPronoun.skills()) : [])
       .concat(this.directPronoun !== undefined ?
-        [['iclause-do-pro', '']].concat(this.directPronoun.skills()) : [])
+        [['iclause-orderof-do-pro', '']].concat(this.directPronoun.skills()) : [])
       .concat(this.conjugation.skills())
       .concat(this.verbFirst ? this.agent.skills() : [])
       .concat(!(this.direct instanceof EsNClause) ? this.direct.skills() : [])
       .concat(this.indirect !== undefined && !this.indirect.omit ?
-        [['iclause-io-a', 'a']].concat(this.indirect.words()) : [])
+        [['iclause-orderof-io-a', 'a']].concat(this.indirect.words()) : [])
       .concat(this.direct instanceof EsNClause ? this.direct.skills() : [])
   }
 }
