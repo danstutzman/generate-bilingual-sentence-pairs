@@ -28,21 +28,21 @@ function lineToUniSpeechAct(line:string): UniSpeechAct {
   }
 }
 
-suite('generate6', function() {
-  suite('parse_line', function() {
-    test('a(b,,c())', function() {
+suite('generate6', ()=>{
+  suite('parse_line', ()=>{
+    test('a(b,,c())', ()=>{
       assert.deepEqual(parseLine('a(b,,c())'), ['a', 'b', '', ['c']])
     })
   })
-  suite('interpret_sexp', function() {
-    test('A want B', function() {
+  suite('interpret_sexp', ()=>{
+    test('A want B', ()=>{
       const sexp = ['want', 'A', 'B']
       assert.deepEqual(interpretIClause(sexp),
         new UniIClause({agent:'A', verb:'want', direct:'B'}))
     })
   })
-  suite('translate_to_es', function() {
-    test('A need B', function() {
+  suite('translate_to_es', ()=>{
+    test('A need B', ()=>{
       const from = new UniIClause({agent:'A', verb:'need', direct:'B'})
       const translated = new EsTranslator('pres', new EsPronouns({}),
         {'A':['M',1,[]], 'B':['M',1,[]]}).translateIClause(from)
@@ -56,8 +56,8 @@ suite('generate6', function() {
       }))
     })
   })
-  suite('words', function() {
-    test('A need B', function() {
+  suite('words', ()=>{
+    test('A need B', ()=>{
       const iclause = new EsIClause({
         agent: new NameNoun('A'),
         conjugation: new RegularConjugation({
@@ -69,7 +69,7 @@ suite('generate6', function() {
       assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
     })
   })
-  suite('integration-spanish', function() {
+  suite('integration-spanish', ()=>{
     const refToPreferredPronouns = {
       'A':['M',1,[]], 'AA':['M',2,['A']], 'B':['M',1,[]], 'BB':['M',2,['B']],
       'Libro':['M',1,[]], 'Libros':['M',2,[]], 'Pluma':['F',1,[]],
@@ -89,7 +89,7 @@ suite('generate6', function() {
       ['give(A,B,Libros)', 'A le da Libros.', {recent:['B']}],
       ['tell(A,B,that(need(A,B)))', 'A dice a B que A lo necesita.', {}],
     ]) {
-      test(expected, /* jshint loopfunc:true */ function() {
+      test(expected, /* jshint loopfunc:true */ ()=>{
         const translated = new EsTranslator('pres', new EsPronouns(pronounsInit),
           refToPreferredPronouns).translateSpeechAct(lineToUniSpeechAct(sexp))
         const joined = join(translated.words())
@@ -97,14 +97,14 @@ suite('generate6', function() {
       })
     }
   })
-  suite('integration-english', function() {
+  suite('integration-english', ()=>{
     const refToPreferredPronouns = { 'A':['M',1,[]], 'B':['M',1,[]], 'C':['N',1,[]] }
     for (const [sexp, expected, pronounsInit] of [
       ['need(A,B)', 'A needs B.', {}],
       ['what(need(A,What))', 'What does A need?', {}],
       ['give(A,B,C)', 'A gives B C.', {}],
     ]) {
-      test(expected, /* jshint loopfunc:true */ function() {
+      test(expected, /* jshint loopfunc:true */ ()=>{
         const translated = new EnTranslator('pres', new EnPronouns(pronounsInit),
           refToPreferredPronouns).translateSpeechAct(lineToUniSpeechAct(sexp))
         const joined = join(translated.words())
