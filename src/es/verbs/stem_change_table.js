@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from '../../types'
 import type { Tense } from '../types'
 const { RegularConjugationPattern } = require('./regular_conjugation_pattern_table')
 
@@ -12,7 +13,7 @@ class StemChange {
     this.infinitive = infinitive
     this.stem = stem
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [[`prod-v-stem-${this.tense}-${this.infinitive}`, this.stem]]
   }
 }
@@ -71,7 +72,7 @@ class StemChangeConjugation {
   words(): Array<string> {
     return [this.stemChange.stem, this.pattern.suffix]
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [['prod-v-inf-' + this.infinitive, '']]
       .concat(this.stemChange.skills())
       .concat(this.pattern.skills())

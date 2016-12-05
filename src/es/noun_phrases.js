@@ -1,5 +1,5 @@
 // @flow
-import type { Ref } from '../types'
+import type { Ref, Skill } from '../types'
 
 const EsIClause = require('./EsIClause')
 
@@ -17,7 +17,7 @@ class NameNoun {
   words(): Array<string> {
     return this.omit ? [] : [this.ref]
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [this.omit ? ['prod-ref-omit', ''] : ['', this.ref]]
   }
 }
@@ -38,7 +38,7 @@ class EsNClause {
   words(): Array<string> {
     return this.headWords.concat(this.iclause.words())
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return []
       .concat(this.headWords.length > 0 ?
         [['prod-nc-' + this.headWords[0], this.headWords[0]]] : [])

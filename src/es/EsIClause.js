@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from '../types'
 import type { EsNP } from './noun_phrases'
 import type { Conjugation } from './verbs'
 
@@ -51,7 +52,7 @@ class EsIClause {
         ['a'].concat(this.indirect.words()) : [])
       .concat(this.direct instanceof EsNClause ? this.direct.words() : [])
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return []
       .concat(!this.verbFirst ? this.agent.skills() : [])
       .concat(this.negative ? [['prod-ic-no', 'no']] : [])

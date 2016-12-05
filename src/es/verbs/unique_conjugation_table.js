@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from '../../types'
 import type { Number, Person, Tense } from '../types'
 
 class UniqueConjugation {
@@ -25,7 +26,7 @@ class UniqueConjugation {
   words(): Array<string> {
     return [this.word]
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [
       [`prod-v-inf-${this.infinitive}`, ''],
       [`prod-v-uniq-${this.infinitive}-${this.tense}${this.person}${this.number}`,

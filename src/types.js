@@ -1,6 +1,7 @@
 // @flow
-export type Sexp = string|Array<Sexp>
+export type Sexp = string | Array<Sexp>
 export type Ref = string
+export type Skill = string
 
 function expectString(sexp:Sexp): string {
   if (typeof sexp !== 'string') {

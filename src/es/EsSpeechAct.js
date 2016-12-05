@@ -1,5 +1,5 @@
 // @flow
-import type { Ref } from '../types'
+import type { Ref, Skill } from '../types'
 import type { EsNP } from './noun_phrases'
 
 export type EsSpeechActIntonation = 'question' | 'exclamation' | 'comment'
@@ -33,7 +33,7 @@ class EsSpeechAct {
       .concat(this.speech.words())
       .concat(INTONATION_TO_PUNCTUATION[this.intonation][1])
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return []
       .concat(this.speaker ? [['',`${this.speaker}:`]] : [])
       .concat(INTONATION_TO_PUNCTUATION_SKILLS[this.intonation][0])

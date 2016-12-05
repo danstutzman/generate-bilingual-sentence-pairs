@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from '../types'
 
 class EsPronoun {
   word: string
@@ -12,7 +13,7 @@ class EsPronoun {
   words(): Array<string> {
     return [this.word]
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [['prod-pro-' + this.word, this.word]]
   }
 }

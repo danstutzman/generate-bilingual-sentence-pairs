@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from "../../types"
 import type { KindOfVerb, Tense, Person, Number } from "../types"
 
 const { isInfinitiveKindOfVerb } = require('../types')
@@ -18,7 +19,7 @@ class RegularConjugationPattern {
     this.number     = number
     this.suffix     = suffix
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     return [
       [`prod-v-suffix-${this.kindOfVerb}-${this.tense}${this.person}${this.number}`,
        this.suffix]]

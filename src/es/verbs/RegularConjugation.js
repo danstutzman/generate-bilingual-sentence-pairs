@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from '../../types'
 
 const { RegularConjugationPattern } = require('./regular_conjugation_pattern_table')
 
@@ -15,7 +16,7 @@ class RegularConjugation {
     const stem = this.infinitive.substring(0, this.infinitive.length - 2) + '-'
     return [stem, this.pattern.suffix]
   }
-  skills(): Array<[string,string]> {
+  skills(): Array<[Skill,string]> {
     const stem = this.infinitive.substring(0, this.infinitive.length - 2)
     return []
       .concat([['prod-v-inf-' + this.infinitive, stem + '-']])
