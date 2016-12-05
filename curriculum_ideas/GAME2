@@ -3,16 +3,12 @@
 # BB: representative's workplace
 # C:  replacement
 
-ask(B,A,what(want(A,What)))       # What do you need?
-tell(A,B,that(want(A,C)))               # I want C
-tell(A,B,that(need(A,C)))               # I need C
-command(A,B,that(give(B,A,C)))          # Give me C
-tell(B,A,that(not(need(A,C))))          # You don't need C
-tell(B,A,that(not(have(BB,C))))         # We don't have C
-#ask(B,A,what(be(TheProblem,What)))      # What's the problem!
-ask(A,B,why(not(give(B,A,C))))    # Why won't you give me C?
+- - ask(B,A,what(want(A,What)))       # What do you need?
+  - - tell(A,B,that(want(A,C)))       # I want C
+    - tell(A,B,that(need(A,C)))       # I need C
+    - command(A,B,that(give(B,A,C)))  # Give me C
+  - - tell(B,A,that(not(need(A,C))))  # You don't need C
+    - tell(B,A,that(not(have(BB,C)))) # We don't have C
+  - ask(A,B,why(not(give(B,A,C))))    # Why won't you give me C?
 
-# Step 1: parse s-expressions
-# Step 2: translate into English, discarding ask/tell/command
-# Step 3: translate into Spanish, discarding ask/tell/command
-# Step 4: judge user's attempted translation from English to Spanish
+#ask(B,A,what(be(TheProblem,What)))      # What's the problem!
