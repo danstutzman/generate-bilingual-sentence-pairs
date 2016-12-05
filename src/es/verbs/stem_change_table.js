@@ -14,7 +14,7 @@ class StemChange {
     this.stem = stem
   }
   skills(): Array<[Skill,string]> {
-    return [[`prod-v-stem-${this.tense}-${this.infinitive}`, this.stem]]
+    return [[`v-stem-${this.tense}-${this.infinitive}`, this.stem]]
   }
 }
 
@@ -73,7 +73,7 @@ class StemChangeConjugation {
     return [this.stemChange.stem, this.pattern.suffix]
   }
   skills(): Array<[Skill,string]> {
-    return [['prod-v-inf-' + this.infinitive, '']]
+    return [['v-inf-' + this.infinitive, '']]
       .concat(this.stemChange.skills())
       .concat(this.pattern.skills())
   }

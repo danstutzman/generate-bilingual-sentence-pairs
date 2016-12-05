@@ -5,14 +5,9 @@ import type { EsNP } from './noun_phrases'
 export type EsSpeechActIntonation = 'question' | 'exclamation' | 'comment'
 
 const INTONATION_TO_PUNCTUATION = {
-  'question':    [['¿'], ['?']],
-  'exclamation': [['¡'], ['!']],
-  'comment':     [[   ], ['.']],
-}
-const INTONATION_TO_PUNCTUATION_SKILLS = {
-  'question':    [[['prod-punc-invq','¿']], [['prod-punc-q','?']]],
-  'exclamation': [[['prod-punc-inve','¡']], [['prod-punc-e','!']]],
-  'comment':     [[                      ], [['prod-punc-p','.']]],
+  'question':    '?',
+  'exclamation': '!',
+  'comment':     '.',
 }
 
 class EsSpeechAct {
@@ -21,6 +16,9 @@ class EsSpeechAct {
   speech:     EsNP
 
   constructor(intonation:EsSpeechActIntonation, speaker:Ref|void, speech:EsNP) {
+    if (INTONATION_TO_PUNCTUATION[intonation] === undefined) {
+      throw new Error(`Unknown intonation '${intonation}'`)
+    }
     this.intonation = intonation
     this.speaker    = speaker
     this.speech     = speech
@@ -29,16 +27,14 @@ class EsSpeechAct {
   words(): Array<string> {
     return []
       .concat(this.speaker ? [`${this.speaker}:`] : [])
-      .concat(INTONATION_TO_PUNCTUATION[this.intonation][0])
       .concat(this.speech.words())
-      .concat(INTONATION_TO_PUNCTUATION[this.intonation][1])
+      .concat([INTONATION_TO_PUNCTUATION[this.intonation]])
   }
   skills(): Array<[Skill,string]> {
     return []
       .concat(this.speaker ? [['',`${this.speaker}:`]] : [])
-      .concat(INTONATION_TO_PUNCTUATION_SKILLS[this.intonation][0])
       .concat(this.speech.skills())
-      .concat(INTONATION_TO_PUNCTUATION_SKILLS[this.intonation][1])
+      .concat([['', INTONATION_TO_PUNCTUATION[this.intonation]]])
   }
 }
 

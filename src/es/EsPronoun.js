@@ -14,7 +14,7 @@ class EsPronoun {
     return [this.word]
   }
   skills(): Array<[Skill,string]> {
-    return [['prod-pro-' + this.word, this.word]]
+    return [['pro-' + this.word, this.word]]
   }
 }
 

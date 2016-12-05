@@ -19,7 +19,7 @@ class RegularConjugation {
   skills(): Array<[Skill,string]> {
     const stem = this.infinitive.substring(0, this.infinitive.length - 2)
     return []
-      .concat([['prod-v-inf-' + this.infinitive, stem + '-']])
+      .concat([['v-inf-' + this.infinitive, stem + '-']])
       .concat(this.pattern.skills())
   }
 }

@@ -28,8 +28,8 @@ class UniqueConjugation {
   }
   skills(): Array<[Skill,string]> {
     return [
-      [`prod-v-inf-${this.infinitive}`, ''],
-      [`prod-v-uniq-${this.infinitive}-${this.tense}${this.person}${this.number}`,
+      [`v-inf-${this.infinitive}`, ''],
+      [`v-uniq-${this.infinitive}-${this.tense}${this.person}${this.number}`,
         this.word]
     ]
   }

@@ -21,7 +21,7 @@ class RegularConjugationPattern {
   }
   skills(): Array<[Skill,string]> {
     return [
-      [`prod-v-suffix-${this.kindOfVerb}-${this.tense}${this.person}${this.number}`,
+      [`v-suffix-${this.kindOfVerb}-${this.tense}${this.person}${this.number}`,
        this.suffix]]
   }
 }

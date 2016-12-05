@@ -83,7 +83,7 @@ suite('generate6', function() {
       ['need(A,Libro)', 'A lo necesita.', {recent:['Libro']}],
       ['need(A,Pluma)', 'A la necesita.', {recent:['Pluma']}],
       ['need(A,Libros)', 'A los necesita.', {recent:['Libros']}],
-      ['what(need(A,What))', '¿Qué necesito?', {yo:'A'}],
+      ['what(need(A,What))', 'Qué necesito?', {yo:'A'}],
       ['give(A,B,Libros)', 'A da Libros a B.', {}],
       ['give(A,B,Libros)', 'A me da Libros.', {yo:'B'}],
       ['give(A,B,Libros)', 'A le da Libros.', {recent:['B']}],
