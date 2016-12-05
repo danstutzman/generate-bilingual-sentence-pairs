@@ -45,4 +45,9 @@ for (const speechAct of speechActs) {
   const esJoined = join(esTranslated.words())
   console.log(chalk.green(esJoined))
   console.log(esTranslated.skills())
+
+  // use styles.red.open and close so user's input is colored too
+  readlineSync.question(chalk.styles.red.open +
+      'Which skills did you get wrong, if any? (separate with spaces) ')
+  console.log(chalk.styles.red.close)
 }

@@ -1,4 +1,5 @@
 [ignore]
+.*/interfaces/.*
 .*/OLD/.*
 .*/*.json
 .*/node_modules/readline-sync/.*
