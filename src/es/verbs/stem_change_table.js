@@ -44,17 +44,21 @@ const table = [
   new StemChange("pret", "poder",     "pud-"),
 ]
 
-function find01(infinitive:string, tense:Tense): Array<StemChange> {
-  const found: Array<StemChange> = []
-  for (const change of table) {
-    if (change.infinitive === infinitive && change.tense === tense) {
-      found.push(change)
+const tableByInfinitiveTense: {[key:string]:StemChange} = {}
+{
+  for (const stemChange of table) {
+    const key = `${stemChange.infinitive}-${stemChange.tense}`
+    if (tableByInfinitiveTense[key] !== undefined) {
+      throw new Error(`Found >1 StemChange for ${key}`)
     }
+    tableByInfinitiveTense[key] = stemChange
   }
-  if (found.length > 1) {
-    throw new Error(`Found >1 StemChange for ${infinitive}.${tense}`)
-  }
-  return found
+}
+
+function find01(infinitive:string, tense:Tense): Array<StemChange> {
+  const key = `${infinitive}-${tense}`
+  const found: StemChange = tableByInfinitiveTense[key]
+  return (found !== undefined) ? [found] : []
 }
 
 class StemChangeConjugation {

@@ -27,6 +27,9 @@ class Translator {
   }
 
   translateSpeechAct(speechAct:UniSpeechAct): EnSpeechAct {
+    this.pronouns.me = speechAct.speaker
+    this.pronouns.you = speechAct.audience
+
     if (speechAct.speech instanceof UniNClause) {
       const np = speechAct.speech
       const intonation = (speechAct.verb === 'ask') ? 'question' :
@@ -73,14 +76,15 @@ class Translator {
       }
     }
 
-    let direct
-    if (iclause.remove !== iclause.direct) {
+    let direct: EnNP | void
+    if (iclause.direct !== undefined && iclause.remove !== iclause.direct) {
       if (typeof iclause.direct === 'string') {
         direct = this.pronouns.lookup(iclause.direct,
           typeof iclause.agent === 'string' ? iclause.agent : undefined, false,
           this.refToIdentity)[2]
       }
-      if (direct === undefined) {
+      if (direct === undefined &&
+          /* flowtype workaround */ iclause.direct !== undefined) {
         direct = this.translateNounPhrase(iclause.direct)
       }
     }

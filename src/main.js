@@ -13,18 +13,26 @@ const EnPronouns             = require('./en/EnPronouns')
 const EsPronouns             = require('./es/EsPronouns')
 const EnTranslator           = require('./en/Translator')
 const EsTranslator           = require('./es/Translator')
-const { join }               = require('./join')
+const { join, joinSkills }   = require('./join')
 const { UniSpeechAct }       = require('./uni/uni_speech_act')
 const { interpretIClause, interpretSpeechAct } = require('./uni/interpret_sexp')
 const { raise }              = require('./raise')
+const { translateInfinitiveToEn, pickInfinitivePairForRegularConjugation } =
+  require('./es/verbs')
+const regular_conjugation_pattern_table =
+  require('./es/verbs/regular_conjugation_pattern_table')
+const { toTense, toNumber, toPerson } = require('./es/types')
+const { UniNClause }         = require('./uni/noun_phrases')
+const { UniIClause }         = require('./uni/uni_iclause')
 
-const esRefToPreferredPronouns: {[ref:Ref]:EsIdentity} = {
+const esRefToIdentity: {[ref:Ref]:EsIdentity} = {
   'A':['M',1,[]], 'AA':['M',2,['A']], 'B':['M',1,[]], 'BB':['M',2,['B']],
-  'C':['M',1,[]], 'Libro':['M',1,[]], 'Libros':['M',2,[]], 'Pluma':['F',1,[]],
-  'What':['M',1,[]],
+  'C':['M',1,[]], 'Libro':['M',1,[]], 'Libros':['M',2,[]],
+  'Me':['M',1,[]], 'Pluma':['F',1,[]], 'What':['M',1,[]], 'You':['M',1,[]],
 }
 const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
   'A':['M',1,[]], 'B':['M',1,[]], 'C':['N',1,[]], 'BB':['N',2,['B']],
+  'Me':['M',1,[]], 'You':['M',1,[]],
 }
 
 const nestedSexps = yaml.safeLoad(fs.readFileSync('curriculum_ideas/GAME2', 'utf8'))
@@ -47,7 +55,7 @@ function flattenNestedSexps(sexpOrSexps) {
     sexpToEnJoined.set(sexpOrSexps, join(enTranslated.words()))
 
     const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
-    const esTranslator = new EsTranslator('pret', esPronouns, esRefToPreferredPronouns)
+    const esTranslator = new EsTranslator('pret', esPronouns, esRefToIdentity)
     const esTranslated = esTranslator.translateSpeechAct(speechAct)
     sexpToEsJoined.set(sexpOrSexps, join(esTranslated.words()))
     sexpToSkills.set(sexpOrSexps, esTranslated.skills())
@@ -74,6 +82,58 @@ for (var [skill, importance] of skillToImportance) {
 skillsByImportance.sort(function([_1, i1], [_2, i2]) { return i2 - i1 })
 console.log(skillsByImportance)
 
+for (var [skill, _] of skillsByImportance) {
+  let match: Array<string> | null | void
+  if (false && (match = skill.match(/^v-inf-(.*)$/))) {
+    const esInfinitive = match[1]
+    const enVerb = translateInfinitiveToEn(esInfinitive)
+    const attempt = readlineSync.question(
+      "Please provide the Spanish infinitive for the following:\n  " + enVerb + "\n> ")
+  } else if ((match = skill.match(/^v-suffix-([^-]+)-(pres|pret)([123])([12])$/))) {
+    const [_, kindOfVerb, tenseStr, personStr, numberStr] = match
+    const tense  = toTense(tenseStr)
+    const person = toPerson(personStr)
+    const number = toNumber(numberStr)
+    console.log(kindOfVerb, tense, person, number)
+    if (kindOfVerb !== 'stempret') {
+      const infinitivePair = pickInfinitivePairForRegularConjugation(
+        tense, person, number)
+      const patterns = regular_conjugation_pattern_table.find01(
+        infinitivePair.es, tense, person, number, false)
+      if (patterns.length === 0) {
+        throw new Error("Found no patterns")
+      }
+      const pattern = patterns[0]
+      // TODO: instead of A B sometimes substitute Yo and Tu, depending on person
+      const speechAct = new UniSpeechAct('tell', 'Me', 'You', new UniNClause(
+        'that', new UniIClause({
+          agent:(person === 1 ? 'Me' : (person === 2 ? 'You' : 'A')),
+          verb:infinitivePair.en,
+        }), true))
+
+      let didGenerateSkill = false
+      const esTranslator = new EsTranslator(tense, new EsPronouns({}),
+        esRefToIdentity)
+      const generatedSkills = esTranslator.translateSpeechAct(speechAct).skills()
+      for (const generatedSkill of generatedSkills) {
+        didGenerateSkill = didGenerateSkill || (generatedSkill[0] === skill)
+      }
+      if (!didGenerateSkill) {
+        throw new Error(`No skill ${skill} in ${JSON.stringify(speechAct)}`)
+      }
+
+      const enTranslator = new EnTranslator(
+        {'pres':'pres', 'pret':'past'}[tense], new EnPronouns({}),
+        enRefToIdentity)
+      const enTranslated = join(enTranslator.translateSpeechAct(speechAct).words())
+      const attempt = readlineSync.question(
+        "Translate the following as one Spanish word:\n  " + enTranslated + "\n> ")
+      console.log('Expected answer was', chalk.green(joinSkills(generatedSkills)))
+    }
+  }
+
+}
+
 // for each unknown/bad skill:
 //   look at prefix to build a "production" task/game
 // later: look at prefix to build a "recognition" card (just demo how skill is used)
@@ -81,7 +141,7 @@ console.log(skillsByImportance)
 for (var [sexp, skills] of sexpToSkills) {
   const enJoined:string = sexpToEnJoined.get(sexp) || raise(`Can't find ${sexp}`)
   const esJoined:string = sexpToEsJoined.get(sexp) || raise(`Can't find ${sexp}`)
-  const answer:string = readlineSync.question(
+  const attempt:string = readlineSync.question(
     "Please translate the following:\n  " + enJoined + "\n> ")
   console.log(chalk.green(esJoined))
   console.log(skills)

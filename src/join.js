@@ -1,4 +1,5 @@
 // @flow
+import type { Skill } from './types'
 
 function initialCaps(word:string): string {
   return word.substring(0, 1).toUpperCase() + word.substring(1)
@@ -42,4 +43,14 @@ function join(words:Array<string>): string {
   return newWords.join(' ')
 }
 
-module.exports = { join, initialCaps }
+function joinSkills(skills:Array<[Skill,string]>): string {
+  const words: Array<string> = []
+  for (const [_, word] of skills) {
+    if (word !== '') {
+      words.push(word)
+    }
+  }
+  return join(words)
+}
+
+module.exports = { initialCaps, join, joinSkills }

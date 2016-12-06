@@ -14,7 +14,7 @@ const EsIClause = require('./EsIClause')
 const EsSpeechAct = require('./EsSpeechAct')
 const { UniNClause } = require('../uni/noun_phrases')
 const { NameNoun, EsNClause } = require('./noun_phrases')
-const { conjugate } = require('./verbs')
+const { conjugate, translateInfinitiveFromEn } = require('./verbs')
 
 const UNI_NCLAUSE_TYPE_TO_HEAD_WORDS_IF_NOT_TOP = {
   'that': ['que'],
@@ -41,6 +41,9 @@ class Translator {
   }
 
   translateSpeechAct(speechAct:UniSpeechAct): EsSpeechAct {
+    this.pronouns.yo = speechAct.speaker
+    this.pronouns.tu = speechAct.audience
+
     if (speechAct.speech instanceof UniNClause) {
       const np = speechAct.speech
       const intonation = (speechAct.verb === 'ask') ? 'question' :
@@ -58,16 +61,6 @@ class Translator {
   }
 
   translateIClause(iclause:UniIClause): EsIClause {
-    const infinitive = {
-      'want': 'querer',
-      'need': 'necesitar',
-      'have': 'tener',
-      'give': 'dar',
-      'tell': 'decir',
-      'ask': 'preguntar',
-      'command': 'ordenar',
-    }[iclause.verb] || raise("Can't find infinitive for verb " + iclause.verb)
-
     let person
     let number
     let isAgentSpecific
@@ -78,6 +71,7 @@ class Translator {
       [person, number, isAgentSpecific] = [3, 1, false]
     }
 
+    const infinitive: string = translateInfinitiveFromEn(iclause.verb)
     const conjugation = conjugate(infinitive, this.tense, person, number)
 
     let indirectPronoun
@@ -103,7 +97,8 @@ class Translator {
       indirect:    iclause.indirect === undefined ? undefined :
                      this.translateNounPhrase(iclause.indirect)
                        .setOmit(isIndirectPronounSpecific),
-      direct:      this.translateNounPhrase(iclause.direct).setOmit(
+      direct:      iclause.direct === undefined ? undefined :
+                     this.translateNounPhrase(iclause.direct).setOmit(
                      isDirectPronounSpecific || iclause.remove === iclause.direct),
       negative:    iclause.negative,
       conjugation, indirectPronoun, directPronoun,

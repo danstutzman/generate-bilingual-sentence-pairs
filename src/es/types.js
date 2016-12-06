@@ -6,10 +6,19 @@ const { raise } = require('../raise')
 export type KindOfVerb = "ar" | "er" | "ir" | "erir" | "stempret"
 
 export type Tense = "pres" | "pret"
+function toTense(s:string): Tense {
+  return { 'pres':'pres', 'pret':'pret' }[s]
+}
 
 export type Person = 1 | 2 | 3
+function toPerson(s:string): Person {
+  return { '1':1, '2':2, '3':3 }[s]
+}
 
 export type Number = 1 | 2
+function toNumber(s:string): Number {
+  return { '1':1, '2':2 }[s]
+}
 
 export type Gender = "M" | "F"
 
@@ -31,4 +40,4 @@ function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb,
 
 export type EsIdentity = [Gender, Number, Array<Ref>]
 
-module.exports = { isInfinitiveKindOfVerb }
+module.exports = { isInfinitiveKindOfVerb, toTense, toPerson, toNumber }

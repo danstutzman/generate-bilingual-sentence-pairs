@@ -6,7 +6,7 @@ class UniIClause {
   agent:    UniNP
   verb:     string
   indirect: UniNP | void
-  direct:   UniNP
+  direct:   UniNP | void
   remove:   void | string
   negative: bool
 
@@ -14,7 +14,7 @@ class UniIClause {
     agent:     UniNP,
     verb:      string,
     indirect?: UniNP | void,
-    direct:    UniNP,
+    direct?:   UniNP | void,
   |}) {
     this.agent    = args.agent
     this.verb     = args.verb

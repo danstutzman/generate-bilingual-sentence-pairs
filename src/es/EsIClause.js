@@ -12,7 +12,7 @@ class EsIClause {
   directPronoun:   EsPronoun|void
   conjugation:     Conjugation
   indirect:        EsNP|void
-  direct:          EsNP
+  direct:          EsNP|void
   negative:        bool|void
   verbFirst:       bool
 
@@ -22,7 +22,7 @@ class EsIClause {
     directPronoun?:   EsPronoun|void,
     conjugation:      Conjugation,
     indirect?:        EsNP|void,
-    direct:           EsNP,
+    direct?:          EsNP|void,
     negative?:        bool,
   |}) {
     this.agent           = args.agent
@@ -47,7 +47,8 @@ class EsIClause {
       .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
       .concat(this.conjugation.words())
       .concat(this.verbFirst ? this.agent.words() : [])
-      .concat(!(this.direct instanceof EsNClause) ? this.direct.words() : [])
+      .concat(this.direct !== undefined && !(this.direct instanceof EsNClause) ?
+        this.direct.words() : [])
       .concat(this.indirect !== undefined && !this.indirect.omit ?
         ['a'].concat(this.indirect.words()) : [])
       .concat(this.direct instanceof EsNClause ? this.direct.words() : [])
@@ -62,7 +63,8 @@ class EsIClause {
         [['iclause-orderof-do-pro', '']].concat(this.directPronoun.skills()) : [])
       .concat(this.conjugation.skills())
       .concat(this.verbFirst ? this.agent.skills() : [])
-      .concat(!(this.direct instanceof EsNClause) ? this.direct.skills() : [])
+      .concat(this.direct !== undefined && !(this.direct instanceof EsNClause) ?
+        this.direct.skills() : [])
       .concat(this.indirect !== undefined && !this.indirect.omit ?
         [['iclause-orderof-io-a', 'a']].concat(this.indirect.words()) : [])
       .concat(this.direct instanceof EsNClause ? this.direct.skills() : [])

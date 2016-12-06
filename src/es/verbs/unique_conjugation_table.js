@@ -87,23 +87,22 @@ const table = [
   new UniqueConjugation("enviar",  "pres", 1, 2, "envían"),
 ]
 
-function find01(infinitive:string, tense:Tense, person:Person,
-    number:Number): Array<UniqueConjugation> {
-  const found = []
-  for (const conjugation of table) {
-    if (conjugation.infinitive === infinitive &&
-        conjugation.tense === tense &&
-        conjugation.person === person &&
-        conjugation.number === number) {
-      found.push(conjugation)
+const tableByInfinitiveTensePersonNumber: {[key:string]:UniqueConjugation} = {}
+{
+  for (const conj of table) {
+    const key = `${conj.infinitive}-${conj.tense}${conj.person}${conj.number}`
+    if (tableByInfinitiveTensePersonNumber[key] !== undefined) {
+      throw new Error(`Found >1 UniqueConjugation for ${key}`)
     }
+    tableByInfinitiveTensePersonNumber[key] = conj
   }
-  if (found.length > 1) {
-    throw new Error(
-      `Found >1 UniqueConjugation for ${infinitive}.${tense}${person}${number}`)
-  }
-  return found
 }
 
+function find01(infinitive:string, tense:Tense, person:Person, number:Number):
+    Array<UniqueConjugation> {
+  const key = `${infinitive}-${tense}${person}${number}`
+  const found: UniqueConjugation|void = tableByInfinitiveTensePersonNumber[key]
+  return (found !== undefined) ? [found] : []
+}
 
 module.exports = { UniqueConjugation, find01 }
