@@ -51,12 +51,12 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
     spawned.stdout.on('data', (data) => { console.log(data.toString().trim()) })
     spawned.stderr.on('data', (data) => { console.log(data.toString().trim()) })
     spawned.on('close', (code) => {
-      if (code !== 0) { exec("/usr/bin/say 'flow type error'") }
+      if (code !== 0) { exec("afplay /System/Library/Sounds/Funk.aiff") }
 
       const flowSource = fs.readFileSync(path, 'utf8')
       for (const line of flowSource.split('\n')) {
         if (line.endsWith(';')) {
-          exec("/usr/bin/say 'semicolon'")
+          exec("afplay /System/Library/Sounds/Funk.aiff")
           return
         }
       }
@@ -66,7 +66,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
         flowRemovedSource = flowRemoveTypes(flowSource)
       } catch (e) {
         console.error(e)
-        exec("/usr/bin/say 'flow remove type error'")
+        exec("afplay /System/Library/Sounds/Funk.aiff")
         return
       }
       fs.writeFileSync(`build/${path}`, flowRemovedSource)
@@ -74,7 +74,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
       JSHINT(flowRemovedSource, JSHINT_OPTIONS, {})
       if (JSHINT.errors.length > 0) {
         console.error(JSHINT.errors)
-        exec("/usr/bin/say 'j s hint error'")
+        exec("afplay /System/Library/Sounds/Funk.aiff")
         return
       }
 
