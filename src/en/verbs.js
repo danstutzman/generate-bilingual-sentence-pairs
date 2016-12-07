@@ -19,6 +19,7 @@ const VERB_REQUIRES_ES = {
 const UNIQUE_PAST_FORM = {
   'do':'did',
   'give':'gave',
+  'have':'had',
 }
 
 function conjugate(base:string, tense:Tense, person:Person,
