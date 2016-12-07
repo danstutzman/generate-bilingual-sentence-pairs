@@ -61,6 +61,7 @@ const table = [
   new InfinitivePair('tell', 'decir'),
   new InfinitivePair('ask', 'preguntar'),
   new InfinitivePair('command', 'ordenar'),
+  new InfinitivePair('eat', 'comer'), // need a regular -er
 ]
 
 function findInfinitiveByKindOfVerb(kindOfVerb:KindOfVerb): InfinitivePair {

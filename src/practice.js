@@ -70,6 +70,10 @@ function practiceRegularSuffix(skill:Skill, kindOfVerb:KindOfVerb, tense:Tense,
     infinitivePair =
       pickInfinitivePairForRegularConjugation(tense, person, number)
   }
+  if (infinitivePair === undefined) {
+    throw new Error(`No infinitivePairs for ${JSON.stringify(kindOfVerb)},${tense
+      },${person},${number}`)
+  }
   const patterns = regular_conjugation_pattern_table.find01(
     infinitivePair.es, tense, person, number, kindOfVerb === 'stempret')
   if (patterns.length === 0) {
