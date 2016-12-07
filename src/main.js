@@ -104,28 +104,26 @@ for (var [skill, _] of skillsByImportance) {
         throw new Error("Found no patterns")
       }
       const pattern = patterns[0]
-      // TODO: instead of A B sometimes substitute Yo and Tu, depending on person
-      const speechAct = new UniSpeechAct('tell', 'Me', 'You', new UniNClause(
-        'that', new UniIClause({
-          agent:(person === 1 ? 'Me' : (person === 2 ? 'You' : 'A')),
-          verb:infinitivePair.en,
-        }), true))
+      const iclause = new UniIClause({
+        agent:(person === 1 ? 'Me' : (person === 2 ? 'You' : 'A')),
+        verb:infinitivePair.en,
+      })
 
       let didGenerateSkill = false
-      const esTranslator = new EsTranslator(tense, new EsPronouns({}),
+      const esTranslator = new EsTranslator(tense, new EsPronouns({yo:'Me', tu:'You'}),
         esRefToIdentity)
-      const generatedSkills = esTranslator.translateSpeechAct(speechAct).skills()
+      const generatedSkills = esTranslator.translateIClause(iclause).skills()
       for (const generatedSkill of generatedSkills) {
         didGenerateSkill = didGenerateSkill || (generatedSkill[0] === skill)
       }
       if (!didGenerateSkill) {
-        throw new Error(`No skill ${skill} in ${JSON.stringify(speechAct)}`)
+        throw new Error(`No skill ${skill} in ${JSON.stringify(iclause)}`)
       }
 
       const enTranslator = new EnTranslator(
-        {'pres':'pres', 'pret':'past'}[tense], new EnPronouns({}),
+        {'pres':'pres', 'pret':'past'}[tense], new EnPronouns({me:'Me', you:'You'}),
         enRefToIdentity)
-      const enTranslated = join(enTranslator.translateSpeechAct(speechAct).words())
+      const enTranslated = join(enTranslator.translateIClause(iclause, false).words())
       const attempt = readlineSync.question(
         "Translate the following as one Spanish word:\n  " + enTranslated + "\n> ")
       console.log('Expected answer was', chalk.green(joinSkills(generatedSkills)))
