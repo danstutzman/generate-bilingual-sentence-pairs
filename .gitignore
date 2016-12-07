@@ -1,9 +1,5 @@
 .*.swp
 .DS_Store
 
-/media
-/test.db
-/cacert.pem
-/vendor
 /build
 /node_modules
