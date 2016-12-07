@@ -16,7 +16,6 @@ const { translateInfinitiveToEn, pickInfinitivePairForRegularConjugation,
 const regular_conjugation_pattern_table =
   require('./es/verbs/regular_conjugation_pattern_table')
 const unique_conjugation_table = require('./es/verbs/unique_conjugation_table')
-const { listInfinitivesWithPretStemChange } = require('./es/verbs/stem_change_table')
 const { toKindOfVerb, toTense, toNumber, toPerson } = require('./es/types')
 const { UniNClause }         = require('./uni/noun_phrases')
 const { UniIClause }         = require('./uni/uni_iclause')

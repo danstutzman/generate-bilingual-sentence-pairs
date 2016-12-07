@@ -61,16 +61,6 @@ function find01(infinitive:string, tense:Tense): Array<StemChange> {
   return (found !== undefined) ? [found] : []
 }
 
-function listInfinitivesWithPretStemChange(): Array<string> {
-  const infinitives: Array<string> = []
-  for (const stemChange of table) {
-    if (stemChange.tense === 'pret') {
-      infinitives.push(stemChange.infinitive)
-    }
-  }
-  return infinitives
-}
-
 class StemChangeConjugation {
   infinitive: string
   stemChange: StemChange
@@ -90,5 +80,4 @@ class StemChangeConjugation {
   }
 }
 
-module.exports = { StemChange, find01, StemChangeConjugation,
-  listInfinitivesWithPretStemChange }
+module.exports = { StemChange, find01, StemChangeConjugation }
