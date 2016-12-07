@@ -4,6 +4,9 @@ import type { Ref } from '../types'
 const { raise } = require('../raise')
 
 export type KindOfVerb = "ar" | "er" | "ir" | "erir" | "stempret"
+function toKindOfVerb(s:string): KindOfVerb {
+  return { 'ar':'ar', 'er':'er', 'ir':'ir', 'erir':'erir', 'stempret':'stempret' }[s]
+}
 
 export type Tense = "pres" | "pret"
 function toTense(s:string): Tense {
@@ -40,4 +43,4 @@ function isInfinitiveKindOfVerb(infinitive:string, kindOfVerb:KindOfVerb,
 
 export type EsIdentity = [Gender, Number, Array<Ref>]
 
-module.exports = { isInfinitiveKindOfVerb, toTense, toPerson, toNumber }
+module.exports = { isInfinitiveKindOfVerb, toKindOfVerb, toTense, toPerson, toNumber }
