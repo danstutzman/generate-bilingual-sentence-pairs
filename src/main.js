@@ -48,7 +48,7 @@ function flattenNestedSexps(sexpOrSexps) {
     sexpToEnJoined.set(sexpOrSexps, join(enTranslated.words()))
 
     const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
-    const esTranslator = new EsTranslator('pres', esPronouns, esRefToIdentity)
+    const esTranslator = new EsTranslator('pret', esPronouns, esRefToIdentity)
     const esTranslated = esTranslator.translateSpeechAct(speechAct)
     sexpToEsJoined.set(sexpOrSexps, joinSkills(esTranslated.skills()))
     sexpToSkills.set(sexpOrSexps, esTranslated.skills())
