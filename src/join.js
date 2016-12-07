@@ -11,7 +11,7 @@ function removeEndingHyphen(word:string): string {
 
 function join(words:Array<string>): string {
   let newWords: Array<string> = []
-  let isStartingSentence: bool = true
+  let isStartingSentence: bool = ['.','?','!'].indexOf(words[words.length - 1]) !== -1
   for (const word of words) {
     if (isStartingSentence) {
       if (word === '¿' || word === '¡') {
