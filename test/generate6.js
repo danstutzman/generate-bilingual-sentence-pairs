@@ -9,7 +9,7 @@ const EsPronouns             = require('../src/es/EsPronouns')
 const EnPronouns             = require('../src/en/EnPronouns')
 const EsTranslator           = require('../src/es/Translator')
 const EnTranslator           = require('../src/en/Translator')
-const { join }               = require('../src/join')
+const { join, joinSkills }   = require('../src/join')
 const EsIClause              = require('../src/es/EsIClause')
 const { NameNoun }           = require('../src/es/noun_phrases')
 const RegularConjugation     = require('../src/es/verbs/RegularConjugation.js')
@@ -66,7 +66,12 @@ suite('generate6', ()=>{
         }),
         direct: new NameNoun('B'),
       })
-      assert.deepEqual(iclause.words(), ['A', 'necesit-', '-a', 'B'])
+      assert.deepEqual(iclause.skills(), [
+        ['',                   'A'],
+        ['v-inf-necesitar',    'necesit-'],
+        ['v-suffix-ar-pres31', '-a'],
+        ['',                   'B'],
+      ])
     })
   })
   suite('integration-spanish', ()=>{
@@ -92,7 +97,7 @@ suite('generate6', ()=>{
       test(expected, /* jshint loopfunc:true */ ()=>{
         const translated = new EsTranslator('pres', new EsPronouns(pronounsInit),
           refToPreferredPronouns).translateSpeechAct(lineToUniSpeechAct(sexp))
-        const joined = join(translated.words())
+        const joined = joinSkills(translated.skills())
         assert.equal(joined, expected)
       })
     }

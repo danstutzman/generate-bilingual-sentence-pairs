@@ -12,10 +12,6 @@ class RegularConjugation {
     this.pattern    = args.pattern
   }
 
-  words(): Array<string> {
-    const stem = this.infinitive.substring(0, this.infinitive.length - 2) + '-'
-    return [stem, this.pattern.suffix]
-  }
   skills(): Array<[Skill,string]> {
     const stem = this.infinitive.substring(0, this.infinitive.length - 2)
     return []

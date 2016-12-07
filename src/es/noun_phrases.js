@@ -14,9 +14,6 @@ class NameNoun {
     this.omit = omit
     return this
   }
-  words(): Array<string> {
-    return this.omit ? [] : [this.ref]
-  }
   skills(): Array<[Skill,string]> {
     return this.omit ? [] : [['', this.ref]]
   }
@@ -34,9 +31,6 @@ class EsNClause {
   setOmit(omit:bool): EsNClause {
     this.omit = omit
     return this
-  }
-  words(): Array<string> {
-    return this.headWords.concat(this.iclause.words())
   }
   skills(): Array<[Skill,string]> {
     return []

@@ -24,12 +24,6 @@ class EsSpeechAct {
     this.speech     = speech
   }
 
-  words(): Array<string> {
-    return []
-      .concat(this.speaker ? [`${this.speaker}:`] : [])
-      .concat(this.speech.words())
-      .concat([INTONATION_TO_PUNCTUATION[this.intonation]])
-  }
   skills(): Array<[Skill,string]> {
     return []
       .concat(this.speaker ? [['',`${this.speaker}:`]] : [])

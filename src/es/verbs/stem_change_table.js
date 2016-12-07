@@ -73,9 +73,6 @@ class StemChangeConjugation {
     this.pattern    = pattern
   }
 
-  words(): Array<string> {
-    return [this.stemChange.stem, this.pattern.suffix]
-  }
   skills(): Array<[Skill,string]> {
     return [['v-inf-' + this.infinitive, '']]
       .concat(this.stemChange.skills())

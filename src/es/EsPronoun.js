@@ -10,9 +10,6 @@ class EsPronoun {
     }
     this.word = word
   }
-  words(): Array<string> {
-    return [this.word]
-  }
   skills(): Array<[Skill,string]> {
     return [['pro-' + this.word, this.word]]
   }

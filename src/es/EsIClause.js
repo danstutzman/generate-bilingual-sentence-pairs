@@ -39,20 +39,6 @@ class EsIClause {
     return this
   }
 
-  words(): Array<string> {
-    return []
-      .concat(!this.verbFirst ? this.agent.words() : [])
-      .concat(this.negative ? ['no'] : [])
-      .concat(this.indirectPronoun !== undefined ? this.indirectPronoun.words() : [])
-      .concat(this.directPronoun !== undefined ? this.directPronoun.words() : [])
-      .concat(this.conjugation.words())
-      .concat(this.verbFirst ? this.agent.words() : [])
-      .concat(this.direct !== undefined && !(this.direct instanceof EsNClause) ?
-        this.direct.words() : [])
-      .concat(this.indirect !== undefined && !this.indirect.omit ?
-        ['a'].concat(this.indirect.words()) : [])
-      .concat(this.direct instanceof EsNClause ? this.direct.words() : [])
-  }
   skills(): Array<[Skill,string]> {
     return []
       .concat(!this.verbFirst ? this.agent.skills() : [])
@@ -66,7 +52,7 @@ class EsIClause {
       .concat(this.direct !== undefined && !(this.direct instanceof EsNClause) ?
         this.direct.skills() : [])
       .concat(this.indirect !== undefined && !this.indirect.omit ?
-        [['iclause-orderof-io-a', 'a']].concat(this.indirect.words()) : [])
+        [['iclause-orderof-io-a', 'a']].concat(this.indirect.skills()) : [])
       .concat(this.direct instanceof EsNClause ? this.direct.skills() : [])
   }
 }

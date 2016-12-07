@@ -57,7 +57,7 @@ function flattenNestedSexps(sexpOrSexps) {
     const esPronouns = new EsPronouns({ yo:speechAct.speaker, tu:speechAct.audience })
     const esTranslator = new EsTranslator('pret', esPronouns, esRefToIdentity)
     const esTranslated = esTranslator.translateSpeechAct(speechAct)
-    sexpToEsJoined.set(sexpOrSexps, join(esTranslated.words()))
+    sexpToEsJoined.set(sexpOrSexps, joinSkills(esTranslated.skills()))
     sexpToSkills.set(sexpOrSexps, esTranslated.skills())
   } else {
     throw new Error(`Unexpected sexpOrSexps '${JSON.stringify(sexpOrSexps)}'`)

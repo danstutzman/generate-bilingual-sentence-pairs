@@ -23,9 +23,6 @@ class UniqueConjugation {
     this.word       = word
   }
 
-  words(): Array<string> {
-    return [this.word]
-  }
   skills(): Array<[Skill,string]> {
     return [
       [`v-inf-${this.infinitive}`, ''],
