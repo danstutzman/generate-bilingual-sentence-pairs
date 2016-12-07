@@ -24,6 +24,7 @@ const UNIQUE_PAST_FORM = {
   'do':'did',
   'give':'gave',
   'have':'had',
+  'tell':'told',
 }
 
 function conjugate(base:string, tense:Tense, person:Person,
