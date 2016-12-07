@@ -67,8 +67,8 @@ function practiceRegularSuffix(skill:Skill, kindOfVerb:KindOfVerb, tense:Tense,
   if (kindOfVerb === 'stempret') {
     infinitivePair = pickInfinitivePairForStemChangePret(person, number)
   } else {
-    infinitivePair =
-      pickInfinitivePairForRegularConjugation(tense, person, number)
+    infinitivePair = pickInfinitivePairForRegularConjugation(
+      kindOfVerb, tense, person, number)
   }
   if (infinitivePair === undefined) {
     throw new Error(`No infinitivePairs for ${JSON.stringify(kindOfVerb)},${tense

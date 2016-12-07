@@ -91,11 +91,14 @@ function translateInfinitiveToEn(es:string): string {
   throw new Error("Can't find InfinitivePair for verb " + es)
 }
 
-function pickInfinitivePairForRegularConjugation(tense:Tense, person:Person,
-    number:Number): InfinitivePair {
+function pickInfinitivePairForRegularConjugation(kindOfVerb:KindOfVerb, tense:Tense,
+    person:Person, number:Number): InfinitivePair {
   const pairs: Array<InfinitivePair> = []
   for (const pair of table) {
-    if (unique_conjugation_table.find01(pair.es, tense, person, number).length === 1) {
+    if (!isInfinitiveKindOfVerb(pair.es, kindOfVerb, false)) {
+      // skip if the wrong kind of veb
+    } else if (unique_conjugation_table.find01(pair.es, tense, person, number
+      ).length === 1) {
       // skip infinitive that has UniqueConjugations for this tense/person/num
     } else if (stem_change_table.find01(pair.es, tense).length === 1) {
       // skip infinitive that has a stem change
