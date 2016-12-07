@@ -54,7 +54,9 @@ class Translator {
         this.refToIdentity)
     }
     if (agent === undefined) {
-      [person, number, agent] = [3, 1, this.translateNounPhrase(iclause.agent)]
+      person = person || 3
+      number = number || 1
+      agent = this.translateNounPhrase(iclause.agent)
     }
 
     const helpingVerb = isVerbFirst || iclause.negative ?
