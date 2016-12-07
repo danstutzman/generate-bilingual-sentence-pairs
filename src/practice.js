@@ -28,10 +28,33 @@ const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
   'I':['M',1,[]], 'We':['M',2,['I']], 'U':['M',1,[]], 'A':['M',1,[]], 'AA':['M',2,[]],
 }
 
-function practiceInfinitive(skill:Skill, esInfinitive:string) {
-  const enVerb = translateInfinitiveToEn(esInfinitive)
-  const attempt = readlineSync.question(
-    "Please provide the Spanish infinitive for the following:\n  " + enVerb + "\n> ")
+class Card {
+  instruction: string
+  targetSkill: Skill
+  skills: Array<[Skill,string]>
+  enJoined: string
+
+  constructor(instruction:string, targetSkill:Skill, skills:Array<[Skill,string]>,
+      enJoined:string) {
+    this.instruction = instruction
+    this.targetSkill = targetSkill
+    this.skills      = skills
+    this.enJoined    = enJoined
+
+    let didGenerateSkill = false
+    for (const generatedSkill of skills) {
+      didGenerateSkill = didGenerateSkill || (generatedSkill[0] === targetSkill)
+    }
+    if (!didGenerateSkill) {
+      throw new Error(`No skill ${targetSkill} in ${JSON.stringify(skills)}`)
+    }
+  }
+
+  questionEsGivenEn() {
+    const attempt = readlineSync.question(
+      this.instruction + "\n  " + this.enJoined + "\n> ")
+    console.log('Expected answer was', chalk.green(joinSkills(this.skills)))
+  }
 }
 
 function assertGeneratedSkill(skill:Skill, iclause:UniIClause,
@@ -45,23 +68,24 @@ function assertGeneratedSkill(skill:Skill, iclause:UniIClause,
   }
 }
 
-function practiceIClause(skill:Skill, iclause:UniIClause, tense:Tense) {
+function makeCardForInfinitive(skill:Skill, esInfinitive:string): Card {
+  return new Card('Please provide the Spanish infinitive for the following:', skill,
+    [[`v-inf-${esInfinitive}`, esInfinitive]], translateInfinitiveToEn(esInfinitive))
+}
+
+function makeCardForIClause(skill:Skill, iclause:UniIClause, tense:Tense): Card {
   const esTranslator = new EsTranslator(tense, new EsPronouns({yo:'I', tu:'U'}),
     esRefToIdentity)
   const generatedSkills = esTranslator.translateIClause(iclause).skills()
-  assertGeneratedSkill(skill, iclause, generatedSkills)
-
   const enTranslator = new EnTranslator(
     {'pres':'pres', 'pret':'past'}[tense], new EnPronouns({me:'I', you:'U'}),
     enRefToIdentity)
-  const enTranslated = join(enTranslator.translateIClause(iclause, false).words())
-  const attempt = readlineSync.question(
-    "Translate the following as one Spanish word:\n  " + enTranslated + "\n> ")
-  console.log('Expected answer was', chalk.green(joinSkills(generatedSkills)))
+  return new Card('Translate the following as one Spanish word:', skill,
+    generatedSkills, join(enTranslator.translateIClause(iclause, false).words()))
 }
 
 function practiceRegularSuffix(skill:Skill, kindOfVerb:KindOfVerb, tense:Tense,
-    person:Person, number:Number) {
+    person:Person, number:Number): Card {
   let infinitivePair: InfinitivePair
   if (kindOfVerb === 'stempret') {
     infinitivePair = pickInfinitivePairForStemChangePret(person, number)
@@ -84,20 +108,20 @@ function practiceRegularSuffix(skill:Skill, kindOfVerb:KindOfVerb, tense:Tense,
       ] || raise(`Can't find agent for ${person}+${number}`),
     verb:infinitivePair.en,
   })
-  practiceIClause(skill, iclause, tense)
+  return makeCardForIClause(skill, iclause, tense)
 }
 
 function practiceUniqSuffix(skill:Skill, esInfinitive:string, tense:Tense,
-    person:Person, number:Number) {
+    person:Person, number:Number): Card {
   const iclause = new UniIClause({
     agent:{'11':'I', '21':'U', '31':'A', '12':'We', '32':'AA'}['' + person + number
       ] || raise(`Can't find agent for ${person}+${number}`),
     verb:translateInfinitiveToEn(esInfinitive),
   })
-  practiceIClause(skill, iclause, tense)
+  return makeCardForIClause(skill, iclause, tense)
 }
 
-function practiceStemChange(skill:Skill, tense:Tense, esInfinitive:string) {
+function practiceStemChange(skill:Skill, tense:Tense, esInfinitive:string): Card {
   let possibleChoices: Array<[Person,Number]>
   if (tense === 'pret') {
     possibleChoices = [[1,1], [2,1], [3,1], [1,2], [3,2]]
@@ -123,22 +147,24 @@ function practiceStemChange(skill:Skill, tense:Tense, esInfinitive:string) {
       ] || raise(`Can't find agent for ${person}+${number}`),
     verb:translateInfinitiveToEn(esInfinitive),
   })
-  practiceIClause(skill, iclause, tense)
+  return makeCardForIClause(skill, iclause, tense)
 }
 
-function practice(skill:Skill) {
+function makeCardForSkill(skill:Skill): Card|void {
   let match: Array<string> | null | void
   if ((match = skill.match(/^v-inf-(.*)$/))) {
-    practiceInfinitive(skill, match[1])
+    return makeCardForInfinitive(skill, match[1])
   } else if ((match = skill.match(/^v-suffix-([^-]+)-(pres|pret)([123])([12])$/))) {
-    practiceRegularSuffix(skill, toKindOfVerb(match[1]), toTense(match[2]),
+    return practiceRegularSuffix(skill, toKindOfVerb(match[1]), toTense(match[2]),
       toPerson(match[3]), toNumber(match[4]))
   } else if ((match = skill.match(/^v-uniq-([^-]+)-(pres|pret)([123])([12])$/))) {
-    practiceUniqSuffix(skill, match[1], toTense(match[2]), toPerson(match[3]),
+    return practiceUniqSuffix(skill, match[1], toTense(match[2]), toPerson(match[3]),
       toNumber(match[4]))
   } else if ((match = skill.match(/^v-stem-(pres|pret)-([^-]+)$/))) {
-    practiceStemChange(skill, toTense(match[1]), match[2])
+    return practiceStemChange(skill, toTense(match[1]), match[2])
+  } else {
+    return undefined
   }
 }
 
-module.exports = { practice }
+module.exports = { Card, makeCardForSkill }

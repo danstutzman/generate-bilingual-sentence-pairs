@@ -17,7 +17,7 @@ const { join, joinSkills }   = require('./join')
 const { UniSpeechAct }       = require('./uni/uni_speech_act')
 const { interpretSpeechAct } = require('./uni/interpret_sexp')
 const { raise }              = require('./raise')
-const { practice }           = require('./practice')
+const { Card, makeCardForSkill } = require('./practice')
 
 const esRefToIdentity: {[ref:Ref]:EsIdentity} = {
   'A':['M',1,[]], 'AA':['M',2,['A']], 'B':['M',1,[]], 'BB':['M',2,['B']],
@@ -76,7 +76,10 @@ skillsByImportance.sort(function([_1, i1], [_2, i2]) { return i2 - i1 })
 console.log(skillsByImportance)
 
 for (var [skill, _] of skillsByImportance) {
-  practice(skill)
+  const card:Card|void = makeCardForSkill(skill)
+  if (card !== undefined) {
+    card.questionEsGivenEn()
+  }
 }
 
 // for each unknown/bad skill:
