@@ -16,6 +16,10 @@ const VERB_REQUIRES_ES = {
   'go':true,
 }
 
+const UNIQUE_ES_FORM = {
+  'have':'has',
+}
+
 const UNIQUE_PAST_FORM = {
   'do':'did',
   'give':'gave',
@@ -33,7 +37,10 @@ function conjugate(base:string, tense:Tense, person:Person,
         throw new Error(`Can't negate verb '${base}'`)
       }
     } else if (person === 3 && number === 1) { // e.g. "he goes"
-      if (VERB_REQUIRES_ES[base]) {
+      const unique = UNIQUE_ES_FORM[base]
+      if (unique !== undefined) {
+        return new EnVerb([unique])
+      } else if (VERB_REQUIRES_ES[base]) {
         return new EnVerb([base, '-es'])
       } else {
         return new EnVerb([base, '-s'])
