@@ -107,5 +107,25 @@ function pickInfinitivePairForRegularConjugation(tense:Tense, person:Person,
   return pair
 }
 
+function pickInfinitivePairForStemChangePret(person:Person,
+    number:Number): InfinitivePair {
+  const pairs: Array<InfinitivePair> = []
+  for (const esInfinitive of stem_change_table.listInfinitivesWithPretStemChange()) {
+    const enInfinitive = translateInfinitiveToEn(esInfinitive)
+    if (enInfinitive !== undefined) {
+      if (unique_conjugation_table.find01(esInfinitive, 'pret', person,
+            number).length === 1) {
+        // skip infinitive that has UniqueConjugations for this tense/person/num
+      } else {
+        pairs.push(new InfinitivePair(enInfinitive, esInfinitive))
+      }
+    }
+  }
+
+  const pair = pairs[Math.floor(Math.random() * pairs.length)]
+  return pair
+}
+
 module.exports = { conjugate, translateInfinitiveFromEn, translateInfinitiveToEn,
-  pickInfinitivePairForRegularConjugation }
+  pickInfinitivePairForRegularConjugation, pickInfinitivePairForStemChangePret,
+  InfinitivePair }
