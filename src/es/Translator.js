@@ -41,8 +41,12 @@ class Translator {
   }
 
   translateSpeechAct(speechAct:UniSpeechAct): EsSpeechAct {
-    this.pronouns.yo = speechAct.speaker
-    this.pronouns.tu = speechAct.audience
+    if (speechAct.speaker !== undefined) {
+      this.pronouns.yo = speechAct.speaker
+    }
+    if (speechAct.audience !== undefined) {
+      this.pronouns.tu = speechAct.audience
+    }
 
     if (speechAct.speech instanceof UniNClause) {
       const np = speechAct.speech
