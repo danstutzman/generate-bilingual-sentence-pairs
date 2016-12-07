@@ -23,7 +23,7 @@ class EnSpeechAct {
 
   words(): Array<string> {
     return []
-      .concat(this.speaker ? [`${this.speaker}:`] : [])
+//      .concat(this.speaker ? [`${this.speaker}:`] : [])
       .concat(this.speech.words())
       .concat(INTONATION_TO_PUNCTUATION[this.intonation])
   }

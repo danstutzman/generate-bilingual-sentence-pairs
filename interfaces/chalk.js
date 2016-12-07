@@ -9,8 +9,9 @@ declare module "chalk" {
   }
 
   declare class Styles {
-    red:  Style;
-    blue: Style;
+    red:   Style;
+    blue:  Style;
+    green: Style;
   }
 
   declare var styles:Styles;

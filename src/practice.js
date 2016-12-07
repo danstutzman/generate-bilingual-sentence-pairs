@@ -30,30 +30,59 @@ const enRefToIdentity: {[ref:Ref]:EnIdentity} = {
 
 class Card {
   instruction: string
-  targetSkill: Skill
   skills: Array<[Skill,string]>
   enJoined: string
 
-  constructor(instruction:string, targetSkill:Skill, skills:Array<[Skill,string]>,
-      enJoined:string) {
+  constructor(instruction:string, skills:Array<[Skill,string]>, enJoined:string) {
     this.instruction = instruction
-    this.targetSkill = targetSkill
     this.skills      = skills
     this.enJoined    = enJoined
+  }
 
+  assertContainsTargetSkill(skill:Skill) {
     let didGenerateSkill = false
-    for (const generatedSkill of skills) {
-      didGenerateSkill = didGenerateSkill || (generatedSkill[0] === targetSkill)
+    for (const generatedSkill of this.skills) {
+      didGenerateSkill = didGenerateSkill || (generatedSkill[0] === skill)
     }
     if (!didGenerateSkill) {
-      throw new Error(`No skill ${targetSkill} in ${JSON.stringify(skills)}`)
+      throw new Error(`No skill ${skill} in ${JSON.stringify(this.skills)}`)
     }
   }
 
-  questionEsGivenEn() {
+  questionEsGivenEn(): {[skill:Skill]: bool} {
+    const newSkillToGoodness: {[skill:Skill]: bool} = {}
+    for (const [newSkill, _] of this.skills) {
+      newSkillToGoodness[newSkill] = true
+    }
+
     const attempt = readlineSync.question(
       this.instruction + "\n  " + this.enJoined + "\n> ")
-    console.log('Expected answer was', chalk.green(joinSkills(this.skills)))
+
+    if (attempt.toLowerCase() === joinSkills(this.skills).toLowerCase()) {
+      console.log(chalk.green('Correct!'))
+    } else {
+      console.log(chalk.styles.red.open, "Expected " + joinSkills(this.skills))
+      console.log(this.skills)
+      let badSkills = ''
+      while (badSkills === '') {
+        badSkills = readlineSync.question(
+          'Which skills did you get wrong, if any? (separate with spaces) ' +
+          chalk.styles.red.close)
+      }
+      for (const badSkill of badSkills.split(' ')) {
+        this.assertSkillInSkills(badSkill)
+        newSkillToGoodness[badSkill] = true
+      }
+    }
+    return newSkillToGoodness
+  }
+  assertSkillInSkills(needleSkill:Skill) {
+    for (const [skill, _] of this.skills) {
+      if (skill === needleSkill) {
+        return
+      }
+    }
+    throw new Error(`Can't find ${needleSkill} in ${JSON.stringify(this.skills)}`)
   }
 }
 
@@ -69,7 +98,7 @@ function assertGeneratedSkill(skill:Skill, iclause:UniIClause,
 }
 
 function makeCardForInfinitive(skill:Skill, esInfinitive:string): Card {
-  return new Card('Please provide the Spanish infinitive for the following:', skill,
+  return new Card('Please provide the Spanish infinitive for the following:',
     [[`v-inf-${esInfinitive}`, esInfinitive]], translateInfinitiveToEn(esInfinitive))
 }
 
@@ -80,7 +109,7 @@ function makeCardForIClause(skill:Skill, iclause:UniIClause, tense:Tense): Card 
   const enTranslator = new EnTranslator(
     {'pres':'pres', 'pret':'past'}[tense], new EnPronouns({me:'I', you:'U'}),
     enRefToIdentity)
-  return new Card('Translate the following as one Spanish word:', skill,
+  return new Card('Translate the following as one Spanish word:',
     generatedSkills, join(enTranslator.translateIClause(iclause, false).words()))
 }
 
@@ -150,7 +179,7 @@ function practiceStemChange(skill:Skill, tense:Tense, esInfinitive:string): Card
   return makeCardForIClause(skill, iclause, tense)
 }
 
-function makeCardForSkill(skill:Skill): Card|void {
+function makeCardForSkill(skill:Skill): Card {
   let match: Array<string> | null | void
   if ((match = skill.match(/^v-inf-(.*)$/))) {
     return makeCardForInfinitive(skill, match[1])
@@ -163,7 +192,7 @@ function makeCardForSkill(skill:Skill): Card|void {
   } else if ((match = skill.match(/^v-stem-(pres|pret)-([^-]+)$/))) {
     return practiceStemChange(skill, toTense(match[1]), match[2])
   } else {
-    return undefined
+    throw new Error("Can't make card for skill " + skill)
   }
 }
 
