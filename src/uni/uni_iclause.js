@@ -16,6 +16,9 @@ class UniIClause {
     indirect?: UniNP | void,
     direct?:   UniNP | void,
   |}) {
+    if (args.agent === undefined) {
+      throw new Error("Agent can't be undefined")
+    }
     this.agent    = args.agent
     this.verb     = args.verb
     this.indirect = args.indirect
