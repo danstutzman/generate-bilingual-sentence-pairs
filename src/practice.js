@@ -3,8 +3,7 @@ import type { Ref, Skill } from './types'
 import type { EnIdentity } from './en/types'
 import type { EsIdentity, KindOfVerb, Tense, Person, Number } from './es/types'
 
-const chalk        = require('chalk')
-const readlineSync = require('readline-sync')
+const chalk           = require('chalk')
 
 const EnPronouns             = require('./en/EnPronouns')
 const EsPronouns             = require('./es/EsPronouns')
@@ -20,6 +19,7 @@ const { toKindOfVerb, toTense, toNumber, toPerson } = require('./es/types')
 const { UniNClause }         = require('./uni/noun_phrases')
 const { UniIClause }         = require('./uni/uni_iclause')
 const { raise }              = require('./raise')
+const readlineTimings        = require('./readline_timings')
 
 const esRefToIdentity: {[ref:Ref]:EsIdentity} = {
   'I':['M',1,[]], 'We':['M',2,['I']], 'U':['M',1,[]], 'A':['M',1,[]], 'AA':['M',2,[]],
@@ -55,21 +55,22 @@ class Card {
       newSkillToGoodness[newSkill] = true
     }
 
-    const attempt = readlineSync.question(
+    const attempt = readlineTimings.question(
       this.instruction + "\n  " + this.enJoined + "\n> ")
-
-    if (attempt.toLowerCase() === joinSkills(this.skills).toLowerCase()) {
+    const attemptStr = attempt.map((c) => { return c[0] }).join('').trim()
+    if (attemptStr.toLowerCase() === joinSkills(this.skills).toLowerCase()) {
       console.log(chalk.green('Correct!'))
     } else {
       console.log(chalk.styles.red.open, "Expected " + joinSkills(this.skills))
       console.log(this.skills)
-      let badSkills = ''
-      while (badSkills === '') {
-        badSkills = readlineSync.question(
+      let badSkillsStr = ''
+      while (badSkillsStr === '') {
+        const badSkills = readlineTimings.question(
           'Which skills did you get wrong, if any? (separate with spaces) ' +
-          chalk.styles.red.close)
+          chalk.styles.red.close).string
+        badSkillsStr = attempt.map((c) => { return c[0] }).join('').trim()
       }
-      for (const badSkill of badSkills.split(' ')) {
+      for (const badSkill of badSkillsStr.split(' ')) {
         this.assertSkillInSkills(badSkill)
         newSkillToGoodness[badSkill] = true
       }
