@@ -52,7 +52,9 @@ class Card {
   questionEsGivenEn(): {[skill:Skill]: bool} {
     const newSkillToGoodness: {[skill:Skill]: bool} = {}
     for (const [newSkill, _] of this.skills) {
-      newSkillToGoodness[newSkill] = true
+      if (newSkill !== '') {
+        newSkillToGoodness[newSkill] = true
+      }
     }
 
     const attempt = readlineTimings.question(
