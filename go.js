@@ -51,7 +51,10 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
     spawned.stdout.on('data', (data) => { console.log(data.toString().trim()) })
     spawned.stderr.on('data', (data) => { console.log(data.toString().trim()) })
     spawned.on('close', (code) => {
-      if (code !== 0) { exec("afplay /System/Library/Sounds/Funk.aiff") }
+      if (code !== 0) {
+        exec("afplay /System/Library/Sounds/Funk.aiff")
+        return
+      }
 
       const flowSource = fs.readFileSync(path, 'utf8')
       for (const line of flowSource.split('\n')) {
