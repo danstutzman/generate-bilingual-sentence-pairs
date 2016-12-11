@@ -1,0 +1,38 @@
+ {"youtube_video_id":"AH18FtrGbwo","begin_millis":12418,"end_millis":18144,"text_if_good":"todo este tiempo algo cambió"}
+ {"youtube_video_id":"AH18FtrGbwo","begin_millis":137768,"end_millis":144084,"text_if_good":"puede ser el final"}
+ {"youtube_video_id":"MwTZRfkIPDY","begin_millis":86026,"end_millis":88255,"text_if_good":"no pudo decir palabras"}
+ {"youtube_video_id":"iE6sZq4hwZ0","begin_millis":89485,"end_millis":91738,"text_if_good":"tuvo la fortuna de llegar antes que yo"}
+ {"youtube_video_id":"44tZddEjp5g","begin_millis":87897,"end_millis":92613,"text_if_good":"que tuvo a granel, señora"}
+ {"youtube_video_id":"BIGhyK4ZIx8","begin_millis":81057,"end_millis":84308,"text_if_good":"nuestro amor que tuvimos"}
+ {"youtube_video_id":"Twt1wNagfYo","begin_millis":52001,"end_millis":52924,"text_if_good":"tú supiste dar más"}
+ {"youtube_video_id":"2aw7sBQLXcQ","begin_millis":196940,"end_millis":200970,"text_if_good":"q iba a terminar"}
+ {"youtube_video_id":"2aw7sBQLXcQ","begin_millis":191787,"end_millis":195418,"text_if_good":"no pude imaginar"}
+ {"youtube_video_id":"2aw7sBQLXcQ","begin_millis":181378,"end_millis":186418,"text_if_good":"Sólo pensar te tuve en mis brazos"}
+ {"youtube_video_id":"2aw7sBQLXcQ","begin_millis":51615,"end_millis":56517,"text_if_good":"Te buscaré en cada lugar"}
+ {"youtube_video_id":"2oiGCxh6SEA","begin_millis":55213,"end_millis":58330,"text_if_good":"Lo que tuve ayer"}
+ {"youtube_video_id":"2oiGCxh6SEA","begin_millis":60078,"end_millis":66868,"text_if_good":"vivir asi no quiero"}
+ {"youtube_video_id":"z3pAS6eKvsc","begin_millis":147751,"end_millis":150361,"text_if_good":"Quise mucho a esa chica .."}
+ {"youtube_video_id":"z3pAS6eKvsc","begin_millis":8767,"end_millis":11910,"text_if_good":"Anoche estuvo aquí .."}
+ {"youtube_video_id":"z3pAS6eKvsc","begin_millis":151319,"end_millis":157426,"text_if_good":"pero espero que no vuelva nunca más."}
+ {"youtube_video_id":"9XrH-oMPxnw","begin_millis":39897,"end_millis":42776,"text_if_good":"no puedo volver"}
+ {"youtube_video_id":"9XrH-oMPxnw","begin_millis":44065,"end_millis":46258,"text_if_good":"fue en un café"}
+ {"youtube_video_id":"AH18FtrGbwo","begin_millis":63003,"end_millis":69783,"text_if_good":"puede hacerte llorar"}
+ {"youtube_video_id":"eZC08evVZAM","begin_millis":16309,"end_millis":18956,"text_if_good":"hay cosas q no se pueden evitar"}
+ {"youtube_video_id":"5YABP0QTMxQ","begin_millis":183740,"end_millis":186340,"text_if_good":"mirándolo bien, sí pudiste ser mi esposa"}
+ {"youtube_video_id":"-P3_aml2-gc","begin_millis":84354,"end_millis":86954,"text_if_good":"pues fueron soldados"}
+ {"youtube_video_id":"44tZddEjp5g","begin_millis":144971,"end_millis":147451,"text_if_good":"que tuvo usted la carne firme"}
+ {"youtube_video_id":"BIGhyK4ZIx8","begin_millis":69239,"end_millis":73464,"text_if_good":"abrázame y dime que me quieres"}
+ {"youtube_video_id":"rE0A05o6pwk","begin_millis":9237,"end_millis":12194,"text_if_good":"no tuviste compasión"}
+ {"youtube_video_id":"Twt1wNagfYo","begin_millis":101981,"end_millis":105167,"text_if_good":"y supiste calmarme"}
+ {"youtube_video_id":"Twt1wNagfYo","begin_millis":148593,"end_millis":150354,"text_if_good":"estoy pensando en mí"}
+ {"youtube_video_id":"Twt1wNagfYo","begin_millis":150354,"end_millis":152132,"text_if_good":"estoy pensando en ti"}
+ {"youtube_video_id":"uFfIssQ2R7g","begin_millis":324,"end_millis":4722,"text_if_good":"siempre tuve la impresion de que el amor"}
+ {"youtube_video_id":"scg2ptSMUPg","begin_millis":37550,"end_millis":39925,"text_if_good":"tuve que sufrir"}
+ {"youtube_video_id":"e2MvWsiw96g","begin_millis":26995,"end_millis":30438,"text_if_good":"dile que anoche estuviste conmigo"}
+ {"youtube_video_id":"Twt1wNagfYo","begin_millis":121156,"end_millis":122883,"text_if_good":"estuve delante del miedo"}
+ {"youtube_video_id":"tqLDAeRgOC0","begin_millis":24981,"end_millis":30723,"text_if_good":"cuando estuve enfermo me viniste a ver"}
+ {"youtube_video_id":"tqLDAeRgOC0","begin_millis":33206,"end_millis":40474,"text_if_good":"cuando solo fuiste tu mi compañía ah ah ah"}
+ {"youtube_video_id":"tqLDAeRgOC0","begin_millis":41795,"end_millis":47118,"text_if_good":"me diste agua de vida oh cuando tuve sed"}
+ {"youtube_video_id":"tqLDAeRgOC0","begin_millis":49459,"end_millis":53027,"text_if_good":"cuando estuve en silencio"}
+ {"youtube_video_id":"tqLDAeRgOC0","begin_millis":53027,"end_millis":54691,"text_if_good":"oh oh oh escuche tu voz"}
+
