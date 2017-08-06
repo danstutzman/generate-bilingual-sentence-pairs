@@ -19,6 +19,7 @@ for (const line of lines) {
 
 const alignment = alignments[Math.floor(Math.random() * alignments.length)]
 const excerptUrl = `http://localhost:9292/excerpt.wav?video_id=${alignment.youtube_video_id}&begin_millis=${alignment.begin_millis}&end_millis=${alignment.end_millis}`
+console.log(`Downloading ${excerptUrl}...`)
 child_process.execFileSync('curl', ['--silent', '-L', excerptUrl, '-o', 'excerpt.wav'])
 console.log('what is the text?')
 child_process.execFileSync('/usr/bin/afplay', ['excerpt.wav'])
