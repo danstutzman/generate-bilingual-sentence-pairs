@@ -1,0 +1,155 @@
+PLACES
+- bar
+- bridge with monster
+- forest with mushrooms
+- shop
+- foot mall / main street
+- home
+
+VEHICLES
+- taxi
+- bicycle
+
+QUESTS
+- bicycle courier, deliver medicine
+- get sick and have to tell 2nd person how to do your job
+- match red envelope to red mailbox
+- ask what time something will happen, then tell someone to do something at that time
+- negate/argue with everything NPC says
+- relay what NPC says to another NPC - write it down?
+- give NPC something they want
+- tell NPC where to get something they want
+- help sick NPC move/position themselves to be happier
+- give food to hungry NPC pet
+- get rid of annoying cat by giving it to someone traveling away
+- lie to NPC
+- avoid NPC whenever they show up; say you have to be somewhere else
+- follow NPC without them noticing and observe where they go
+- follow instructions on machine
+- buy something from vending machine
+- tell boss what you spent money on to justify it (past tense)
+- testify on a friend's behalf (past tense)
+- coat attendant: "this is his; that is yours; that's mine"
+- trick NPC somehow
+- convince guard that it's safe for you to face monster; you have a plan (future tense)
+- bring flowers to an old lady
+- see an NPC doing a sequence of events; copy them
+- buy stuff from a shop and pay for it with change
+
+STATEMENTS
+- deliver X to Y
+- ask X for Y
+- I need a ticket to X
+- Person A, person B has thing X
+- Person A, person B wants thing X
+
+COMMANDS
+- VOY AL NORTE
+- VOY AL SUD
+- MIRO A ALGO
+- PONGO ALGO (EN EL PISO=floor, SUELO=ground)
+- TOMO ALGO
+- DOY ALGO A ALGUIEN
+- MUESTRO ALGO A ALGUIEN
+- ABRO ALGO
+- PIDO ALGO DE(?) ALGUIEN
+- DIGO ALGO A ALGUIEN
+- GOLPEO (hit) A ALGUIEN
+- ENTRAR/SALIR a vehiculo
+- COMER/BEBER ALGO
+
+DESCRIPTIONS
+- Estoy en ...
+- Hay un ...
+- Puedo voy ...
+
+RESPONSES:
+- qué haces?
+- no puedes.
+- no hay aquí.
+- small steps, please?  pero cómo lo haces?
+- entiendes? sí o no.
+
+MIMABLE/COGNATE NOUNS
+- vegetales = any kind of plant
+- animales, gatos
+- suelo
+- el sól (demasiado brillante) en el cielo
+- la luna en el cielo
+- personas
+- río (agua)
+- gran pared de metal
+
+POSSIBLE NOUNS
+- edificios: casas, escuela, iglesia, templo
+- cartera/billetera (wallet), dólar
+- letrero/cartel/rótulo (sign)
+
+TIME: noche, mañana, día
+
+PERSONAL NEEDS: tener hambre, estár cansado, estár caliente/frío
+
+QUEST 1: bridge monster needs fruit
+You're in a garden.  You can go north to the river.
+> GO NORTH
+A wide river blocks progress to the north, but there's a bridge across the river.
+> GO NORTH or CROSS BRIDGE
+A giant monster blocks your path.
+> GO SOUTH
+> GET FRUIT
+> GO NORTH
+> GIVE FRUIT TO MONSTER
+> GO NORTH or CROSS BRIDGE
+
+QUEST 2: old man needs blinds opened
+You're in a very dark bedroom.  An old man lies in a bed asleep.  You want him to get up.
+> WAKE HIM or TELL HIM TO GET UP
+You shake him but he grumbles "It's night time; let me sleep."
+> LOOK AT CLOCK
+There is no clock in the room, but you have a watch.
+> LOOK AT MY WATCH
+The time is noon.
+> SHOW HIM MY WATCH
+You try to show him but he says "I don't see anything."
+> TURN ON THE LIGHT
+here is no electric light or light switch.
+> TELL HIM THE TIME
+You try to tell him but he says "But it's still dark outside."
+> OPEN THE WINDOW or CURTAINS
+You open the window and light streams in.
+The old man says "Goodness me! I slept too long"
+
+QUEST 3: buy peppermint tea from shop
+You are in a tea shop, surrounded by many kinds of teas.  A shopkeeper is close by.
+> GET PEPPERMINT
+You can't find it.
+> CALL SHOPKEEPER
+She can't hear you over the noise of the street.
+> GO TO SHOPKEEPER
+You walk to her and she turns and asks "how may I help you?"
+> ASK HER FOR PEPPERMINT
+She says "yes, come this way" and walks north.
+> FOLLOW HER
+You follow her.  She points to a box of peppermint tea.
+> GET PEPPERMINT
+You pick up the box.
+> LEAVE STORE
+The shopkeeper calls after you, "hey did you forget to pay for that?"
+> PAY FOR PEPPERMINT
+You don't know the price yet.
+> LOOK AT PEPPERMINT
+The price tag says three dollars.
+> GIVE THREE DOLLARS TO SHOPKEEPER
+She says "I'll help you at the register" and walks to the register.
+> GIVE THREE DOLLARS TO SHOPKEEPER
+She walked away from you.
+> WALK TO REGISTER
+Okay you're at the register.
+> GIVE THREE DOLLARS TO SHOPKEEPER
+"Okay thank you; would you like a receipt?" she asks.
+> SAY NO.
+"Okay have a nice day" she says.
+> LEAVE STORE
+You walk out to the street.
+> DRINK TEA
+The box of tea is not a liquid.

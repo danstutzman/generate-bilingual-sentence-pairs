@@ -1,0 +1,82 @@
+# how to handle "yes, ..." or "no..." tags
+# or ", senora" tags?
+# where/how_well/what questions can also be yes/no questions with supplied answer
+# questions not about 2nd person directly can be prefixed with "do you know..."
+# I have not-much -> I don't have much
+
+- pardon_me(A,B)
+- greet_with_time(A,B,TimeOfDay)
+- thanks(A,B)
+- goodbye(A,B)
+- hows_that(A,B)
+- very_good(A,B)
+- ask_and_answer(A,B,yes_no(be_national(B,Nationality)))
+- ask_and_answer(A,B,how_well(speak(B,Language)))
+- ask_and_answer(A,B,how_well(understand(B,Language)))
+- ask_and_answer(A,B,how(be_feeling(B,How)))
+- ask_and_answer(A,B,where(be_from(B,Where)))
+- ask_and_answer(A,B,what(be_named(B,What)))
+- ask_and_answer(A,B,where(be_located(C,Where)))
+- ask_and_answer(A,B,howmuch(have(B),Howmuch))
+- ask_and_answer(A,B,howmuch(have(B),Howmuch))
+- ask_and_answer(A,B,want(A,Amount))
+
+function listAll() {
+  return [
+    new OneOff(en:'pardon', es:'pardon'),
+    new OneOff(en:'good morning', es:'buenos dias'),
+    new OneOff(en:'thanks', es:'gracias'),
+    new OneOff(en:'goodbye', es:'adios'),
+    new OneOff(en:'goodbye', es:'adios'),
+    IC([Yes, No, Do], [I, U2, he/she], VP(v:V('speak','hablar'),
+      adverb:[null, Adverb('well', 'bien'), Adverb('a little', 'un poco')])),
+  ]
+}
+
+instead of separate classes, UniIClause and UniNP etc. should be generic structures?
+  not 'smart' about how to translate themselves
+IClause := { NP, VP }
+  has negative:bool?  has remove:string?  has speech act?
+VP := { V, NP, To, Adverb, IClause }
+
+add('CommunicateV',    V('hablar', 'speak'))
+add('CommunicateV',    V('comprender', 'comprehend'))
+add('CommunicateV',    V('entender', 'understand'))
+add('CommunicateAdv',  Adv('bien', 'well'))
+add('CommunicateAdv',  Adv('un poco', 'a little'))
+add('CommmunicateVP',  VP('SpeakV', 'SpeakAdv'))
+
+add(new UniN('pardon', 'pardon'))
+
+add(new UniNP(new UniAdj('buenos', 'good'), new UniN('días', 'day(s)')))
+add(new UniNP(new UniAdj('buenas', 'good'), new UniN('tardes', 'afternoon(s)')))
+
+for (const agent of [I1, You2]) {
+  for (const v of [Speak, Comprehend, Understand]) {
+    for (const direct of [Spanish, English, null]) {
+      add(new UniNClause(['how well', 'qué tan bien'],
+        new UniIClause(agent, v, direct, howWell)))
+    }
+  }
+}
+
+for (const agent of [I1, You2]) {
+  for (const customer of [I1, You2]) {
+    for (const part of [ItMale, ItFemale]) {
+      add(ask(what(want(customer, what))))
+      add(tell(that(want(customer, part))))
+    }
+  }
+}
+
+// Q1. need to have speech types? (ask, tell, command)
+// Q2. need to know speech audience?
+// Q3. need to group question with answer?
+
+#- - ask(B,A,what(want(A,What)))       # What do you need?
+#  - - tell(A,B,that(want(A,C)))       # I want C
+#    - tell(A,B,that(need(A,C)))       # I need C
+#    - command(A,B,that(give(B,A,C)))  # Give me C
+#  - - tell(B,A,that(not(need(A,C))))  # You don't need C
+#    - tell(B,A,that(not(have(BB,C)))) # We don't have C
+#  - ask(A,B,why(not(give(B,A,C))))    # Why won't you give me C?

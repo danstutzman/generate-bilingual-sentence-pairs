@@ -1,0 +1,58 @@
+grade responses on dimensions of:
+- slowness
+- specificity of translation found
+  1. missing altogether (e.g. couldn't recall parecer or encontrar)
+  2. related (e.g. hablar for decir)
+  3. OK: prompt wasn't clear enough
+     (estar vs. ser, conocer vs. saber, they for 3rd pl.)
+  4. correct
+- correctly conjugated (tuve vs. tuvo)
+- spelling (vees for ves)
+
+Figure out which stimuli could reinforce/correct each error
+and eventually test again
+
+Grep song lyrics for that word; phrase and include as possible candidate?
+0. Collect lyrics (and add vocab to dictionary)
+1. Test to find strengths/weaknesses
+2. Prioritize/summarize weaknesses to create a language-learning plan
+3. Filter lyrics for excerpts that address most important weaknesses
+4. Present or test lyrics and collect response to update plan
+
+No prioritization yet?
+
+** OR start synthesizing sentences / verbs using "say" utility
+- reinforce conjugation difficulty (me or you?) with matching pronouns/stories/roles
+  and differing questions/speech-acts (statements about me; questions about you)
+- reinforce verb meanings with associated objects and vice versa
+  * use corpus linguistics or Google auto-complete to pick good objects!
+- reinforce hablar vs. decir difference with differing grammar
+
+Write big grammar of reinforcing meaning!
+- If *you call someone*, then *they'll help you*
+- Currently *I am here*, but soon *I'll be there*
+- *I love you*, but *I'm calling the cops*
+- *I need somewhere to stay tonight* - *do you know a place*?
+- *I'm hungry*, but *I don't have any money*.  *Can you give me some money?*
+- *I like it*, except *it's too dirty*
+
+Big list of scripts/roles/topics/situations/literary-genres!
+"I want to..." a) understand a sermon; b) preach a sermon; c) order a drink
+- Bible: Psalms, gospels, apocalypic
+- sermons, religious material
+- greetings
+- language learning help
+- erotic fiction, flirting
+- traveling: airplane, hotels, directions
+- services: restaurants, shops
+- Pimsleur curriculum, Rosetta Stone curriculum
+- health, therapy, coaching, education, autobiography
+- world/local news: newspaper, television, politics
+- phone call: menu trees, ask for person, leave message
+- facebook/SMS/online scheduling
+Grades:
+A) names of desired objects (e.g. I want ____), yes/no
+B) verb phrases with those objects
+C) modal/time variations, motivation
+
+Sign up with an online Spanish language Skype service

@@ -1,0 +1,81 @@
+#greetings:
+#  SENTENCE:
+#  - en: excuse me
+#    es: perdone
+#  - en: hello
+#    es: hola
+#  - en: nice to meet you
+#    es: encantada de conocerte
+#  - en: good TIME
+#    es: buenos TIME
+#  - en: WHO is HOW
+#    es: WHO está HOW
+#  - en: thanks
+#    es: gracias
+#  - en: "you're welcome"
+#    es: de nada
+#  - en: bye
+#    es: chau
+#  TIME:
+#  - en: morning
+#    es: días
+#  - en: afternoon
+#    es: tardes
+#  - en: evening
+#    es: noches
+#  HOW:
+#  - en: good
+#    es: bien
+
+  
+identity:
+  SENTENCE:
+  - en: WHOSE name is NAME
+    es: WHOSE nombre es NAME
+  - en: WHO is from WHERE
+    es: WHO es de WHERE
+
+#language_skills:
+#  SENTENCE:
+#  - en: WHO understands LANGUAGE HOW
+#    es: WHO comprende LANGUAGE HOW
+#  - en: WHO speaks LANGUAGE HOW
+#    es: WHO habla LANGUAGE HOW
+#  - en: WHO understands WHO2 HOW
+#    es: WHO entiende a WHO2 HOW
+#  - en: What?
+#    es: Qué?
+#  - en: Say that again?
+#    es: Puedes repetirlo?
+#  HOW:
+#  - en: well
+#    es: bien
+#  - en: poorly
+#    es: mal
+#  - en: a little
+#    es: un poco
+#  LANGUAGE:
+#  - en: English
+#    es: español
+
+#-------------
+#navigation:
+#  SENTENCE:
+#  - PLACE is WHERE
+#  - WHO is WHERE
+#  PLACE:
+#  - the restaurant
+#  WHERE:
+#  - here
+#  - there
+#
+#payment:
+#  SENTENCE:
+#  - WHAT costs HOWMUCH
+#  - WHO pays HOWMUCH to WHOM for WHAT
+#  - WHO has HOWMUCH
+#  - WHO needs WHAT
+#  - WHO wants WHAT
+#  HOWMUCH:
+#  - NUMBER dollars
+#  - NUMBER cents
