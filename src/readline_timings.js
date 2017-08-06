@@ -42,6 +42,7 @@ function question(prompt) {
       fs.writeSync(fdW, bytesRead)
     }
   }
+  charTimings.string = charTimings.map((c) => { return c[0] }).join('').trim()
   return charTimings
 }
 

@@ -65,14 +65,13 @@ class Card {
     } else {
       console.log(chalk.styles.red.open, "Expected " + joinSkills(this.skills))
       console.log(this.skills)
-      let badSkillsStr = ''
-      while (badSkillsStr === '') {
-        const badSkills = readlineTimings.question(
+      let badSkills= ''
+      while (badSkills === '') {
+        badSkills = readlineTimings.question(
           'Which skills did you get wrong, if any? (separate with spaces) ' +
           chalk.styles.red.close).string
-        badSkillsStr = attempt.map((c) => { return c[0] }).join('').trim()
       }
-      for (const badSkill of badSkillsStr.split(' ')) {
+      for (const badSkill of badSkills.split(' ')) {
         this.assertSkillInSkills(badSkill)
         newSkillToGoodness[badSkill] = true
       }
