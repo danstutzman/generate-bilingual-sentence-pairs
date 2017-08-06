@@ -74,7 +74,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
       }
       fs.writeFileSync(`build/${path}`, flowRemovedSource)
 
-      JSHINT(flowRemovedSource, JSHINT_OPTIONS, {})
+      JSHINT(flowRemovedSource.toString(), JSHINT_OPTIONS, {})
       if (JSHINT.errors.length > 0) {
         console.error(JSHINT.errors)
         exec("afplay /System/Library/Sounds/Funk.aiff")
