@@ -1,4 +1,5 @@
 var fs = require('fs')
+var BYTES_IN_LONGEST_UTF8_CHARACTER = 4
 
 function question(prompt) {
   var charTimings = []
@@ -7,8 +8,7 @@ function question(prompt) {
   var fdR = fs.openSync('/dev/tty', 'r')
   var fdW = process.stdout.fd
   var ttyR = process.stdin._handle
-  var buffer = Buffer.alloc(1)
-  var reqSize = 1
+  var buffer = Buffer.alloc(BYTES_IN_LONGEST_UTF8_CHARACTER)
   if (ttyR.setRawMode(true) !== 0) { throw new Error("Non-zero from setRawMode") }
 
   fs.writeSync(fdW, prompt)
@@ -17,11 +17,12 @@ function question(prompt) {
   var gotNewline = false
   while (!gotNewline) {
 
-    fs.readSync(fdR, buffer, 0, reqSize)
+    var numBytesRead = fs.readSync(fdR, buffer, 0, BYTES_IN_LONGEST_UTF8_CHARACTER)
+    var bytesRead = buffer.toString('utf-8', 0, numBytesRead)
     var diff = process.hrtime(startTime)
-    charTimings.push([buffer.toString(), diff[0] + diff[1] / 1000000000])
+    charTimings.push([bytesRead, diff[0] + diff[1] / 1000000000])
 
-    var charCode = buffer.toString().charCodeAt(0)
+    var charCode = bytesRead.charCodeAt(0)
     if (charCode === 3) { // if Ctrl-C
       console.log('^C')
       process.kill(process.pid, 'SIGINT')
@@ -38,7 +39,7 @@ function question(prompt) {
         charTimings.pop() // pop the character before
       }
     } else {
-      fs.writeSync(fdW, buffer.toString())
+      fs.writeSync(fdW, bytesRead)
     }
   }
   return charTimings
