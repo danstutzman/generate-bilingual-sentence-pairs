@@ -5,10 +5,10 @@ const fs       = require('fs')
 const { Card } = require('./practice')
 
 class Estimate {
-  stuckSkill: Skill | void
+  stuckSkills: Array<Skill>
 
-  constructor(stuckSkill: Skill|void) {
-    this.stuckSkill = stuckSkill
+  constructor(stuckSkills: Array<Skill>) {
+    this.stuckSkills = stuckSkills
   }
 }
 
@@ -23,19 +23,18 @@ class Bank {
     }
     this.skillToGoodness = JSON.parse(fs.readFileSync(bankJsonPath).toString())
   }
-  estimate(card:Card) {
-    let stuckSkill: Skill | void
+  estimate(card:Card): Estimate {
+    let stuckSkills: Array<Skill> = []
     for (const [skill, _] of card.skills) {
       if (skill.startsWith('nclause-') ||
           skill.startsWith('iclause-orderof-') ||
           skill.startsWith('pro-')) {
         // assume it's known
       } else if (skill !== '' && this.skillToGoodness[skill] !== true) {
-        stuckSkill = skill
-        break
+        stuckSkills.push(skill)
       }
     }
-    return new Estimate(stuckSkill)
+    return new Estimate(stuckSkills)
   }
   update(newSkillToGoodness: {[skill:Skill]: bool}) {
     for (const skill in newSkillToGoodness) {

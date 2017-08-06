@@ -52,19 +52,31 @@ function flattenNestedSexps(sexpOrSexps) {
 flattenNestedSexps(nestedSexps)
 
 const bank = new Bank('bank.json')
-const readyCards: Array<Card> = []
+const translatableSentenceCards: Array<Card> = []
+const skillToRemedialCard: Map<string, Card> = new Map()
 for (const card of sexpToCard.values()) {
   const estimate = bank.estimate(card)
-  if (estimate.stuckSkill === undefined) {
-    readyCards.push(card)
-  } else if (typeof estimate.stuckSkill === 'string') {
-    readyCards.push(makeCardForSkill(estimate.stuckSkill))
+  if (estimate.stuckSkills.length === 0) {
+    translatableSentenceCards.push(card)
   } else {
-    throw new Error("Unexpected estimate.stuckSkill")
+    for (const stuckSkill of estimate.stuckSkills) {
+      skillToRemedialCard.set(stuckSkill, makeCardForSkill(stuckSkill))
+    }
   }
 }
 
-for (var card of readyCards) {
+console.log('Translatable sentence cards:')
+for (var card of translatableSentenceCards) {
+  console.log(`- ${card.enJoined}`)
+}
+
+console.log('Remedial cards:')
+for (var pair of skillToRemedialCard) {
+  const [skill, card] = pair
+  console.log(`- ${card.enJoined} (${skill})`)
+}
+
+for (var card of translatableSentenceCards) {
   const newSkillToGoodness = card.questionEsGivenEn()
   bank.update(newSkillToGoodness)
   break
