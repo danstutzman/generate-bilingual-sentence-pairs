@@ -52,6 +52,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
     spawned.stderr.on('data', (data) => { console.log(data.toString().trim()) })
     spawned.on('close', (code) => {
       if (code !== 0) {
+        console.error(`Got non-zero code ${code} from spawn node_modules/.bin/flow`)
         exec("afplay /System/Library/Sounds/Funk.aiff")
         return
       }
@@ -59,6 +60,7 @@ chokidar.watch(['src', 'test'], CHOKIDAR_OPTIONS).on('all', (event, path) => {
       const flowSource = fs.readFileSync(path, 'utf8')
       for (const line of flowSource.split('\n')) {
         if (line.endsWith(';')) {
+          console.error(`Line ends with semicolon: ${line}`)
           exec("afplay /System/Library/Sounds/Funk.aiff")
           return
         }
