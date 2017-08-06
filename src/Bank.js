@@ -43,7 +43,7 @@ class Bank {
         this.skillToGoodness[skill] = newSkillToGoodness[skill]
       }
     }
-    fs.writeFileSync(this.bankJsonPath, JSON.stringify(this.skillToGoodness))
+    fs.writeFileSync(this.bankJsonPath, JSON.stringify(this.skillToGoodness, null, 2))
   }
 }
 
